@@ -25,11 +25,9 @@
 """ Flask application routes for E-ARK Python IP Validator. """
 import logging
 import os.path
-import pprint
 
 from flask import render_template, request, redirect, Response
 from flask_negotiate import produces
-from werkzeug.utils import secure_filename
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
 
 from .webapp import APP, __version__
@@ -64,24 +62,22 @@ def get_specification(spec_name):
 @APP.route("/api/validate/", methods=['GET', 'POST'])
 def validate():
     """POST method to valdiate an information package."""
-    logging.debug("Validating")
-    message = pprint.pformat(request.files, depth=5)
-    logging.debug(message)
     if request.method == 'POST':
-        logging.debug("POST request")
         # check if the post request has the file part
         if not request.files['package']:
             logging.debug('No file part %s', request.files)
             return redirect(request.url)
         uploaded = request.files['package']
-        logging.debug(uploaded)
         if uploaded.filename == '':
             logging.debug('No selected file')
             return redirect(request.url)
-        if uploaded:
-            filename = secure_filename(uploaded.filename)
-            uploaded.save(os.path.join(APP.config['UPLOAD_FOLDER'], filename))
-            logging.debug("Filename: %s", filename)
+        if uploaded and _allowed_file(uploaded.filename):
+            logging.debug("Digest: %s", request.form["digest"])
+            filename = request.form["digest"]
+            dest_path = os.path.join(APP.config['UPLOAD_FOLDER'], filename)
+            if not os.path.exists(dest_path):
+                uploaded.save(dest_path)
+            logging.debug("File upload successful: %s", filename)
             return 'File upload successful'
     return Response(str, mimetype="text/text")
 
@@ -146,6 +142,10 @@ def _request_wants_xml():
     return best == XML_MIME and \
         request.accept_mimetypes[best] > \
         request.accept_mimetypes[PDF_MIME]
+
+def _allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in APP.config['ALLOWED_EXTENSIONS']
 
 if __name__ == "__main__":
     APP.run(threaded=True)

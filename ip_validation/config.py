@@ -35,6 +35,7 @@ HOST = 'localhost'
 TEMP = tempfile.gettempdir()
 HOME = os.path.expanduser('~')
 LOG_ROOT = TEMP
+UPLOADS_TEMP = os.path.join(TEMP, 'ip-uploads')
 class BaseConfig():# pylint: disable-msg=R0903
     """Base / default config, no debug logging and short log format."""
     NAME = 'Default'
@@ -49,7 +50,8 @@ class BaseConfig():# pylint: disable-msg=R0903
     SQL_URL = 'sqlite:///' + SQL_PATH
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
-    UPLOAD_FOLDER = tempfile.mkdtemp()
+    UPLOAD_FOLDER = UPLOADS_TEMP
+    ALLOWED_EXTENSIONS = {'zip', 'tar', 'tar.gz'}
 
 class DevConfig(BaseConfig):# pylint: disable-msg=R0903
     """Developer level config, with debug logging and long log format."""
@@ -78,4 +80,6 @@ def configure_app(app, profile_name='dev'):
     app.config.from_object(CONFIGS[config_name])
     if os.getenv(ENV_CONF_FILE):
         app.config.from_envvar(ENV_CONF_FILE)
-    toolbar = DebugToolbarExtension(app)
+    if not os.path.exists(UPLOADS_TEMP):
+        os.makedirs(UPLOADS_TEMP)
+    DebugToolbarExtension(app)

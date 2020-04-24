@@ -15,7 +15,7 @@ $(document).ready(function () {
     // Set the filename selection, a little tricksy
     fileLabel.addClass('selected').html(fileName)
     // Calculate and display the SHA1 of the file
-    // calcFileSha1(this.files[0])
+    calcFileSha1(this.files[0])
   })
 
   /**
@@ -44,7 +44,7 @@ function calcFileSha1 (file) {
     // Calculate the checksum from the reader result
     var digest = rusha.digest(reader.result)
     // Set the label when finished
-    $('#digest').val(digest)
+    $('input[name="digest"]').val(digest)
     // Enable the submit button
     $('button').prop('disabled', false)
   }
