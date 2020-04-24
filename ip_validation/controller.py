@@ -24,6 +24,7 @@
 #
 """ Flask application routes for E-ARK Python IP Validator. """
 import logging
+import os.path
 import pprint
 
 from flask import render_template, request, redirect, Response
@@ -79,6 +80,7 @@ def validate():
             return redirect(request.url)
         if uploaded:
             filename = secure_filename(uploaded.filename)
+            uploaded.save(os.path.join(APP.config['UPLOAD_FOLDER'], filename))
             logging.debug("Filename: %s", filename)
             return 'File upload successful'
     return Response(str, mimetype="text/text")

@@ -7,7 +7,7 @@ $(document).ready(function () {
   */
   $('input:file').on('change', function () {
     // Disable the submit button
-    $('button').prop('disabled', true)
+    // $('button').prop('disabled', true)
     // Grab the label component
     var fileLabel = $(this).siblings('.custom-file-label')
     // Get filename without the fake path prefix
@@ -15,7 +15,7 @@ $(document).ready(function () {
     // Set the filename selection, a little tricksy
     fileLabel.addClass('selected').html(fileName)
     // Calculate and display the SHA1 of the file
-    calcFileSha1(this.files[0])
+    // calcFileSha1(this.files[0])
   })
 
   /**

@@ -48,6 +48,8 @@ class BaseConfig():# pylint: disable-msg=R0903
     SQL_PATH = os.path.join(TEMP, 'eark-pyip-validation.db')
     SQL_URL = 'sqlite:///' + SQL_PATH
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+    UPLOAD_FOLDER = tempfile.mkdtemp()
 
 class DevConfig(BaseConfig):# pylint: disable-msg=R0903
     """Developer level config, with debug logging and long log format."""
