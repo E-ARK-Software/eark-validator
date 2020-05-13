@@ -1,0 +1,140 @@
+<schema xmlns="http://purl.oclc.org/dsdl/schematron">
+    <ns prefix="csip" uri="https://dilcis.eu/XML/METS/CSIPExtensionMETS"/>
+    <ns prefix="ead" uri="urn:isbn:1-931666-22-9"/>
+    <ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
+
+    <pattern id="METS_file_premis_element_validation">
+        <title>Validate METS element fileSec.</title>
+        <rule id="CSIP58" context="fileSec">
+            <assert test="name()='fileSec'">When the section is used only one file section (fileSec) element is present. It is possible to transfer just descriptive metadata and/or adminsitrative metadata without files placed in this section.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_id_validation">
+        <title>Validate METS file element id</title>
+        <rule id="CSIP59" context="fileSec">
+            <assert test="@ID">An identifier for the file section used for referencing inside the package. It must be unique within the package. The ID must follow the rules for xml:id described in the chapter of the textual description of CSIP named "General requirements for the use of metadata".</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_filegrp_validation">
+        <title>Validate METS file element fileGrp.</title>
+        <rule id="CSIP60" context="fileGrp">
+            <assert test="name()='fileGrp'">There are one or more file group (fileGrp) elements present grouping the transfered files in the main catagorization of; Documentation, Schemas and Representations. In one or more file groups with the catagorization of "Documentation" all documetation pertaining to the transfered information is present. In one or more file groups with the catagorization of "Schemas" all XML-schemas pertaining to the transfered XML documents is present. In one or more file groups with the catagorization of "Representations" the data being transfered is present or in one file group the data for each representation is present. To make the catagorization easier the different files being transfered should be placed in folders with names folowing the catagorization .</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_admid_validation">
+        <title>Validate METS file element admid</title>
+        <rule id="CSIP61" context="file">
+            <assert test="@ADMID">If administrative metadata is has been provided on the file group (fileGrp) level this attribute points to the correct administrative metadata section.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_contentinformationtype_validation">
+        <title>Validate METS file element contentinformationtype</title>
+        <rule id="CSIP62" context="fileGrp">
+            <assert test="@CONTENTINFORMATIONTYPE">An added attribute which describes the specific content information type specification used for the transferred content. The attribute is mandatory to use when the file group catagorization is Representations. The vocabulary is going to evolve under the care of the DILCIS Board as additional content information type specifications are developed.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_othercontentinformationtype_validation">
+        <title>Validate METS file element othercontentinformationtype</title>
+        <rule id="CSIP63" context="fileGrp">
+            <assert test="@OTHERCONTENTINFORMATIONTYPE">When the @csip:CONTENTINFORMATIONTYPE uses the value "OTHER" the @csip:OTHERCONTENTINFORMATIONTYPE must describe the content.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_use_validation">
+        <title>Validate METS file element use</title>
+        <rule id="CSIP64" context="fileGrp">
+            <assert test="@USE">The value in the @USE is the name of the whole folder structure to the data, e.g "Documentation", "Schemas", "Representations/preingest" or "Representations/submission/data".</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_id_validation">
+        <title>Validate METS file element grp id</title>
+        <rule id="CSIP65" context="fileGrp">
+            <assert test="@ID">An identifier for the file group used for referencing inside the package. It must be unique within the package. The ID must follow the rules for xml:id described in the chapter of the textual description of CSIP named "General requirements for the use of metadata".</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_filegrp_file_validation">
+        <title>Validate METS file element file.</title>
+        <rule id="CSIP66" context="file">
+            <assert test="name()='file'">The lowest level file group (fileGrp) contains the file elements which describe the transferred file objects.
+When the file element is categorised as "Representations" each representation file group contains one file which is the reference to the METS document describing the representation.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_file_id_validation">
+        <title>Validate METS file element file id</title>
+        <rule id="CSIP67" context="file">
+            <assert test="@ID">A unique identifier for this file across the package. The ID must follow the rules for xml:id described in the chapter of the textual description of CSIP named "General requirements for the use of metadata".</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_file_mimetype_validation">
+        <title>Validate METS file element file mimetype</title>
+        <rule id="CSIP68" context="file">
+            <assert test="@MIMETYPE">The IANA mime type for the linked file.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_file_size_validation">
+        <title>Validate METS file element file size</title>
+        <rule id="CSIP69" context="file">
+            <assert test="@SIZE">Size of the linked file in bytes.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_file_created_validation">
+        <title>Validate METS file element file created</title>
+        <rule id="CSIP70" context="file">
+            <assert test="@CREATED">Date the linked file was created.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_file_checksum_validation">
+        <title>Validate METS file element file checksum</title>
+        <rule id="CSIP71" context="file">
+            <assert test="@CHECKSUM">The checksum of the linked file.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_file_checksum_type_validation">
+        <title>Validate METS file element file checksum type</title>
+        <rule id="CSIP72" context="file">
+            <assert test="@CHECKSUMTYPE">The type of checksum following the value list in the standard which used for the linked file.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_file_owner_id_validation">
+        <title>Validate METS file element file owner id</title>
+        <rule id="CSIP73" context="file">
+            <assert test="@OWNERID and count(OWNERID)>=0">If an original ID for the file has been given by the owner it can be saved in this attribute.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_file_adm_id_validation">
+        <title>Validate METS file element file adm id</title>
+        <rule id="CSIP74" context="file">
+            <assert test="@ADMID and count(ADMID)>=0">If administrative metadata has been described for the file this attribute points to the file's administrative metadata.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_file_dmd_id_validation">
+        <title>Validate METS file element file dmd id</title>
+        <rule id="CSIP75" context="file">
+            <assert test="@DMDID and count(DMDID)>=0">If descriptive metadata has been described per file this attribute points to the file's descriptive metadata.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_filegrp_file_flocat_validation">
+        <title>Validate METS file element file Flocat.</title>
+        <rule id="CSIP76" context="Flocat">
+            <assert test="name()='Flocat'">The location of each external file must be defined by the file location (FLocat) element using the same rules as for referencing metadata files. All references to files should be made using the XLink href attribute and the file protocol using the relative location of the file.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_file_flocat_loctype_validation">
+        <title>Validate METS file element file flocat loctype</title>
+        <rule id="CSIP77" context="Flocat">
+            <assert test="@LOCTYPE">The locator type is always used with the value "URL" from the vocabulary in the attribute.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_file_flocat_type_validation">
+        <title>Validate METS file element file flocat type</title>
+        <rule id="CSIP78" context="Flocat">
+            <assert test="@type">Attribute used with the value “simple”. Value list is maintained by the xlink standard.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_file_premis_element_grp_file_flocat_href_validation">
+        <title>Validate METS file element file flocat href</title>
+        <rule id="CSIP79" context="Flocat">
+            <assert test="@href">The actual location of the resource. We recommend recording a URL type filepath within this attribute.</assert>
+        </rule>
+    </pattern>
+
+</schema>

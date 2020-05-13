@@ -17,18 +17,6 @@ $(document).ready(function () {
     // Calculate and display the SHA1 of the file
     calcFileSha1(this.files[0])
   })
-
-  /**
-  * Event handler for submit button
-  */
-  // $('button').click(function () {
-  //   // Grab the data from the form object
-  //   var formData = new FormData($('form')[0])
-  //   // Call the validator, with result renderer as callback
-  //   ipValidator.validate(formData, function () {
-  //     renderResult()
-  //   })
-  // })
 })
 
 /**

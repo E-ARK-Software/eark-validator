@@ -1,0 +1,47 @@
+{% extends "page.html" %}
+{% block title %}Home{% endblock %}
+{% block page_content %}
+<h1>Validation Report</h1>
+<p class="lead">Schema Validation: {{ schema_result }}</p>
+<ul>
+  {% for error in schema_errors %}
+    <li>{{ error }}</li>
+  {% endfor %}
+</ul>
+<p class="lead">Schematron Validation:</p>
+<ul>
+  {% for key, value in results.items() %}
+    <li>{{ key }}: {{ value }}</li>
+  {% endfor %}
+</ul>
+<p class="lead">Schematron Errors:</p>
+<table class="table table-striped">
+  <tr>
+    <th>ID</th>
+    <th>Context</th>
+    <th>Test</th>
+    <th>Location</th>
+    <th>Message</th>
+  </tr>
+  {{ prop_rows(errors) }}
+
+</table>
+{% endblock page_content %}
+{% block page_script %}
+{% endblock page_script %}
+
+{% macro prop_rows(errors) %}
+{% for error in errors %}
+  {{ prop_row(error) }}
+{% endfor %}
+{% endmacro %}
+
+{% macro prop_row(error) %}
+  <tr>
+    <td>{{ error.rule_id }}</td>
+    <td>{{ error.context }}</td>
+    <td>{{ error.test }}</td>
+    <td>{{ error.location }}</td>
+    <td>{{ error.message }}</td>
+  </tr>
+{% endmacro -%}

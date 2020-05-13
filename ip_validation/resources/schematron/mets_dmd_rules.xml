@@ -1,0 +1,104 @@
+<schema xmlns="http://purl.oclc.org/dsdl/schematron">
+    <ns prefix="csip" uri="https://dilcis.eu/XML/METS/CSIPExtensionMETS"/>
+    <ns prefix="ead" uri="urn:isbn:1-931666-22-9"/>
+    <ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
+
+    <pattern id="METS_descriptive_metadata_element_validation">
+        <title>Validate METS header element dmdSec.</title>
+        <rule id="CSIP20" context="mets">
+            <assert test="count(dmdSec) > 0">Must be used if descriptive metadata about the package content is available. NOTE: According to official METS documentation each metadata section must describe one and only one set of metadata. As such, if implementers want to include multiple occurrences of descriptive metadata into the package this must be done by repeating the whole dmdSec element for each individual metadata.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_descriptive_metadata_element_id_validation">
+        <rule id="CSIP21" context="dmdSec">
+            <assert test="@ID">Mandatory, identifier must be unique within the package.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_descriptive_metadata_element_admid_validation">
+        <rule id="CSIP22" context="dmdSec">
+            <assert test="@ADMID">In case administrative (provenance) metadata is available and described within METS about changes to the descriptive metadata, this element must reference the appropriate ID of the administrative metadata section.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_descriptive_metadata_element_package_creation_date_validation">
+        <rule id="CSIP23" context="dmdSec">
+            <assert test="@CREATED">Required by this specification. Creation date of the metadata in this section, needed to track changes to metadata files.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_descriptive_metadata_element_status_validation">
+        <rule id="CSIP24" context="dmdSec">
+            <assert test="@STATUS">Status of the metadata. Recommended for use to indicate currency of package. If used it is recommended to use one of the two values “SUPERSEDED” or “CURRENT”.</assert>
+        </rule>
+    </pattern>
+    <pattern id="METS_descriptive_metadata_element_package_creation_date">
+        <rule id="CSIP25" context="dmdSec">
+            <assert test="name()='mdRef'">Reference to the descriptive metadata file stored in the “metadata” folder of the IP. In each occurrence of the dmdSec exactly one occurrence of the mdRef element must be present.</assert>
+        </rule>
+    </pattern>
+
+    <pattern id="METS_descriptive_metadata_element_location_locator_type_validation">
+        <rule id="CSIP26" context="mdRef">
+            <assert test="@xlink:href">Specifies the locator type used in the @xlink:href attribute which points to the file. The @LOCTYPE attribute is mandatory in the CS IP</assert>
+        </rule>
+    </pattern>
+
+    <pattern id="METS_descriptive_metadata_element_location_locator_type_value_url_validation">
+        <rule id="CSIP27" context="mdRef">
+            <assert test="contains(string(@LOCTYPE), 'URL')">Within the CS IP the value of @LOCTYPE attribute must be “URL”.</assert>
+        </rule>
+    </pattern>
+
+    <pattern id="METS_descriptive_metadata_element_location_xlink_type_validation">
+        <rule id="CSIP28" context="mdRef">
+            <assert test="@xlink:type">The type of the link. The @xlink:type attribute is mandatory in the CS IP</assert>
+        </rule>
+    </pattern>
+
+    <pattern id="METS_descriptive_metadata_element_location_xlink_type_value_validation">
+        <rule id="CSIP29" context="mdRef">
+            <assert test="contains(string(@xlink:type), 'simple')">The CS IP requires the use of @xlink:type attribute with the fixed value “simple”</assert>
+        </rule>
+    </pattern>
+
+    <pattern id="METS_descriptive_metadata_element_location_xlink_href_validation">
+        <rule id="CSIP30" context="mdRef">
+            <assert test="@xlink:href">The actual location of the resource. This specification requires the recording of an URL type filepath within this attribute. Further, the filepath must be decoded consistently throughout all mdRef elements within the information package, and follow the requirements for referencing as described in Section 5.2.</assert>
+        </rule>
+    </pattern>
+
+    <pattern id="METS_descriptive_metadata_element_mdtype_validation">
+        <rule id="CSIP31" context="mdRef">
+            <assert test="@MDTYPE">Specifies the type of metadata in the linked file. Values should be taken from the METS list provided.</assert>
+        </rule>
+    </pattern>
+
+    <pattern id="METS_descriptive_metadata_core_mimetype_validation">
+        <rule id="CSIP32" context="mdRef">
+            <assert test="@MIMETYPE">The IANA media type for the external file, mandatory in CS IP</assert>
+        </rule>
+    </pattern>
+
+    <pattern id="METS_descriptive_metadata_core_size_validation">
+        <rule id="CSIP33" context="mdRef">
+            <assert test="@SIZE">Size of linked file in bytes, mandatory in CS IP</assert>
+        </rule>
+    </pattern>
+
+    <pattern id="METS_descriptive_metadata_core_created_validation">
+        <rule id="CSIP34" context="mdRef">
+            <assert test="@CREATED">Date the linked file was created, mandatory in CS IP</assert>
+        </rule>
+    </pattern>
+
+    <pattern id="METS_descriptive_metadata_core_checksum_validation">
+        <rule id="CSIP35" context="mdRef">
+            <assert test="@CHECKSUM">The checksum of the linked file, mandatory in CS IP</assert>
+        </rule>
+    </pattern>
+
+    <pattern id="METS_descriptive_metadata_core_checksumtype_validation">
+        <rule id="CSIP36" context="mdRef">
+            <assert test="@CHECKSUMTYPE">The type of checksum used for calculating the checksum of the linked file, mandatory in CS IP</assert>
+        </rule>
+    </pattern>
+
+</schema>

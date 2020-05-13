@@ -46,12 +46,9 @@ class BaseConfig():# pylint: disable-msg=R0903
     LOG_FILE = os.path.join(LOG_ROOT, 'eark-pyip-validation.log')
     SECRET_KEY = 'a5c020ced05af9ad3aacc6bba41beb5c7b6f750b846dadad'
     EARKVAL_ROOT = TEMP
-    SQL_PATH = os.path.join(TEMP, 'eark-pyip-validation.db')
-    SQL_URL = 'sqlite:///' + SQL_PATH
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+    MAX_CONTENT_LENGTH = 64 * 1024 * 1024
     UPLOAD_FOLDER = UPLOADS_TEMP
-    ALLOWED_EXTENSIONS = {'zip', 'tar', 'tar.gz'}
+    ALLOWED_EXTENSIONS = {'zip', 'tar', 'gz', 'gzip'}
 
 class DevConfig(BaseConfig):# pylint: disable-msg=R0903
     """Developer level config, with debug logging and long log format."""
@@ -63,8 +60,6 @@ class DevConfig(BaseConfig):# pylint: disable-msg=R0903
 class TestConfig(BaseConfig):# pylint: disable-msg=R0903
     """Developer level config, with debug logging and long log format."""
     NAME = 'Testing'
-    SQL_PATH = os.path.join(TEMP, 'pyip-test.db')
-    SQL_URL = 'sqlite:///' + SQL_PATH
 
 CONFIGS = {
     "dev": 'ip_validation.config.DevConfig',
@@ -74,8 +69,6 @@ CONFIGS = {
 
 def configure_app(app, profile_name='dev'):
     """Grabs the environment variable for app config or defaults to dev."""
-    if not profile_name:
-        profile_name = 'test'
     config_name = os.getenv(ENV_CONF_PROFILE, profile_name)
     app.config.from_object(CONFIGS[config_name])
     if os.getenv(ENV_CONF_FILE):

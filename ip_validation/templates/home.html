@@ -37,11 +37,9 @@
     </div><!-- end row -->
 {% endblock page_content %}
 {% block page_script %}
-    <script src="{{ url_for('static', filename='/js/rest-client.js') }}"></script>
+    <script src="/static/js/rest-client.js"></script>
     <!-- Client side SHA-1 calculation -->
-    <script src="{{ url_for('static', filename='/js/sha1.js') }}"></script>
-    <!-- JQuery AJAX wrapping of validtion REST services -->
-    <!-- <script src="{{ url_for('static', filename='/js/ip-validation.js') }}"></script> -->
+    <script src="/static/js/rusha.min.js"></script>
     <!-- JSON to HTML templating -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/json2html/1.2.0/json2html.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.json2html/1.2.0/jquery.json2html.min.js"></script>

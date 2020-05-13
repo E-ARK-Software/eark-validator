@@ -25,12 +25,21 @@
 """ Flask application routes for E-ARK Python IP Validator. """
 import logging
 import os.path
+import tarfile
+import tempfile
+import zipfile
 
-from flask import render_template, request, redirect, Response
+import lxml.etree as ET
+
+from flask import render_template, request, redirect, url_for
 from flask_negotiate import produces
-from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized, InternalServerError
+
+from eatb.metadata.mets import MetsValidation
 
 from .webapp import APP, __version__
+from .rules import ValidationProfile, TestResult
+
 ROUTES = True
 
 JSON_MIME = 'application/json'
@@ -59,27 +68,75 @@ def get_specification(spec_name):
     """Get """
     return render_template('blobstore.html')
 
-@APP.route("/api/validate/", methods=['GET', 'POST'])
-def validate():
+@APP.route("/validate/<string:digest>/", endpoint="validate")
+def validate(digest):
+    """Display validation results."""
+    to_validate = os.path.join(APP.config['UPLOAD_FOLDER'], digest)
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        if zipfile.is_zipfile(to_validate):
+            zip_ip = zipfile.ZipFile(to_validate)
+            zip_ip.extractall(path=tmpdirname)
+        elif tarfile.is_tarfile(to_validate):
+            tar_ip = tarfile.open(to_validate)
+            tar_ip.extractall(path=tmpdirname)
+        else:
+            raise BadRequest("Invalid Package Format")
+        root_entries = os.listdir(tmpdirname)
+        if len(root_entries) != 1:
+            return "Invalid Package without a single root directory."
+        package_root = os.path.join(tmpdirname, root_entries[0])
+        validator = MetsValidation.MetsValidation(tmpdirname)
+        mets_path = os.path.join(package_root, 'METS.xml')
+        schema_result = validator.validate_mets(mets_path)
+        schema_errors = []
+        for error in validator.validation_errors:
+            schema_errors.append(str(error))
+
+        profile = ValidationProfile()
+        profile.validate(mets_path)
+        errors = []
+
+        for sect in ["root", "hdr", "amd", "dmd", "file", "structmap"]:
+            if not profile.get_result(sect):
+                report = profile.rulesets[sect].get_report()
+                xml_report = ET.XML(bytes(report))
+
+                rule = None
+                for ele in xml_report.iter():
+                    if ele.tag == '{http://purl.oclc.org/dsdl/svrl}fired-rule':
+                        rule = ele
+                        print(format(rule))
+                    elif ele.tag == '{http://purl.oclc.org/dsdl/svrl}failed-assert':
+                        print(format(rule))
+                        print(format(ele))
+                        errors.append(TestResult.from_element(rule, ele))
+        return render_template('validate.html', schema_result=schema_result,
+                               schema_errors=schema_errors,
+                               results=profile.get_results(), errors=errors)
+    raise InternalServerError("Failed to process package")
+
+@APP.route("/api/validate/", methods=['POST'])
+def upload():
     """POST method to valdiate an information package."""
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if not request.files['package']:
-            logging.debug('No file part %s', request.files)
-            return redirect(request.url)
-        uploaded = request.files['package']
-        if uploaded.filename == '':
-            logging.debug('No selected file')
-            return redirect(request.url)
-        if uploaded and _allowed_file(uploaded.filename):
-            logging.debug("Digest: %s", request.form["digest"])
-            filename = request.form["digest"]
-            dest_path = os.path.join(APP.config['UPLOAD_FOLDER'], filename)
-            if not os.path.exists(dest_path):
-                uploaded.save(dest_path)
-            logging.debug("File upload successful: %s", filename)
-            return 'File upload successful'
-    return Response(str, mimetype="text/text")
+    # check if the post request has the file part
+
+    if not request.files['package'] or not request.form["digest"]:
+        logging.debug('No file part %s', request.files)
+        raise BadRequest('No file part, or digest')
+    uploaded = request.files['package']
+    digest = request.form["digest"]
+    if uploaded.filename == '':
+        logging.debug('No selected file')
+        raise BadRequest('No selected file')
+    if uploaded and _allowed_file(uploaded.filename):
+        logging.debug("Digest: %s", digest)
+        filename = request.form["digest"]
+        dest_path = os.path.join(APP.config['UPLOAD_FOLDER'], filename)
+        if not os.path.exists(dest_path):
+            uploaded.save(dest_path)
+        logging.debug("File upload successful: %s", filename)
+        return redirect(url_for('validate', digest=digest))
+    raise BadRequest("File type upload not allowed")
 
 @APP.route("/about/")
 def about():
@@ -123,6 +180,17 @@ def unauth_handler(unauthorized):
                            http_code=401,
                            http_error="Unauthorized")
 
+@APP.errorhandler(InternalServerError)
+def servererr_handler(servererr):
+    """Basic not found request handler."""
+    return render_template('except.html',
+                           http_excep=servererr,
+                           message='It appears there are no S3 credentials ' +\
+                                   'available to the application',
+                           http_code=500,
+                           http_error="Internal Server Error")
+
+
 @APP.teardown_appcontext
 def shutdown_session(exception=None):
     """Tear down the database session."""
@@ -148,4 +216,4 @@ def _allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in APP.config['ALLOWED_EXTENSIONS']
 
 if __name__ == "__main__":
-    APP.run(threaded=True)
+    APP.run(host='0.0.0.0', threaded=True)
