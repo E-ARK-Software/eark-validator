@@ -2,6 +2,17 @@
 {% block title %}Home{% endblock %}
 {% block page_content %}
 <h1>Validation Report</h1>
+<p class="lead">Package Structure: {{ details.package_status.name }}</p>
+<table class="table table-striped">
+  <tr>
+    <th>ID</th>
+    <th>Severity</th>
+    <th>Message</th>
+    <th>Sub Message</th>
+  </tr>
+  {{ struct_rows(details.errors) }}
+
+</table>
 <p class="lead">Schema Validation: {{ schema_result }}</p>
 <ul>
   {% for error in schema_errors %}
@@ -39,9 +50,24 @@
 {% macro prop_row(error) %}
   <tr>
     <td>{{ error.rule_id }}</td>
-    <td>{{ error.context }}</td>
-    <td>{{ error.test }}</td>
-    <td>{{ error.location }}</td>
+    <td>{{ error.location.context }}</td>
+    <td>{{ error.location.test }}</td>
+    <td>{{ error.location.location }}</td>
     <td>{{ error.message }}</td>
+  </tr>
+{% endmacro -%}
+
+{% macro struct_rows(errors) %}
+{% for error in errors %}
+  {{ struct_row(error) }}
+{% endfor %}
+{% endmacro %}
+
+{% macro struct_row(error) %}
+  <tr>
+    <td>{{ error.rule_id }}</td>
+    <td>{{ error.severity.name }}</td>
+    <td>{{ error.message }}</td>
+    <td>{{ error.sub_message }}</td>
   </tr>
 {% endmacro -%}

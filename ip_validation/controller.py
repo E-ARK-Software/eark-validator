@@ -25,9 +25,6 @@
 """ Flask application routes for E-ARK Python IP Validator. """
 import logging
 import os.path
-import tarfile
-import tempfile
-import zipfile
 
 import lxml.etree as ET
 
@@ -37,8 +34,9 @@ from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized, I
 
 from eatb.metadata.mets import MetsValidation
 
-from .webapp import APP, __version__
-from .rules import ValidationProfile, TestResult
+from ip_validation.webapp import APP, __version__
+from ip_validation.infopacks.rules import ValidationProfile, TestResult
+import ip_validation.infopacks.information_package as IP
 
 ROUTES = True
 
@@ -71,30 +69,26 @@ def get_specification(spec_name):
 @APP.route("/validate/<string:digest>/", endpoint="validate")
 def validate(digest):
     """Display validation results."""
+    # Get the validation path ready
     to_validate = os.path.join(APP.config['UPLOAD_FOLDER'], digest)
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        if zipfile.is_zipfile(to_validate):
-            zip_ip = zipfile.ZipFile(to_validate)
-            zip_ip.extractall(path=tmpdirname)
-        elif tarfile.is_tarfile(to_validate):
-            tar_ip = tarfile.open(to_validate)
-            tar_ip.extractall(path=tmpdirname)
-        else:
-            raise BadRequest("Invalid Package Format")
-        root_entries = os.listdir(tmpdirname)
-        if len(root_entries) != 1:
-            return "Invalid Package without a single root directory."
-        package_root = os.path.join(tmpdirname, root_entries[0])
-        validator = MetsValidation.MetsValidation(tmpdirname)
-        mets_path = os.path.join(package_root, 'METS.xml')
+    # Validate package structure
+    package_details = IP.validate_package_structure(to_validate)
+    # Schema and schematron validation to be factored out.
+    # initialise schema and schematron validation structures
+    schema_result = None
+    prof_results = {}
+    errors = []
+    schema_errors = []
+    # IF package is well formed then we can validate it.
+    if package_details.package_status == IP.PackageStatus.WellFormed:
+        validator = MetsValidation.MetsValidation(package_details.path)
+        mets_path = os.path.join(package_details.path, 'METS.xml')
         schema_result = validator.validate_mets(mets_path)
-        schema_errors = []
         for error in validator.validation_errors:
             schema_errors.append(str(error))
 
         profile = ValidationProfile()
         profile.validate(mets_path)
-        errors = []
 
         for sect in ["root", "hdr", "amd", "dmd", "file", "structmap"]:
             if not profile.get_result(sect):
@@ -110,10 +104,10 @@ def validate(digest):
                         print(format(rule))
                         print(format(ele))
                         errors.append(TestResult.from_element(rule, ele))
-        return render_template('validate.html', schema_result=schema_result,
-                               schema_errors=schema_errors,
-                               results=profile.get_results(), errors=errors)
-    raise InternalServerError("Failed to process package")
+        prof_results = profile.get_results()
+    return render_template('validate.html', details=package_details, schema_result=schema_result,
+                           schema_errors=schema_errors,
+                           results=prof_results, errors=errors)
 
 @APP.route("/api/validate/", methods=['POST'])
 def upload():
