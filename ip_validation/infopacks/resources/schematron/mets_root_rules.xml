@@ -13,6 +13,7 @@
         <assert id="CSIP17" role="WARN" test="mets:dmdSec">Must be used if descriptive metadata about the package content is available. NOTE: According to official METS documentation each metadata section must describe one and only one set of metadata. As such, if implementers want to include multiple occurrences of descriptive metadata into the package this must be done by repeating the whole dmdSec element for each individual metadata.</assert>
         <assert id="CSIP31" role="WARN" test="mets:amdSec">If administrative / preservation metadata is available, it must be described using the administrative metadata section (amdSec) element. All administrative metadata is present in a single amdSec element.</assert>
         <assert id="CSIP58" role="WARN" test="mets:fileSec">The transferred content is placed in the file section in different file group elements, described in other requirements.</assert>
+        <assert id="CSIP80" role="ERROR" test="mets:structMap">Each METS file must include ONE structural map structMap element used exactly as described here.</assert>
         <assert id="CSIP117" role="ERROR" test="mets:metsHdr">There MUST be a general element that describes the package.</assert>
       </rule>
   </pattern>
