@@ -75,4 +75,4 @@ def configure_app(app, profile_name='dev'):
         app.config.from_envvar(ENV_CONF_FILE)
     if not os.path.exists(UPLOADS_TEMP):
         os.makedirs(UPLOADS_TEMP)
-    DebugToolbarExtension(app)
+    # DebugToolbarExtension(app)
