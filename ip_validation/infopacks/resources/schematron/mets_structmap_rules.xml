@@ -1,209 +1,61 @@
 <schema xmlns="http://purl.oclc.org/dsdl/schematron">
-    <ns prefix="csip" uri="https://dilcis.eu/XML/METS/CSIPExtensionMETS"/>
-    <ns prefix="ead" uri="urn:isbn:1-931666-22-9"/>
-    <ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
-
-    <pattern id="METS_structmap_premis_element_validation">
-        <title>Validate METS element structmap.</title>
-        <rule id="CSIP80" context="structMap">
-            <assert test="name()='structMap'">Each METS file must include ONE structural map (structMap) element used exactly as described here. Institutions can add their own additional custom structural maps as separate structMap sections.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_type_validation">
-        <title>Validate METS structmap element type</title>
-        <rule id="CSIP81" context="structMap">
-            <assert test="count(@TYPE['PHYSICAL']) > 0">The type attribute of the structural map (structMap) is set to value "PHYSICAL" from the vocabualry.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_label_validation">
-        <title>Validate METS structmap element label</title>
-        <rule id="CSIP82" context="structMap">
-            <assert test="@LABEL['CSIP StructMap']">The label attribute is set to value "CSIP StructMap" from the vocabulary.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_id_validation">
-        <title>Validate METS structmap element id</title>
-        <rule id="CSIP83" context="/mets/structMap">
-            <assert test="@ID">An identifier for the structural description (structMap) used for referencing inside the package. It must be unique within the package.
-The ID must follow the rules for xml:id described in the chapter of the textual description of CSIP named "General requirements for the use of metadata"</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_validation">
-        <title>Validate METS structmap element div.</title>
-        <rule id="CSIP84" context="div">
-            <assert test="name()='div'">The structural map consist of one main division.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_id_validation">
-        <title>Validate METS structmap element div id</title>
-        <rule id="CSIP85" context="*/div">
-            <assert test="@ID">Mandatory, identifier must be unique within the package.
-The ID must follow the rules for xml:id described in the chapter of the textual description of CSIP named "General requirements for the use of metadata".</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_label_validation">
-        <title>Validate METS structmap element div label</title>
-        <rule id="CSIP86" context="div">
-            <assert test="@LABEL">The main division (div) element in the package uses the package ID as the value for the attribute LABEL.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_label_sub_validation">
-        <title>Validate METS structmap element div label sub</title>
-        <rule id="CSIP87" context="div">
-            <assert test="(contains(string(@LABEL), 'Metadata') and contains(string(@LABEL), 'Schemas') and contains(string(@LABEL), 'Representation'))">Each catagorization "Documentation", "Schemas" as well as each "Representation" within the package must be represented by an occurrence of the division (div) element. Metadata in the administrative and descriptive metadata section has its own division.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_validation">
-        <title>Validate METS structmap element div div</title>
-        <rule id="CSIP88" context="structMap">
-            <assert test="@div/@div">The metadata referenced in the administrative and/or descriptive metadata section is described in the structural map with one sub division
-When the transfer consist of only administrative and/or descriptive metadata this is the only sub division that occurs.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_id_validation">
-        <title>Validate METS structmap element div div id</title>
-        <rule id="CSIP89" context="structMap">
-            <assert test="@div/@div/@ID">Mandatory, identifier must be unique within the package. The ID must follow the rules for xml:id described in the chapter of the textual description of CSIP named "General requirements for the use of metadata".</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_label_validation">
-        <title>Validate METS structmap element div div label</title>
-        <rule id="CSIP90" context="structMap">
-            <assert test="@div/@div/@LABEL and contains(string(@div/@div/@LABEL), 'Metadata')">The metadata division (div) element in the package uses the value "Metadata" as the value for the attribute LABEL.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_admid_validation">
-        <title>Validate METS structmap element div div admid</title>
-        <rule id="CSIP91" context="structMap">
-            <assert test="@div/@div/@ADMID and count(@div/@div/@ADMID)>=0">All administrative metadata described in the package are referenced via the administrative sections different identifiers.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_dmdid_validation">
-        <title>Validate METS structmap element div div dmdid</title>
-        <rule id="CSIP92" context="structMap">
-            <assert test="@div/@div/@DMDID and count(@div/@div/@DMDID)>=0">All descriptive metadata described in the package are referenced via the descriptive section identifiers.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_documentation_validation">
-        <title>Validate METS structmap element div div documentation</title>
-        <rule id="CSIP93" context="structMap">
-            <assert test="@div/@div and contains(string(@div/@div/@LABEL), 'Documentation') and count(@div/@div)>=0">The documentation referenced in the file section file groups is described in the structural map with one sub division.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_documentation_id_validation">
-        <title>Validate METS structmap element div div documentation id</title>
-        <rule id="CSIP94" context="structMap">
-            <assert test="@div/@div/@ID">Mandatory, identifier must be unique within the package.
-The ID must follow the rules for xml:id described in the chapter of the textual description of CSIP named "General requirements for the use of metadata".</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_documentation_label_validation">
-        <title>Validate METS structmap element div div documentation label</title>
-        <rule id="CSIP95" context="structMap">
-            <assert test="@div/@div/@LABEL and contains(string(@div/@div/@LABEL), 'Documentation')">The documentation division (div) element in the package uses the value "Documentation" as the value for the attribute LABEL.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_documentation_contentid_validation">
-        <title>Validate METS structmap element div div documentation contentid</title>
-        <rule id="CSIP96" context="structMap">
-            <assert test="@div/@div/@CONTENTIDS">All file groups containg documentation described in the package are referenced via the relevant file group identifiers.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_schema_validation">
-        <title>Validate METS structmap element div div schema</title>
-        <rule id="CSIP97" context="structMap">
-            <assert test="@div/@div and contains(string(@div/@div/@LABEL), 'Schemas') and count(@div/@div)>=0">The schemas referenced in the file section file groups is described in the structural map with one sub division.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_schema_id_validation">
-        <title>Validate METS structmap element div div documentation id</title>
-        <rule id="CSIP98" context="structMap">
-            <assert test="@div/@div/@ID">Mandatory, identifier must be unique within the package. The ID must follow the rules for xml:id described in the chapter of the textual description of CSIP named "General requirements for the use of metadata".</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_schema_label_validation">
-        <title>Validate METS structmap element div div schema label</title>
-        <rule id="CSIP99" context="structMap">
-            <assert test="@div/@div/@LABEL and contains(string(@div/@div/@LABEL), 'Schemas')">The schema division (div) element in the package uses the value "Schemas" as the value for the attribute LABEL.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_schema_contentid_validation">
-        <title>Validate METS structmap element div div schema contentid</title>
-        <rule id="CSIP100" context="structMap">
-            <assert test="@div/@div/@CONTENTIDS">All file groups containg schemas described in the package are referenced via the relevant file group identifiers.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_file_validation">
-        <title>Validate METS structmap element div div file</title>
-        <rule id="CSIP101" context="structMap">
-            <assert test="@div/@div and contains(string(@div/@div/@LABEL), 'Representation') and count(@div/@div)>=0">When the transfer consist of only data and no representations there are one representation div present. The transfered files referenced in the file section file group is described in the structural map with one sub division.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_file_id_validation">
-        <title>Validate METS structmap element div div file id</title>
-        <rule id="CSIP102" context="structMap">
-            <assert test="@div/@div/@ID">Mandatory, identifier must be unique within the package. The ID must follow the rules for xml:id described in the chapter of the textual description of CSIP named "General requirements for the use of metadata".</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_file_label_validation">
-        <title>Validate METS structmap element div div file label</title>
-        <rule id="CSIP103" context="structMap">
-            <assert test="@div/@div/@LABEL and contains(string(@div/@div/@LABEL), 'Representation')">The file division (div) element in the package uses the value "Representations" as the value for the attribute LABEL.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_file_contentid_validation">
-        <title>Validate METS structmap element div div file contentid</title>
-        <rule id="CSIP104" context="structMap">
-            <assert test="@div/@div/@CONTENTIDS">The file group containing the files described in the package are referenced via the relevant file group identifier.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_representation_validation">
-        <title>Validate METS structmap element div div representation</title>
-        <rule id="CSIP105" context="structMap">
-            <assert test="@div/@div and contains(string(@div/@div/@LABEL), 'Representation') and count(@div/@div)>=0">The documentation referenced in the file section file groups is described in the structural map with one sub division.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_representation_id_validation">
-        <title>Validate METS structmap element div div representation id</title>
-        <rule id="CSIP106" context="structMap">
-            <assert test="@div/@div/@ID">Mandatory, identifier must be unique within the package. The ID must follow the rules for xml:id described in the chapter of the textual description of CSIP named "General requirements for the use of metadata".</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_representation_label_validation">
-        <title>Validate METS structmap element div div representation label</title>
-        <rule id="CSIP107" context="structMap">
-            <assert test="@div/@div/@LABEL and contains(string(@div/@div/@LABEL), 'Representation')">The representation division (div) element in the package uses the path to the METS document as the value for the attribute LABEL.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_representation_contentid_validation">
-        <title>Validate METS structmap element div div representation contentid</title>
-        <rule id="CSIP108" context="structMap">
-            <assert test="@div/@div/@CONTENTIDS">The file group containing the files described in the package are referenced via the relevant file group identifier.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_representation_mptr_validation">
-        <title>Validate METS structmap element div div mptr</title>
-        <rule id="CSIP109" context="div">
-            <assert test="@mptr">The division (div) of the specific representation includes one occurrence of the METS pointer (mptr) element, pointing to the appropriate representation METS file.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_representation_mptr_href_validation">
-        <title>Validate METS structmap element div div mptr href</title>
-        <rule id="CSIP110" context="mptr">
-            <assert test="@href">The actual location of the resource. We recommend recording a URL type filepath within this attribute.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_representation_mptr_type_validation">
-        <title>Validate METS structmap element div div mptr type</title>
-        <rule id="CSIP111" context="mptr">
-            <assert test="@type">Attribute used with the value “simple”. Value list is maintained by the xlink standard.</assert>
-        </rule>
-    </pattern>
-    <pattern id="METS_structmap_premis_element_div_div_representation_mptr_loctype_validation">
-        <title>Validate METS structmap element div div mptr loctype</title>
-        <rule id="CSIP112" context="mptr">
-            <assert test="@LOCTYPE">The locator type is always used with the value "URL" from the vocabulary in the attribute.</assert>
-        </rule>
-    </pattern>
-
+  <ns prefix="mets" uri="http://www.loc.gov/METS/" />
+  <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
+  <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
+  <pattern id="METS_structmap_element">
+    <title>Use of the METS structural map.</title>
+    <rule context="/mets:mets/mets:structMap">
+      <assert id="CSIP81" role="ERROR" test="@TYPE = 'PHYSICAL'">The mets/structMap/@TYPE attribute must take the value “PHYSICAL” from the vocabulary.</assert>
+      <assert id="CSIP82" role="ERROR" test="@LABEL = 'CSIP'">The mets/structMap/@LABEL attribute value is set to “CSIP” from the vocabulary.</assert>
+    </rule>
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']">
+      <assert id="CSIP83" role="ERROR" test="@ID">An xml:id identifier for the structural description (structMap) used for internal package references. It must be unique within the package.</assert>
+      <assert id="CSIP84" role="ERROR" test="mets:div">The structural map MUST comprises a single division.</assert>
+      <assert id="CSIP86" role="ERROR" test="mets:div[@LABEL = /mets:mets/@OBJID]">The package’s top-level structural division div element’s @LABEL attribute value must be identical to the package identifier, i.e. the same value as the mets/@OBJID attribute.</assert>
+    </rule>
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div">
+      <assert id="CSIP85" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
+      <assert id="CSIP88" role="ERROR" test="mets:div[@LABEL = 'Metadata']">The package’s top-level structural division div element’s @LABEL attribute value must be identical to the package identifier, i.e. the same value as the mets/@OBJID attribute.</assert>
+      <assert id="CSIP93" role="WARN" test="mets:div[@LABEL = 'Documentation']">The documentation referenced in the file section file groups is described in the structural map with one sub division.</assert>
+      <assert id="CSIP97" role="WARN" test="mets:div[@LABEL = 'Schemas']">The schemas referenced in the file section file groups are described in the structural map within a single sub-division.</assert>
+      <assert id="CSIP101" role="WARN" test="mets:div[@LABEL = 'Representations']">When no representations are present the content referenced in the file section file group with @USE attribute value “Representations” is described in the structural map as a single sub division.</assert>
+    </rule>
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Metadata']">
+      <assert id="CSIP89" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
+      <assert id="CSIP91" role="WARN" test="@ADMID">When there is administrative metadata and the amdSec is present, all administrative metadata MUST be referenced via the administrative sections different identifiers.</assert>
+      <assert id="CSIP92" role="WARN" test="@DMDID">When there are descriptive metadata and one or more dmdSec is present, all descriptive metadata MUST be referenced via the descriptive section identifiers.</assert>
+    </rule>
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Documentation']">
+      <assert id="CSIP94" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
+      <assert id="CSIP96" role="ERROR" test="mets:fptr">All file groups containing documentation described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
+    </rule>
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Documentation']/fptr">
+      <assert id="CSIP116" role="ERROR" test="@FILEID">A reference, by ID, to the “Documentation” file group.</assert>
+    </rule>
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Schemas']">
+      <assert id="CSIP98" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
+      <assert id="CSIP100" role="ERROR" test="mets:fptr">All file groups containing documentation described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
+    </rule>
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Schemas']/fptr">
+      <assert id="CSIP118" role="ERROR" test="@FILEID">The pointer to the identifier for the “Schema” file group.</assert>
+    </rule>
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Representations']">
+      <assert id="CSIP102" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
+      <assert id="CSIP104" role="ERROR" test="mets:fptr">All file groups containing documentation described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
+    </rule>
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Representations']/fptr">
+      <assert id="CSIP119" role="ERROR" test="@FILEID">The pointer to the identifier for the Representations file group.</assert>
+    </rule>
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Representations']/mets:div">
+      <assert id="CSIP106" role="ERROR" test="@ID">Mandatory, xml:id identifier must be unique within the package.</assert>
+      <assert id="CSIP107" role="ERROR" test="@LABEL">The package’s representation division div element @LABEL attribute value must be the path to the representation level METS document.</assert>
+      <assert id="CSIP109" role="ERROR" test="mptr">The division div of the specific representation includes one occurrence of the METS pointer mptr element, pointing to the appropriate representation METS file.</assert>
+    </rule>
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Representations']/mptr">
+      <assert id="CSIP108" role="ERROR" test="@xlink:title">The file group containing the files described in the package are referenced via the relevant file group identifier.</assert>
+      <assert id="CSIP110" role="ERROR" test="@xlink:href">MUST point to the actual location of the resource. We recommend recording a URL type filepath within this attribute.</assert>
+      <assert id="CSIP111" role="ERROR" test="@xlink:type = 'simple'">Attribute used with the value “simple”. Value list is maintained by the xlink standard.</assert>
+      <assert id="CSIP112" role="ERROR" test="@LOCTYPE = 'URL'">The locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
+    </rule>
+  </pattern>
 </schema>
