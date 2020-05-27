@@ -23,21 +23,25 @@
 # under the License.
 #
 """METS Schema validation."""
+import fnmatch
 import os
 
 from lxml import etree
 
-XLINK_NS = "http://www.w3.org/1999/xlink"
+from importlib_resources import files
+
+import ip_validation.infopacks.resources.schemas as SCHEMA
+
+XLINK_NS = 'http://www.w3.org/1999/xlink'
 METS_NS = 'http://www.loc.gov/METS/'
+DILCIS_EXT_NS = 'https://DILCIS.eu/XML/METS/CSIPExtensionMETS'
 
 class MetsValidator(object):
     """Encapsulates METS schema validation."""
-    def __init__(self, root, mets_schema_file=os.path.join(ROOT, "eatb/resources/schemas/IP.xsd"),
-                 premis_schema_file=os.path.join(ROOT, "eatb/resources/schemas/premis-v2-2.xsd")):
+    def __init__(self, root):
         self.validation_errors = []
         self.total_files = 0
-        self.schema_mets = etree.XMLSchema(file=mets_schema_file)
-        self.schema_premis = etree.XMLSchema(file=premis_schema_file)
+        self.schema_mets = etree.XMLSchema(file=str(files(SCHEMA).joinpath('mets.xsd')))
         self.rootpath = root
         self.subsequent_mets = []
 
@@ -63,8 +67,7 @@ class MetsValidator(object):
                 # Define what to do with specific tags.
                 if event == 'end' and element.tag == q(METS_NS, 'file'):
                     # files
-                    self.total_files += 1
-                    self.validate_file(element)
+                    # self.total_files += 1
                     element.clear()
                     while element.getprevious() is not None:
                         del element.getparent()[0]
@@ -84,34 +87,7 @@ class MetsValidator(object):
                     # dmdSec
                     pass
                 elif event == 'end' and element.tag == q(METS_NS, 'amdSec'):
-                    # pass
-                    if len(element.getchildren()) > 0:
-                        for child in element.getchildren():
-                            # child are: digiprovMD
-                            if len(child.getchildren()) > 0:
-                                for sub_child in child.getchildren():
-                                    # sub_child are: mdRef
-                                    if sub_child.tag == etree.Comment or sub_child.tag == etree.PI:  # filter out comments (they also count as children)
-                                        pass
-                                    elif sub_child.attrib['MDTYPE'] == 'PREMIS':
-                                        if sub_child.attrib[q(XLINK_NS, 'href')].startswith('file://./'):
-                                            rel_path = sub_child.attrib[q(XLINK_NS, 'href')]
-                                            premis = os.path.join(self.rootpath, rel_path[9:])
-                                            try:
-                                                parsed_premis = etree.iterparse(premis, events=('start',), schema=self.schema_premis)
-                                                for event, el in parsed_premis:
-                                                    # What to do here?
-                                                    pass
-                                                print('Successfully validated Premis file: %s' % premis)
-
-                                            except etree.XMLSyntaxError as e:
-                                                print('VALIDATION ERROR: The Premis file %s yielded errors:' % premis)
-                                                print(e)
-                                                self.validation_errors.append(e)
-                                        else:
-                                            pass
-                                    else:
-                                        pass
+                    pass
         except etree.XMLSyntaxError as e:
             self.validation_errors.append(e)
         except BaseException as e:
@@ -127,59 +103,5 @@ class MetsValidator(object):
 
         return True if len(self.validation_errors) == 0 else False
 
-
-    def validate_file(self, file):
-        '''
-        Validates every file found inside a Mets, so far: size, checksum, fixity. If a file exists, the counter for
-        self.total_files is diminished.
-
-        @param file:    XML Element of a file that will be validated.
-        @return:
-        '''
-        err = []
-        log = []
-
-        # get information about the file
-        for child in file.getchildren():
-            if child.tag == etree.Comment or child.tag == etree.PI:
-                # skip if it's an XML comment
-                pass
-            elif child.tag == q(METS_NS, 'FLocat'):
-                attr_path = child.attrib[q(XLINK_NS, 'href')]
-        attr_size = file.attrib['SIZE']
-        attr_checksum = file.attrib['CHECKSUM'].lower() # just in case someone creates a checksum with uppercase letters
-        attr_checksumtype = file.attrib['CHECKSUMTYPE']
-        # mimetpye = file.attrib['MIMETYPE']
-
-        # check if file exists, if yes validate it
-        fitem = remove_protocol(attr_path)
-        file_path = os.path.join(self.rootpath, fitem).replace('\\', '/')
-
-        if not os.path.exists(file_path):
-            err.append("Unable to find file referenced in METS: %s" % file_path)
-        else:
-            self.total_files -= 1
-            # check if file size is valid
-            # TODO: is this even needed?
-            file_size = os.path.getsize(file_path)
-            if not int(file_size) == int(attr_size):
-                err.append("Actual file size %s does not equal file size attribute value %s, file: %s" % (file_size, attr_size, file_path))
-                # workaround for conduit.log in AIP metadata/ folder on IP root level
-                if file_path[-22:] == './metadata/conduit.log':
-                    err.pop()
-                    log.append('Forced validation result \'True\' for file: %s' % (file_path))
-
-            # validate checksum
-            checksum_validation = ChecksumValidation()
-            checksum_result = checksum_validation.validate_checksum(file_path, attr_checksum, attr_checksumtype)
-
-            # workaround for conduit.log in AIP metadata/ folder on IP root level
-            if file_path[-22:] == './metadata/conduit.log':
-                checksum_result = True
-
-            if not checksum_result == True:
-                err.append('Checksum validation failed for: %s' % file_path)
-
-        for error in err:
-            print('File validation error: ' + error)
-            self.validation_errors.append(error)
+def q(ns, v):
+    return '{{{}}}{}'.format(ns, v)

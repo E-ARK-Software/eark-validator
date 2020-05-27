@@ -18,8 +18,8 @@ Mackenzie Smith (Massachusetts Institute of Technology), Tobias Steinke (German 
 Taylor Surface (OCLC), Brian Tingle (California Digital Library) and Robin Wendler (Harvard University), 
 Robert Wolfe (Massachusetts Institute of Technology), Patrick Yott (Brown University).
 -->
-<!-- May, 2015 -->
-<!-- Version 1.11 -->
+<!-- May, 2018 -->
+<!-- Version 1.12 -->
 <!-- Change History -->
 <!-- April 23, 2001: Alpha Draft completed -->
 <!-- June 7, 2001: Beta completed -->
@@ -129,8 +129,8 @@ mptr and area elements for mapping MPEG21 DII Identifier values
 6. ID Attribute added to smLink.
 7. "LOM" added as metadata type.
  -->
-<!-- April 12, 2005: Version 1.5 -->
-<!-- 04/12/2005 v1.5 changes:
+ <!-- April 12, 2005: Version 1.5 -->
+ <!-- 04/12/2005 v1.5 changes:
  
  1. Made file element recursive to deal with PREMIS Onion Layer model and
  support XFDU-ish unpacking specification.
@@ -139,8 +139,8 @@ mptr and area elements for mapping MPEG21 DII Identifier values
  3. Modify structLink TO and FROM attributes to put them in XLink namespace.
  4. Make processContents "lax" for all xsd:any elements.
  -->
-<!-- October 18, 2006: Version 1.6 -->
-<!-- 10/18/2006 v1.6 changes:
+ <!-- October 18, 2006: Version 1.6 -->
+ <!-- 10/18/2006 v1.6 changes:
  	
  1. add ID to stream and transformFile
  2. add ADMID to metsHdr
@@ -216,8 +216,14 @@ mptr and area elements for mapping MPEG21 DII Identifier values
 			area
 	2.	Also added xsd:anyAttribute with namespace ##other and processContents lax to these elements.  This will allow arbitrary new attributes to be added to these elements to support local needs.	
 -->
+<!-- May 2018: Version 1.12 -->
+<!-- Version 1.12 Changes:
+	1.	Added xsd:anyAttribute with namespace ##other and processContents lax to these elements:
+			agent/note
+		This will allow arbitrary new attributes to be added to this element to support local needs.  The original use case was to identify the type of the note
+-->
 <xsd:schema targetNamespace="http://www.loc.gov/METS/" xmlns="http://www.loc.gov/METS/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
-	<xsd:import namespace="http://www.w3.org/1999/xlink" schemaLocation="xlink.xsd"/>
+	<xsd:import namespace="http://www.w3.org/1999/xlink" schemaLocation="http://www.loc.gov/standards/xlink/xlink.xsd"/>
 	
 	<xsd:element name="mets">
 		<xsd:annotation>
@@ -261,12 +267,19 @@ mptr and area elements for mapping MPEG21 DII Identifier values
 											</xsd:documentation>
 										</xsd:annotation>
 									</xsd:element>
-									<xsd:element name="note" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
+									<xsd:element name="note" minOccurs="0" maxOccurs="unbounded" >
 										<xsd:annotation>
 											<xsd:documentation xml:lang="en"> 
 											The &lt;note&gt; element can be used to record any additional information regarding the agent's activities with respect to the METS document.
 											</xsd:documentation>
 										</xsd:annotation>
+										<xsd:complexType>
+											<xsd:simpleContent>
+												<xsd:extension base="xsd:string">
+													<xsd:anyAttribute namespace="##other" processContents="lax"></xsd:anyAttribute>
+												</xsd:extension>
+											</xsd:simpleContent>
+										</xsd:complexType>
 									</xsd:element>
 								</xsd:sequence>
 								<xsd:attribute name="ID" type="xsd:ID" use="optional">
@@ -541,7 +554,7 @@ A &lt;fileGrp&gt; may contain zero or more &lt;fileGrp&gt; elements and or &lt;f
 			<xsd:element name="rightsMD" type="mdSecType" minOccurs="0" maxOccurs="unbounded">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">
-						An intellectual property rights metadata element &lt;rightsMD&gt; records information about copyright and licensing pertaining to a component of the METS object. The &lt;rightsMD&gt; element conforms to same generic datatype as the &lt;dmdSec&gt;, &lt;techMD&gt;, &lt;sourceMD&gt; and &lt;digiprovMD&gt; elements, and supports the same sub-elements and attributes. A rights metadata element can either wrap the metadata  (mdWrap) or reference it in an external location (mdRef) or both.  METS allows multiple &lt;rightsMD&gt; elements; and rights metadata can be associated with any METS element that supports an ADMID attribute. Rights metadata can be expressed according current rights description standards (such as CopyrightMD and rightsDeclarationMD) or a locally produced XML schema.
+						An intellectual property rights metadata element &lt;rightsMD&gt; records information about copyright and licensing pertaining to a component of the METS object. The &lt;rightsMD&gt; element conforms to same generic datatype as the &lt;dmdSec&gt;, &lt;techMD>, &lt;sourceMD&gt; and &lt;digiprovMD&gt; elements, and supports the same sub-elements and attributes. A rights metadata element can either wrap the metadata  (mdWrap) or reference it in an external location (mdRef) or both.  METS allows multiple &lt;rightsMD&gt; elements; and rights metadata can be associated with any METS element that supports an ADMID attribute. Rights metadata can be expressed according current rights description standards (such as CopyrightMD and rightsDeclarationMD) or a locally produced XML schema.
 					</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
@@ -555,7 +568,7 @@ A &lt;fileGrp&gt; may contain zero or more &lt;fileGrp&gt; elements and or &lt;f
 			<xsd:element name="digiprovMD" type="mdSecType" minOccurs="0" maxOccurs="unbounded">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">
-						A digital provenance metadata element &lt;digiprovMD&gt; can be used to record any preservation-related actions taken on the various files which comprise a digital object (e.g., those subsequent to the initial digitization of the files such as transformation or migrations) or, in the case of born digital materials, the files’ creation. In short, digital provenance should be used to record information that allows both archival/library staff and scholars to understand what modifications have been made to a digital object and/or its constituent parts during its life cycle. This information can then be used to judge how those processes might have altered or corrupted the object’s ability to accurately represent the original item. One might, for example, record master derivative relationships and the process by which those derivations have been created. Or the &lt;digiprovMD&gt; element could contain information regarding the migration/transformation of a file from its original digitization (e.g., OCR, TEI, etc.,)to its current incarnation as a digital object (e.g., JPEG2000). The &lt;digiprovMD&gt; element conforms to same generic datatype as the &lt;dmdSec&gt;,  &lt;techMD&gt;, &lt;rightsMD&gt;, and &lt;sourceMD&gt; elements, and supports the same sub-elements and attributes. A digital provenance metadata element can either wrap the metadata  (mdWrap) or reference it in an external location (mdRef) or both.  METS allows multiple &lt;digiprovMD&gt; elements; and digital provenance metadata can be associated with any METS element that supports an ADMID attribute. Digital provenance metadata can be expressed according to current digital provenance description standards (such as PREMIS) or a locally produced XML schema.
+						A digital provenance metadata element &lt;digiprovMD&gt; can be used to record any preservation-related actions taken on the various files which comprise a digital object (e.g., those subsequent to the initial digitization of the files such as transformation or migrations) or, in the case of born digital materials, the files’ creation. In short, digital provenance should be used to record information that allows both archival/library staff and scholars to understand what modifications have been made to a digital object and/or its constituent parts during its life cycle. This information can then be used to judge how those processes might have altered or corrupted the object’s ability to accurately represent the original item. One might, for example, record master derivative relationships and the process by which those derivations have been created. Or the &lt;digiprovMD&gt; element could contain information regarding the migration/transformation of a file from its original digitization (e.g., OCR, TEI, etc.,)to its current incarnation as a digital object (e.g., JPEG2000). The &lt;digiprovMD&gt; element conforms to same generic datatype as the &lt;dmdSec&gt;,  &lt;techMD&gt;, &lt;rightsMD&gt;, and &lt;sourceMD&gt; elements, and supports the same sub-elements and attributes. A digital provenance metadata element can either wrap the metadata  (mdWrap) or reference it in an external location (mdRef) or both.  METS allows multiple &lt;digiprovMD> elements; and digital provenance metadata can be associated with any METS element that supports an ADMID attribute. Digital provenance metadata can be expressed according to current digital provenance description standards (such as PREMIS) or a locally produced XML schema.
 					</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
@@ -576,7 +589,7 @@ A &lt;fileGrp&gt; may contain zero or more &lt;fileGrp&gt; elements and or &lt;f
 		</xsd:annotation>
 		<xsd:choice>
 			<xsd:element name="fileGrp" type="fileGrpType" minOccurs="0" maxOccurs="unbounded"/>			
-			<xsd:element name="file" minOccurs="0" maxOccurs="unbounded" type="fileType">
+			<xsd:element name="file" minOccurs="0" maxOccurs="unbounded" type="fileType" >
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">
 						The file element &lt;file&gt; provides access to the content files for the digital object being described by the METS document. A &lt;file&gt; element may contain one or more &lt;FLocat&gt; elements which provide pointers to a content file and/or a &lt;FContent&gt; element which wraps an encoded version of the file. Embedding files using &lt;FContent&gt; can be a valuable feature for exchanging digital objects between repositories or for archiving versions of digital objects for off-site storage. All &lt;FLocat&gt; and &lt;FContent&gt; elements should identify and/or contain identical copies of a single file. The &lt;file&gt; element is recursive, thus allowing sub-files or component files of a larger file to be listed in the inventory. Alternatively, by using the &lt;stream&gt; element, a smaller component of a file or of a related file can be placed within a &lt;file&gt; element. Finally, by using the &lt;transformFile&gt; element, it is possible to include within a &lt;file&gt; element a different version of a file that has undergone a transformation for some reason, such as format migration.
@@ -652,7 +665,7 @@ A &lt;fileGrp&gt; may contain zero or more &lt;fileGrp&gt; elements and or &lt;f
 					The METS standard represents a document structurally as a series of nested div elements, that is, as a hierarchy (e.g., a book, which is composed of chapters, which are composed of subchapters, which are composed of text).  Every div node in the structural map hierarchy may be connected (via subsidiary mptr or fptr elements) to content files which represent that div's portion of the whole document.
 
 SPECIAL NOTE REGARDING DIV ATTRIBUTE VALUES:
-to clarify the differences between the ORDER, ORDERLABEL, and LABEL attributes for the &lt;div&gt; element, imagine a text with 10 roman numbered pages followed by 10 arabic numbered pages. Page iii would have an ORDER of "3", an ORDERLABEL of "iii" and a LABEL of "Page iii", while page 3 would have an ORDER of "13", an ORDERLABEL of "3" and a LABEL of "Page 3".
+to clarify the differences between the ORDER, ORDERLABEL, and LABEL attributes for the &lt;div&gt; element, imagine a text with 10 roman numbered pages followed by 10 arabic numbered pages. Page iii would have an ORDER of &quot;3&quot;, an ORDERLABEL of &quot;iii&quot; and a LABEL of &quot;Page iii&quot;, while page 3 would have an ORDER of &quot;13&quot;, an ORDERLABEL of &quot;3&quot; and a LABEL of &quot;Page 3&quot;.
 			</xsd:documentation>
 		</xsd:annotation>
 		<xsd:sequence>
@@ -727,7 +740,7 @@ to clarify the differences between the ORDER, ORDERLABEL, and LABEL attributes f
 				            </xsd:documentation>
 			            </xsd:annotation>
                	    </xsd:attribute>
-					<xsd:anyAttribute namespace="##other" processContents="lax"/>
+					<xsd:anyAttribute namespace="##other" processContents="lax"></xsd:anyAttribute>
 				</xsd:complexType>
 			</xsd:element>
 			<xsd:element name="div" type="divType" minOccurs="0" maxOccurs="unbounded"/>
@@ -786,7 +799,7 @@ to clarify the differences between the ORDER, ORDERLABEL, and LABEL attributes f
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attributeGroup ref="ORDERLABELS"/>		
-		<xsd:anyAttribute namespace="##other" processContents="lax"/>
+		<xsd:anyAttribute namespace="##other" processContents="lax"></xsd:anyAttribute>
 	</xsd:complexType>
 	<xsd:complexType name="seqType">
 		<xsd:annotation>
@@ -805,7 +818,7 @@ to clarify the differences between the ORDER, ORDERLABEL, and LABEL attributes f
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attributeGroup ref="ORDERLABELS"/>		
-		<xsd:anyAttribute namespace="##other" processContents="lax"/>
+		<xsd:anyAttribute namespace="##other" processContents="lax"></xsd:anyAttribute>
 	</xsd:complexType>
 	<xsd:complexType name="areaType">
 		<xsd:annotation>
@@ -947,7 +960,7 @@ TCF.
 			</xsd:annotation>
 	    </xsd:attribute>
 		<xsd:attributeGroup ref="ORDERLABELS"/>		
-		<xsd:anyAttribute namespace="##other" processContents="lax"/>
+		<xsd:anyAttribute namespace="##other" processContents="lax"></xsd:anyAttribute>
 	</xsd:complexType>
 	<xsd:complexType name="structLinkType">
 		<xsd:annotation>
@@ -1021,10 +1034,10 @@ TCF.
 				</xsd:annotation>
 				<xsd:complexType>
 					<xsd:sequence>
-						<xsd:element name="smLocatorLink" minOccurs="2" maxOccurs="unbounded">
+						<xsd:element name="smLocatorLink" minOccurs="2" maxOccurs="unbounded" >
 							<xsd:annotation>
 								<xsd:documentation xml:lang="en">
-									The structMap locator link element &lt;smLocatorLink&gt; is of xlink:type "locator".  It provides a means of identifying a &lt;div&gt; element that will participate in one or more of the links specified by means of &lt;smArcLink&gt; elements within the same &lt;smLinkGrp&gt;. The participating &lt;div&gt; element that is represented by the &lt;smLocatorLink&gt; is identified by means of a URI in the associate xlink:href attribute.  The lowest level of this xlink:href URI value should be a fragment identifier that references the ID value that identifies the relevant &lt;div&gt; element.  For example, "xlink:href='#div20'" where "div20" is the ID value that identifies the pertinent &lt;div&gt; in the current METS document. Although not required by the xlink specification, an &lt;smLocatorLink&gt; element will typically include an xlink:label attribute in this context, as the &lt;smArcLink&gt; elements will reference these labels to establish the from and to sides of each arc link.
+									The structMap locator link element &lt;smLocatorLink&gt; is of xlink:type &quot;locator&quot;.  It provides a means of identifying a &lt;div&gt; element that will participate in one or more of the links specified by means of &lt;smArcLink&gt; elements within the same &lt;smLinkGrp&gt;. The participating &lt;div&gt; element that is represented by the &lt;smLocatorLink&gt; is identified by means of a URI in the associate xlink:href attribute.  The lowest level of this xlink:href URI value should be a fragment identifier that references the ID value that identifies the relevant &lt;div&gt; element.  For example, &quot;xlink:href=&apos;#div20&apos;&quot; where &quot;div20&quot; is the ID value that identifies the pertinent &lt;div&gt; in the current METS document. Although not required by the xlink specification, an &lt;smLocatorLink&gt; element will typically include an xlink:label attribute in this context, as the &lt;smArcLink&gt; elements will reference these labels to establish the from and to sides of each arc link.
 								</xsd:documentation>
 							</xsd:annotation>
 							<xsd:complexType>
@@ -1040,7 +1053,7 @@ TCF.
 							<xsd:complexType>
 								<xsd:annotation>
 									<xsd:documentation xml:lang="en">
-										The structMap arc link element &lt;smArcLink&gt; is of xlink:type "arc" It can be used to establish a traversal link between two &lt;div&gt; elements as identified by &lt;smLocatorLink&gt; elements within the same smLinkGrp element. The associated xlink:from and xlink:to attributes identify the from and to sides of the arc link by referencing the xlink:label attribute values on the participating smLocatorLink elements.
+										The structMap arc link element &lt;smArcLink&gt; is of xlink:type &quot;arc&quot; It can be used to establish a traversal link between two &lt;div&gt; elements as identified by &lt;smLocatorLink&gt; elements within the same smLinkGrp element. The associated xlink:from and xlink:to attributes identify the from and to sides of the arc link by referencing the xlink:label attribute values on the participating smLocatorLink elements.
 									</xsd:documentation>
 								</xsd:annotation>
 								<xsd:attribute name="ID" type="xsd:ID">									
@@ -1067,7 +1080,7 @@ TCF.
 					<xsd:attribute name="ID" type="xsd:ID"/>
 					<xsd:attribute name="ARCLINKORDER" default="unordered">
 						<xsd:annotation>
-							<xsd:documentation xml:lang="en">ARCLINKORDER (enumerated string/O): ARCLINKORDER is used to indicate whether the order of the smArcLink elements aggregated by the smLinkGrp element is significant. If the order is significant, then a value of "ordered" should be supplied.  Value defaults to "unordered" Note that the ARLINKORDER attribute has no xlink specified meaning.</xsd:documentation>
+							<xsd:documentation xml:lang="en">ARCLINKORDER (enumerated string/O): ARCLINKORDER is used to indicate whether the order of the smArcLink elements aggregated by the smLinkGrp element is significant. If the order is significant, then a value of &quot;ordered&quot; should be supplied.  Value defaults to &quot;unordered&quot; Note that the ARLINKORDER attribute has no xlink specified meaning.</xsd:documentation>
 						</xsd:annotation>
 						<xsd:simpleType>
 							<xsd:restriction base="xsd:string">
@@ -1321,7 +1334,7 @@ TCF.
 				</xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:anyAttribute namespace="##other" processContents="lax"/> 
+		<xsd:anyAttribute namespace="##other" processContents="lax" /> 
 	</xsd:complexType>
 	<xsd:complexType name="fileType">
 		<xsd:annotation>
@@ -1481,8 +1494,8 @@ TCF.
 								</xsd:annotation>
 								<xsd:simpleType>
 									<xsd:restriction base="xsd:string">
-										<xsd:enumeration value="decompression"/>
-										<xsd:enumeration value="decryption"/>
+										<xsd:enumeration value="decompression"></xsd:enumeration>
+										<xsd:enumeration value="decryption"></xsd:enumeration>
 									</xsd:restriction>
 								</xsd:simpleType>
 							</xsd:attribute>
@@ -1510,7 +1523,7 @@ TCF.
 					</xsd:complexContent>
 				</xsd:complexType>
 			</xsd:element>
-			<xsd:element name="file" type="fileType" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="file" type="fileType" minOccurs="0" maxOccurs="unbounded"></xsd:element>
 		</xsd:sequence>
 		<xsd:attribute name="ID" type="xsd:ID" use="required">
 			<xsd:annotation>
@@ -1524,7 +1537,7 @@ TCF.
 				</xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attributeGroup ref="FILECORE"/>
+		<xsd:attributeGroup ref="FILECORE"></xsd:attributeGroup>
 		<xsd:attribute name="OWNERID" type="xsd:string" use="optional">
 			<xsd:annotation>
 				<xsd:documentation xml:lang="en">OWNERID (string/O): A unique identifier assigned to the file by its owner.  This may be a URI which differs from the URI used to retrieve the file.

@@ -32,7 +32,7 @@ from flask import render_template, request, redirect, url_for
 from flask_negotiate import produces
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized, InternalServerError
 
-from eatb.metadata.mets import MetsValidation
+from ip_validation.infopacks.mets import MetsValidator
 
 from ip_validation.webapp import APP, __version__
 from ip_validation.infopacks.rules import ValidationProfile, TestResult
@@ -72,48 +72,35 @@ def validate(digest):
     # Get the validation path ready
     to_validate = os.path.join(APP.config['UPLOAD_FOLDER'], digest)
     # Validate package structure
-    package_details = IP.validate_package_structure(to_validate)
+    struct_details = IP.validate_package_structure(to_validate)
     # Schema and schematron validation to be factored out.
     # initialise schema and schematron validation structures
     schema_result = None
     prof_results = {}
-    errors = []
     schema_errors = []
     # IF package is well formed then we can validate it.
-    if package_details.package_status == IP.PackageStatus.WellFormed:
-        validator = MetsValidation.MetsValidation(package_details.path)
-        mets_path = os.path.join(package_details.path, 'METS.xml')
+    if struct_details.package_status == IP.PackageStatus.WellFormed:
+        # Schema based METS validation first
+        validator = MetsValidator(struct_details.path)
+        mets_path = os.path.join(struct_details.path, 'METS.xml')
         schema_result = validator.validate_mets(mets_path)
+        # Now grab any errors
         for error in validator.validation_errors:
             schema_errors.append(str(error))
 
+        # Schematron validation profile
         profile = ValidationProfile()
         profile.validate(mets_path)
-
-        for sect in ["root", "hdr", "amd", "dmd", "file", "structmap"]:
-            if not profile.get_result(sect):
-                report = profile.rulesets[sect].get_report()
-                xml_report = ET.XML(bytes(report))
-
-                rule = None
-                for ele in xml_report.iter():
-                    if ele.tag == '{http://purl.oclc.org/dsdl/svrl}fired-rule':
-                        rule = ele
-                        print(format(rule))
-                    elif ele.tag == '{http://purl.oclc.org/dsdl/svrl}failed-assert':
-                        print(format(rule))
-                        print(format(ele))
-                        errors.append(TestResult.from_element(rule, ele))
         prof_results = profile.get_results()
-    return render_template('validate.html', details=package_details, schema_result=schema_result,
+
+    return render_template('validate.html', details=struct_details, schema_result=schema_result,
                            schema_errors=schema_errors,
-                           results=prof_results, errors=errors)
+                           schematron_result=profile.is_valid, profile_results=prof_results)
 
 @APP.route("/api/validate/", methods=['POST'])
 def upload():
     """POST method to valdiate an information package."""
     # check if the post request has the file part
-
     if not request.files['package'] or not request.form["digest"]:
         logging.debug('No file part %s', request.files)
         raise BadRequest('No file part, or digest')

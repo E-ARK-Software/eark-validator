@@ -19,41 +19,46 @@
     <li>{{ error }}</li>
   {% endfor %}
 </ul>
-<p class="lead">Schematron Validation:</p>
+<p class="lead">Schematron Validation: {{ schematron_result }}</p>
 <ul>
-  {% for key, value in results.items() %}
-    <li>{{ key }}: {{ value }}</li>
+  {% for key, value in profile_results.items() %}
+    <li>{{ key }}: {{ value.is_valid }}</li>
   {% endfor %}
 </ul>
-<p class="lead">Schematron Errors:</p>
+<p class="lead">Schematron Issues:</p>
 <table class="table table-striped">
   <tr>
     <th>ID</th>
-    <th>Context</th>
-    <th>Test</th>
+    <th>Severity</th>
     <th>Location</th>
+    <th>Test</th>
     <th>Message</th>
   </tr>
-  {{ prop_rows(errors) }}
+  {{ prop_rows(profile_results) }}
 
 </table>
 {% endblock page_content %}
 {% block page_script %}
 {% endblock page_script %}
 
-{% macro prop_rows(errors) %}
-{% for error in errors %}
-  {{ prop_row(error) }}
+{% macro prop_rows(results) %}
+{% for key, value in results.items() %}
+  {% for warning in value.warnings %}
+    {{ prop_row(warning) }}
+  {% endfor %}
+  {% for failure in value.failures %}
+    {{ prop_row(failure) }}
+  {% endfor %}
 {% endfor %}
 {% endmacro %}
 
-{% macro prop_row(error) %}
+{% macro prop_row(issue) %}
   <tr>
-    <td>{{ error.rule_id }}</td>
-    <td>{{ error.location.context }}</td>
-    <td>{{ error.location.test }}</td>
-    <td>{{ error.location.location }}</td>
-    <td>{{ error.message }}</td>
+    <td>{{ issue.rule_id }}</td>
+    <td>{{ issue.severity.name }}</td>
+    <td>{{ issue.location.location }}</td>
+    <td>{{ issue.location.test }}</td>
+    <td>{{ issue.message }}</td>
   </tr>
 {% endmacro -%}
 
