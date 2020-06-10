@@ -272,7 +272,7 @@ def check_package_root(package_root):
         details.add_error(StructError.from_values(1, sub_message="""Multiple root
                           elements found when unpacking {}""".format(package_root)))
         return details
-    if os.path.isfile(root_entries[0]):
+    if os.path.isfile(os.path.join(package_root, root_entries[0])):
         details = PackageDetails(package_root, package_status=PackageStatus.NotWellFormed)
         details.add_error(StructError.from_values(1, sub_message="""Package {}
                           unpacked to a single file.""".format(package_root)))
