@@ -78,6 +78,8 @@ def validate(digest):
     schema_result = None
     prof_results = {}
     schema_errors = []
+    # Schematron validation profile
+    profile = ValidationProfile()
     # IF package is well formed then we can validate it.
     if struct_details.package_status == IP.PackageStatus.WellFormed:
         # Schema based METS validation first
@@ -88,8 +90,6 @@ def validate(digest):
         for error in validator.validation_errors:
             schema_errors.append(str(error))
 
-        # Schematron validation profile
-        profile = ValidationProfile()
         profile.validate(mets_path)
         prof_results = profile.get_results()
 
