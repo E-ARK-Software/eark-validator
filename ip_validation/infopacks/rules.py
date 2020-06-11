@@ -79,7 +79,16 @@ class ValidationRules():
 
 class ValidationProfile():
     """ A complete set of Schematron rule sets that comprise a complete validation profile."""
-    SECTIONS = ['root', 'hdr', 'amd', 'dmd', 'file', 'structmap']
+    NAMES = {
+        'root': 'METS Root',
+        'hdr': 'METS Header',
+        'amd': 'Adminstrative Metadata',
+        'dmd': 'Descriptive Metadata',
+        'file': 'File Section',
+        'structmap': 'Structural Map'
+    }
+    SECTIONS = NAMES.keys()
+
     def __init__(self):
         self.rulesets = {}
         self.results = {}

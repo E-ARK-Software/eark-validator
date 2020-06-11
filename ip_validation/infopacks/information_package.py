@@ -81,6 +81,11 @@ class PackageDetails:
         return self._path
 
     @property
+    def name(self):
+        """Get the name of the package."""
+        return os.path.basename(os.path.normpath(self.path))
+
+    @property
     def size(self):
         """Return the package size in bytes."""
         return self._size

@@ -2,7 +2,9 @@
 {% block title %}Home{% endblock %}
 {% block page_content %}
 <h1>Validation Report</h1>
-<p class="lead">Package Structure: {{ details.package_status.name }}</p>
+<h2>Package ID: {{ details.name }}</h2>
+<h3>Structure Checks</h3>
+<p class='lead {{ details.package_status.name|lower }}'>{{ details.package_status.name }}</p>
 <table class="table table-striped">
   <tr>
     <th>ID</th>
@@ -11,20 +13,36 @@
     <th>Sub Message</th>
   </tr>
   {{ struct_rows(details.errors) }}
-
 </table>
-<p class="lead">Schema Validation: {{ schema_result }}</p>
-<ul>
+
+<h3>Metadata Checks</h3>
+<h4>Schema</h4>
+<p class="lead">Schema Validation: {{ validation_badge(schema_result) }}</p>
+<table class="table table-striped">
+  <tr>
+    <th>Severity</th>
+    <th>Message</th>
+  </tr>
   {% for error in schema_errors %}
-    <li>{{ error }}</li>
+    <tr>
+      <td>Error</td>
+      <td>{{ error.msg }}</td>
+    </tr>
   {% endfor %}
-</ul>
-<p class="lead">Schematron Validation: {{ schematron_result }}</p>
-<ul>
+</table>
+<p class="lead">Schematron Validation: {{ validation_badge(schematron_result) }}</p>
+<table class="table table-striped">
+  <tr>
+    <th>Section</th>
+    <th>Result</th>
+  </tr>
   {% for key, value in profile_results.items() %}
-    <li>{{ key }}: {{ value.is_valid }}</li>
+  <tr>
+    <td>{{ prof_names[key] }}</td>
+    <td>{{ validation_badge(value.is_valid) }}</td>
+  </tr>
   {% endfor %}
-</ul>
+</table>
 <p class="lead">Schematron Issues:</p>
 <table class="table table-striped">
   <tr>
@@ -54,7 +72,7 @@
 
 {% macro prop_row(issue) %}
   <tr>
-    <td>{{ issue.rule_id }}</td>
+    <td>{{ rule_link(issue.rule_id) }}</td>
     <td>{{ issue.severity.name }}</td>
     <td>{{ issue.location.location }}</td>
     <td>{{ issue.location.test }}</td>
@@ -70,9 +88,21 @@
 
 {% macro struct_row(error) %}
   <tr>
-    <td>{{ error.rule_id }}</td>
+    <td>{{ rule_link(error.rule_id) }}</td>
     <td>{{ error.severity.name }}</td>
     <td>{{ error.message }}</td>
     <td>{{ error.sub_message }}</td>
   </tr>
-{% endmacro -%}
+{% endmacro %}
+
+{% macro validation_badge(result) %}
+  <span class="{{ validation_badge_class(result) }}">{% if result == true %}Valid{% else %}Invalid{% endif %}</span>
+{% endmacro %}
+
+{% macro validation_badge_class(result) %}
+  badge badge-{% if result == true %}success{% else %}danger{% endif %}
+{% endmacro %}
+
+{% macro rule_link(rule_id) %}
+  <a href="https://earkcsip.dilcis.eu/#{{ rule_id }}">{{ rule_id }}</a>
+{% endmacro %}
