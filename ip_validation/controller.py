@@ -26,8 +26,6 @@
 import logging
 import os.path
 
-import lxml.etree as ET
-
 from flask import render_template, request, redirect, url_for
 from flask_negotiate import produces
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized, InternalServerError
@@ -35,7 +33,7 @@ from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized, I
 from ip_validation.infopacks.mets import MetsValidator
 
 from ip_validation.webapp import APP, __version__
-from ip_validation.infopacks.rules import ValidationProfile, TestResult
+from ip_validation.infopacks.rules import ValidationProfile
 import ip_validation.infopacks.information_package as IP
 
 ROUTES = True
@@ -87,14 +85,13 @@ def validate(digest):
         mets_path = os.path.join(struct_details.path, 'METS.xml')
         schema_result = validator.validate_mets(mets_path)
         # Now grab any errors
-        for error in validator.validation_errors:
-            schema_errors.append(str(error))
+        schema_errors = validator.validation_errors
 
         profile.validate(mets_path)
         prof_results = profile.get_results()
 
     return render_template('validate.html', details=struct_details, schema_result=schema_result,
-                           schema_errors=schema_errors,
+                           schema_errors=schema_errors, prof_names=ValidationProfile.NAMES,
                            schematron_result=profile.is_valid, profile_results=prof_results)
 
 @APP.route("/api/validate/", methods=['POST'])
