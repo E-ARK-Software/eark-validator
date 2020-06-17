@@ -92,7 +92,7 @@ class ValidationProfile():
     def __init__(self):
         self.rulesets = {}
         self.is_valid = False
-        self.is_wellformed = True
+        self.is_wellformed = False
         self.results = {}
         self.messages = []
         for section in self.SECTIONS:
