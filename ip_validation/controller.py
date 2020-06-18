@@ -86,9 +86,9 @@ def validate(digest):
         schema_result = validator.validate_mets(mets_path)
         # Now grab any errors
         schema_errors = validator.validation_errors
-
-        profile.validate(mets_path)
-        prof_results = profile.get_results()
+        if schema_result is True:
+            profile.validate(mets_path)
+            prof_results = profile.get_results()
 
     return render_template('validate.html', details=struct_details, schema_result=schema_result,
                            schema_errors=schema_errors, prof_names=ValidationProfile.NAMES,

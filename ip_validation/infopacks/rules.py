@@ -91,16 +91,27 @@ class ValidationProfile():
 
     def __init__(self):
         self.rulesets = {}
-        self.results = {}
         self.is_valid = False
+        self.is_wellformed = False
+        self.results = {}
+        self.messages = []
         for section in self.SECTIONS:
             self.rulesets[section] = ValidationRules(section)
 
     def validate(self, to_validate):
         """Validates a file against each loaded ruleset."""
         is_valid = True
+        self.is_wellformed = True
+        self.results = {}
+        self.messages = []
         for section in self.SECTIONS:
-            self.rulesets[section].validate(to_validate)
+            try:
+                self.rulesets[section].validate(to_validate)
+            except lxml.etree.XMLSyntaxError as parse_err:
+                self.is_wellformed = False
+                self.is_valid = False
+                self.messages.append(parse_err.msg)
+                return
             self.results[section] = self.rulesets[section].get_report()
             if not self.results[section].is_valid:
                 is_valid = False
