@@ -23,6 +23,7 @@
 # under the License.
 #
 """ Flask application routes for E-ARK Python IP Validator. """
+import hashlib
 import logging
 import os.path
 
@@ -134,6 +135,17 @@ def upload():
         dest_path = os.path.join(APP.config['UPLOAD_FOLDER'], filename)
         if not os.path.exists(dest_path):
             uploaded.save(dest_path)
+        BLOCKSIZE = 65536
+        hasher = hashlib.sha1()
+        with open(dest_path, 'rb') as afile:
+            buf = afile.read(BLOCKSIZE)
+            while len(buf) > 0:
+                hasher.update(buf)
+                buf = afile.read(BLOCKSIZE)
+        sha1_hash = hasher.hexdigest()
+        if not sha1_hash == digest:
+            return {'message' : 'Digest mismatch, calculated {}, POSTED {}'.format(sha1_hash,
+                                                                                   digest)}, 403
         logging.debug("File upload successful: %s", uploaded.filename)
         return jsonify(sha1=digest,
                        validation_url="{}api/ip/validation/{}/".format(request.url_root,
@@ -177,7 +189,8 @@ def api_validate(digest):
             for _err in schema_errors:
                 schema_messages.append(_err.msg)
     return jsonify(schema_valid=schema_valid, schema_errors=schema_messages,
-                   metadata_valid=profile_valid, profile_warnings=profile_warnings)
+                   metadata_valid=profile_valid, profile_warnings=profile_warnings,
+                   profile_errors=profile_errors)
 
 @APP.route("/about/")
 def about():
