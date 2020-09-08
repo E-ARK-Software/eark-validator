@@ -173,6 +173,11 @@ class TestResult():
     def __str__(self):
         return str(self.rule_id) + " " + str(self.severity) + " " + str(self.location)
 
+    def to_Json(self):
+        return {"rule_id" : self.rule_id, "severity" : str(self.severity.name),
+                "test" : self.location.test, "location" : self.location.location,
+                "message" : self.message}
+
     @classmethod
     def from_element(cls, rule, failed_assert, severity=Severity.Error):
         """Create a Test result from an element."""

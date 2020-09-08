@@ -26,7 +26,7 @@
 import logging
 import os.path
 
-from flask import render_template, request, redirect, url_for
+from flask import abort, jsonify, render_template, request, redirect, url_for
 from flask_negotiate import produces
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized, InternalServerError
 
@@ -95,7 +95,7 @@ def validate(digest):
                            schematron_result=profile.is_valid, profile_results=prof_results)
 
 @APP.route("/api/validate/", methods=['POST'])
-def upload():
+def upload_redirect():
     """POST method to valdiate an information package."""
     # check if the post request has the file part
     if not request.files['package'] or not request.form["digest"]:
@@ -115,6 +115,69 @@ def upload():
         logging.debug("File upload successful: %s", filename)
         return redirect(url_for('validate', digest=digest))
     raise BadRequest("File type upload not allowed")
+
+@APP.route("/api/ip/package/", methods=['POST'])
+def upload():
+    """POST method to valdiate an information package."""
+    # check if the post request has the file part
+    if not request.files['package'] or not request.form["digest"]:
+        logging.debug('No file part %s', request.files)
+        return {'message' : 'No file part, or digest'}, 403
+    uploaded = request.files['package']
+    digest = request.form["digest"]
+    if uploaded.filename == '':
+        logging.debug('No selected file')
+        return {'message' : 'No selected file'}, 403
+    if uploaded and _allowed_file(uploaded.filename):
+        logging.debug("Digest: %s", digest)
+        filename = request.form["digest"]
+        dest_path = os.path.join(APP.config['UPLOAD_FOLDER'], filename)
+        if not os.path.exists(dest_path):
+            uploaded.save(dest_path)
+        logging.debug("File upload successful: %s", uploaded.filename)
+        return jsonify(sha1=digest,
+                       validation_url="{}api/ip/validation/{}/".format(request.url_root,
+                                                                       digest))
+    return {'message' : 'File type upload not allowed'}, 403
+
+@APP.route("/api/ip/validation/<string:digest>/")
+def api_validate(digest):
+    """Display validation results."""
+    # Get the validation path ready
+    to_validate = os.path.join(APP.config['UPLOAD_FOLDER'], digest)
+    # Validate package structure
+    struct_details = IP.validate_package_structure(to_validate)
+    # Schema and schematron validation to be factored out.
+    # initialise schema and schematron validation structures
+    schema_valid = None
+    schema_messages = []
+    profile_valid = None
+    profile_warnings = []
+    profile_errors = []
+    # Schematron validation profile
+    profile = ValidationProfile()
+    # IF package is well formed then we can validate it.
+    if struct_details.package_status == IP.PackageStatus.WellFormed:
+        # Schema based METS validation first
+        validator = MetsValidator(struct_details.path)
+        mets_path = os.path.join(struct_details.path, 'METS.xml')
+        schema_valid = validator.validate_mets(mets_path)
+        # Now grab any errors
+        schema_errors = validator.validation_errors
+        if schema_valid is True:
+            profile.validate(mets_path)
+            profile_valid = profile.is_valid
+            for name in ValidationProfile.SECTIONS:
+                report = profile.get_result(name)
+                for failure in report.failures:
+                    profile_errors.append(failure.to_Json())
+                for warning in report.warnings:
+                    profile_warnings.append(warning.to_Json())
+        else:
+            for _err in schema_errors:
+                schema_messages.append(_err.msg)
+    return jsonify(schema_valid=schema_valid, schema_errors=schema_messages,
+                   metadata_valid=profile_valid, profile_warnings=profile_warnings)
 
 @APP.route("/about/")
 def about():
