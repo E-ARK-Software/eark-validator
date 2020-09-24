@@ -148,7 +148,7 @@ def upload():
                                                                                    digest)}, 403
         logging.debug("File upload successful: %s", uploaded.filename)
         return jsonify(sha1=digest,
-                       validation_url="{}api/ip/validation/{}/".format(request.url_root,
+                       validation_url="https://{}/api/ip/validation/{}/".format(request.host,
                                                                        digest))
     return {'message' : 'File type upload not allowed'}, 403
 
