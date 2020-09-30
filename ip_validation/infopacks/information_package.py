@@ -24,7 +24,6 @@
 #
 """Module covering information package structure validation and navigation."""
 from enum import Enum, unique
-import hashlib
 import os
 import tarfile
 import tempfile
@@ -33,7 +32,7 @@ import zipfile
 from ip_validation.infopacks.struct_errors import StructError
 from ip_validation.infopacks.rules import Severity
 
-BUFF_SIZE = 1024 * 64
+import ip_validation.utils as UTILS
 
 @unique
 class PackageStatus(Enum):
@@ -150,23 +149,11 @@ class ArchivePackageHandler():
             return True
         return tarfile.is_tarfile(to_test)
 
-    @staticmethod
-    def calc_sha1(to_hash):
-        """Calculate and return the hex SHA1 value of the file path to_hash."""
-        sha1 = hashlib.sha1()
-        with open(to_hash, 'rb') as source:
-            while True:
-                data = source.read(BUFF_SIZE)
-                if not data:
-                    break
-                sha1.update(data)
-        return sha1.hexdigest()
-
     def unpack_package(self, to_unpack, dest=None):
         """Unpack an archived package to a destination (defaults to tempdir)."""
         if not os.path.isfile(to_unpack) or not self.is_archive(to_unpack):
             raise PackageStructError("File is not an archive file.")
-        sha1 = ArchivePackageHandler.calc_sha1(to_unpack)
+        sha1 = UTILS.sha1(to_unpack)
         dest_root = dest if dest else self.unpack_root
         destination = os.path.join(dest_root, sha1)
         if zipfile.is_zipfile(to_unpack):

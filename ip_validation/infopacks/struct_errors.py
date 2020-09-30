@@ -110,6 +110,10 @@ class StructError():
         """Get the sub-message."""
         return self._sub_message
 
+    def to_Json(self):
+        return {"rule_id" : self.rule_id, "severity" : str(self.severity.name),
+                "message" : self.message, "sub_message" : self.sub_message}
+
     @classmethod
     def from_values(cls, rule_id, severity=Severity.Error, sub_message=''):
         """Create an StructError from values supplied."""

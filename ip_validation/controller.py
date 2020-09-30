@@ -23,11 +23,10 @@
 # under the License.
 #
 """ Flask application routes for E-ARK Python IP Validator. """
-import hashlib
 import logging
 import os.path
 
-from flask import abort, jsonify, render_template, request, redirect, url_for
+from flask import jsonify, render_template, request, redirect, url_for
 from flask_negotiate import produces
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized, InternalServerError
 
@@ -36,6 +35,7 @@ from ip_validation.infopacks.mets import MetsValidator
 from ip_validation.webapp import APP, __version__
 from ip_validation.infopacks.rules import ValidationProfile
 import ip_validation.infopacks.information_package as IP
+import ip_validation.utils as UTILS
 
 ROUTES = True
 
@@ -135,21 +135,14 @@ def upload():
         dest_path = os.path.join(APP.config['UPLOAD_FOLDER'], filename)
         if not os.path.exists(dest_path):
             uploaded.save(dest_path)
-        BLOCKSIZE = 65536
-        hasher = hashlib.sha1()
-        with open(dest_path, 'rb') as afile:
-            buf = afile.read(BLOCKSIZE)
-            while len(buf) > 0:
-                hasher.update(buf)
-                buf = afile.read(BLOCKSIZE)
-        sha1_hash = hasher.hexdigest()
+        sha1_hash = UTILS.sha1(dest_path)
         if not sha1_hash == digest:
             return {'message' : 'Digest mismatch, calculated {}, POSTED {}'.format(sha1_hash,
                                                                                    digest)}, 403
         logging.debug("File upload successful: %s", uploaded.filename)
         return jsonify(sha1=digest,
                        validation_url="https://{}/api/ip/validation/{}/".format(request.host,
-                                                                       digest))
+                                                                                digest))
     return {'message' : 'File type upload not allowed'}, 403
 
 @APP.route("/api/ip/validation/<string:digest>/")
