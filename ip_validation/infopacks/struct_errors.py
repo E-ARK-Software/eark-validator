@@ -101,6 +101,21 @@ class StructError():
         self._severity = value
 
     @property
+    def is_error(self):
+        """Returns True if this is an error message, false otherwise."""
+        return self.severity == Severity.Error
+
+    @property
+    def is_info(self):
+        """Returns True if this is an info message, false otherwise."""
+        return self.severity == Severity.Info
+
+    @property
+    def is_warning(self):
+        """Returns True if this is an warning message, false otherwise."""
+        return self.severity == Severity.Warn
+
+    @property
     def message(self):
         """Get the message."""
         return self._message
@@ -110,7 +125,8 @@ class StructError():
         """Get the sub-message."""
         return self._sub_message
 
-    def to_Json(self):
+    def to_json(self):
+        """Output the message in JSON format."""
         return {"rule_id" : self.rule_id, "severity" : str(self.severity.name),
                 "message" : self.message, "sub_message" : self.sub_message}
 

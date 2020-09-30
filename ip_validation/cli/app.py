@@ -28,11 +28,10 @@ E-ARK : Information package validation
 """
 import argparse
 from pprint import pprint
-import sys
 import os.path
+import sys
 
 import ip_validation.infopacks.information_package as IP
-import ip_validation.utils as UTILS
 
 __version__ = "0.1.0"
 
@@ -113,9 +112,10 @@ def main():
             to_validate = arch_processor.unpack_package(info_pack)
 
         struct_details = IP.validate_package_structure(to_validate)
-        pprint('Path {} is dir, struct result is: {}'.format(to_validate, struct_details.package_status))
+        pprint('Path {} is dir, struct result is: {}'.format(to_validate,
+                                                             struct_details.package_status))
         for error in struct_details.errors:
-            pprint(error.to_Json())
+            pprint(error.to_json())
 
 
 

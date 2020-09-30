@@ -175,9 +175,9 @@ def api_validate(digest):
             for name in ValidationProfile.SECTIONS:
                 report = profile.get_result(name)
                 for failure in report.failures:
-                    profile_errors.append(failure.to_Json())
+                    profile_errors.append(failure.to_json())
                 for warning in report.warnings:
-                    profile_warnings.append(warning.to_Json())
+                    profile_warnings.append(warning.to_json())
         else:
             for _err in schema_errors:
                 schema_messages.append(_err.msg)

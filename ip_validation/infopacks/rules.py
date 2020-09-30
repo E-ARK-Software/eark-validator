@@ -173,7 +173,8 @@ class TestResult():
     def __str__(self):
         return str(self.rule_id) + " " + str(self.severity) + " " + str(self.location)
 
-    def to_Json(self):
+    def to_json(self):
+        """Output the error message in JSON form."""
         return {"rule_id" : self.rule_id, "severity" : str(self.severity.name),
                 "test" : self.location.test, "location" : self.location.location,
                 "message" : self.message}
