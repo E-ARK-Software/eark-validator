@@ -54,6 +54,11 @@ PARSER = argparse.ArgumentParser(description=defaults['description'], epilog=def
 def parse_command_line():
     """Parse command line arguments."""
     # Add arguments
+    PARSER.add_argument('--testcase', '-t',
+                        action="store_true",
+                        dest="testCase",
+                        default=False,
+                        help="Treat [FILE]s as XML test cases and drive validation from those.")
     PARSER.add_argument('--recurse', '-r',
                         action="store_true",
                         dest="inputRecursiveFlag",
