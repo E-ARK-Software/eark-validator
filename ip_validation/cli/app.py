@@ -31,6 +31,7 @@ from pprint import pprint
 import os.path
 import sys
 
+import ip_validation.cli.testcases as TC
 import ip_validation.infopacks.information_package as IP
 
 __version__ = "0.1.0"
@@ -97,32 +98,42 @@ def main():
         PARSER.print_help()
         sys.exit(0)
 
-    arch_processor = IP.ArchivePackageHandler()
     # Iterate the file arguments
-    for info_pack in args.files:
-        # This is a var for the final source to validate
-        to_validate = info_pack
+    for file_arg in args.files:
+        if args.testCase:
+            _validate_test_case(file_arg)
+        else:
+            _validate_ip(file_arg)
 
-        if not os.path.exists(info_pack):
-            # Skip files that don't exist
-            pprint('Path {} does not exist'.format(info_pack))
-            continue
-        if os.path.isfile(info_pack):
-            # Check if file is a archive format
-            if not IP.ArchivePackageHandler.is_archive(info_pack):
-                # If not we can't process so report and iterate
-                pprint('Path {} is not a file we can process.'.format(info_pack))
-                continue
-            # Unpack the archive and set the source
-            to_validate = arch_processor.unpack_package(info_pack)
+def _validate_ip(info_pack):
+    arch_processor = IP.ArchivePackageHandler()
+    # This is a var for the final source to validate
+    to_validate = info_pack
 
-        struct_details = IP.validate_package_structure(to_validate)
-        pprint('Path {} is dir, struct result is: {}'.format(to_validate,
-                                                             struct_details.package_status))
-        for error in struct_details.errors:
-            pprint(error.to_json())
+    if not os.path.exists(info_pack):
+        # Skip files that don't exist
+        pprint('Path {} does not exist'.format(info_pack))
+        return
+    if os.path.isfile(info_pack):
+        # Check if file is a archive format
+        if not IP.ArchivePackageHandler.is_archive(info_pack):
+            # If not we can't process so report and iterate
+            pprint('Path {} is not a file we can process.'.format(info_pack))
+            return
+        # Unpack the archive and set the source
+        to_validate = arch_processor.unpack_package(info_pack)
 
+    struct_details = IP.validate_package_structure(to_validate)
+    pprint('Path {} is dir, struct result is: {}'.format(to_validate,
+                                                         struct_details.package_status))
+    for error in struct_details.errors:
+        pprint(error.to_json())
 
+def _validate_test_case(test_case):
+    case = TC.TestCase.from_xml_file(test_case)
+    if not case.testable:
+        sys.exit(0)
+    sys.exit(1)
 
 if __name__ == "__main__":
     main()
