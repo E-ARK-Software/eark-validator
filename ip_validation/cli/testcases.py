@@ -26,7 +26,13 @@
 E-ARK : Information package validation
         E-ARK Test Case processing
 """
-import xml.etree.ElementTree as ET
+import lxml.etree as ET
+
+from importlib_resources import files
+
+import ip_validation.cli.resources as RES
+
+TC_SCHEMA = ET.XMLSchema(file=str(files(RES).joinpath('testCase.xsd')))
 
 class TestCase():
     """
@@ -103,21 +109,22 @@ class TestCase():
             return cls(requirement_id, specification, version)
 
     @classmethod
-    def from_xml_string(cls, xml):
+    def from_xml_string(cls, xml, schema=TC_SCHEMA):
         """Create a test case from an XML string."""
         tree = ET.fromstring(xml)
-        return cls.from_element(tree.getroot())
+        return cls.from_element(tree.getroot(), schema)
 
     @classmethod
-    def from_xml_file(cls, xml_file):
+    def from_xml_file(cls, xml_file, schema=TC_SCHEMA):
         """Create a test case from an XML file."""
         tree = ET.parse(xml_file)
-        return cls.from_element(tree.getroot())
+        return cls.from_element(tree.getroot(), schema)
 
     @classmethod
-    def from_element(cls, case_ele):
+    def from_element(cls, case_ele, schema=TC_SCHEMA):
         """Create a TestCase from an XML element."""
         # Grab the testable att
+        schema.validate(case_ele)
         testable = case_ele.get('testable')
         req_id = None
         text = ""

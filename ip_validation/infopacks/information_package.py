@@ -35,17 +35,21 @@ from ip_validation.infopacks.rules import Severity
 import ip_validation.utils as UTILS
 
 @unique
-class PackageStatus(Enum):
+class StructureStatus(Enum):
     """Enum covering information package validation statuses."""
     Unknown = 1
     # Package has basic parse / structure problems and can't be validated
     NotWellFormed = 2
-    # Package is well formed but there has been a problem validating the metadata
-    Invalid = 3
+    # Package structure is OK
+    WellFormed = 3
+
+class MetadataStatus(Enum):
+    """Enum covering information package validation statuses."""
+    Unknown = 1
+    # Package Metatdata is valid
+    Invalid = 2
     # Package structure and metadata are both OK
-    WellFormed = 4
-    # Package structure and metadata are both OK
-    Valid = 5
+    Valid = 3
 
 @unique
 class ManifestStatus(Enum):
@@ -62,10 +66,10 @@ class ManifestStatus(Enum):
 
 class PackageDetails:
     """Stores the vital facts and figures about a package."""
-    package_values = list(PackageStatus)
+    package_values = list(StructureStatus)
     manifest_values = list(ManifestStatus)
     def __init__(self, path, size=0, version='unknown',
-                 package_status=PackageStatus.Unknown,
+                 package_status=StructureStatus.Unknown,
                  manifest_status=ManifestStatus.Unknown):
         self._path = path
         self._size = size
@@ -120,7 +124,7 @@ class PackageDetails:
         """Add a validation error to package lists."""
         self._errors.append(error)
         if error.severity == Severity.Error:
-            self.package_status = PackageStatus.NotWellFormed
+            self.package_status = StructureStatus.NotWellFormed
 
     def add_errors(self, errors):
         """Add a validation error to package lists."""
@@ -173,12 +177,12 @@ def validate_package_structure(package_path):
         if os.path.isdir(package_path) \
         else unpack_package(package_path)
     # Check it's not a broken package as unpack errors are terminal
-    if details.package_status == PackageStatus.NotWellFormed:
+    if details.package_status == StructureStatus.NotWellFormed:
         return details
     # Now carry out the root checks on the package
     details = check_package_root(details.path)
     # If it has basic structure errors then bale.
-    if details.package_status == PackageStatus.NotWellFormed:
+    if details.package_status == StructureStatus.NotWellFormed:
         return details
 
     # [CSIPSTR2] Do package name and <mets objid="?" > match?
@@ -194,8 +198,8 @@ def validate_package_structure(package_path):
         rep_errors = rep_errors + validate_manifest(manifest, is_root=False)
     validation_errors = root_errors + rep_errors
     details.add_errors(validation_errors)
-    if details.package_status == PackageStatus.Unknown:
-        details.package_status = PackageStatus.WellFormed
+    if details.package_status == StructureStatus.Unknown:
+        details.package_status = StructureStatus.WellFormed
     return details
 
 def validate_manifest(manifest, is_root=True):
@@ -248,7 +252,7 @@ def unpack_package(package_path):
         unpacked_dir = archive_handler.unpack_package(package_path)
     except PackageStructError:
         # If it's a file and it can't be unpacked that's about all we can do.
-        details = PackageDetails(package_path, package_status=PackageStatus.NotWellFormed)
+        details = PackageDetails(package_path, package_status=StructureStatus.NotWellFormed)
         details.add_error(StructError.from_values(1, sub_message="""Package file
                           is not a recognised archive format."""))
         return details
@@ -260,12 +264,12 @@ def check_package_root(package_root):
     # get root entries (files and folders)
     root_entries = os.listdir(package_root)
     if len(root_entries) != 1:
-        details = PackageDetails(package_root, package_status=PackageStatus.NotWellFormed)
+        details = PackageDetails(package_root, package_status=StructureStatus.NotWellFormed)
         details.add_error(StructError.from_values(1, sub_message="""Multiple root
                           elements found when unpacking {}""".format(package_root)))
         return details
     if os.path.isfile(os.path.join(package_root, root_entries[0])):
-        details = PackageDetails(package_root, package_status=PackageStatus.NotWellFormed)
+        details = PackageDetails(package_root, package_status=StructureStatus.NotWellFormed)
         details.add_error(StructError.from_values(1, sub_message="""Package {}
                           unpacked to a single file.""".format(package_root)))
         return details

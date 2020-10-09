@@ -132,8 +132,12 @@ def _validate_ip(info_pack):
 def _validate_test_case(test_case):
     case = TC.TestCase.from_xml_file(test_case)
     if not case.testable:
+        pprint('Path {}, test case {} @testable="FALSE".'.format(test_case, case.case_id))
         sys.exit(0)
     sys.exit(1)
+
+# def _test_case_schema_checks():
+
 
 if __name__ == "__main__":
     main()
