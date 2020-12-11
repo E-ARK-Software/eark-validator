@@ -43,13 +43,12 @@ class TestCase():
      - testable: boolean, True if test case is "testable", False otherwise
      - references: a list of references to relavent requirements.
     """
-    def __init__(self, case_id, testable=True, references=None, text=""):
+    def __init__(self, case_id, testable=True, references=None, text="", rules=None):
         self._case_id = case_id
         self._testable = testable
-        if references is None:
-            references = []
-        self._references = references
+        self._references = [] if references is None else references
         self._text = text
+        self._rules = [] if rules is None else rules
 
     @property
     def case_id(self):
@@ -62,6 +61,11 @@ class TestCase():
         return self._testable == 'TRUE'
 
     @property
+    def unknown(self):
+        """Return True if the test case testability is unknown, otherwise False."""
+        return self._testable == 'UNKNOWN'
+
+    @property
     def references(self):
         """Return the list of relavent requirements."""
         return self._references
@@ -70,6 +74,15 @@ class TestCase():
     def requirement_text(self):
         """Return the requirment text."""
         return self._text
+
+    @property
+    def rules(self):
+        """Return the rules associated with the test case."""
+        return self._rules
+
+    def __str__(self):
+        return "case_id:" + str(self.case_id) + ", testable:" + \
+            self.testable + ", requirement:" + self.requirement_text
 
     class CaseId():
         """
@@ -93,7 +106,7 @@ class TestCase():
         @property
         def specification(self):
             """Return the specification name."""
-            return self._requirement_id
+            return self._specification
 
         @property
         def version(self):
@@ -107,6 +120,135 @@ class TestCase():
             specification = case_id_ele.get('specification')
             version = case_id_ele.get('version')
             return cls(requirement_id, specification, version)
+
+        def __str__(self):
+            return "req_id:" + self.requirement_id + ", specification:" + \
+                self.specification + ", version:" + self.version
+
+    class Rule():
+        """docstring for Rule."""
+        def __init__(self, rule_id, description, error, packages):
+            self._rule_id = rule_id
+            self._description = description
+            self._error = error
+            self._packages = packages
+
+        @property
+        def rule_id(self):
+            """Return the rule ID."""
+            return self._rule_id
+
+        @property
+        def description(self):
+            """Return the description."""
+            return self._description
+
+        @property
+        def error(self):
+            """Return the error."""
+            return self._error
+
+        @property
+        def packages(self):
+            """Return the corpus packages."""
+            return self._packages
+
+        def __str__(self):
+            return "rule_id:" + self.rule_id + ", description:" + \
+                self.description + ", error:" + str(self.error)
+
+        @classmethod
+        def from_element(cls, rule_ele):
+            """Create a Rule from an XML element."""
+            rule_id = rule_ele.get('id')
+            description = ""
+            error = None
+            packages = []
+            for child in rule_ele:
+                if child.tag == 'description':
+                    description = child.text
+                elif child.tag == 'error':
+                    error = cls.Error.from_element(child)
+                elif child.tag == 'corpusPackages':
+                    packages = cls._parse_package_list(child)
+            return cls(rule_id, description, error, packages)
+
+        @staticmethod
+        def _parse_package_list(packages_ele):
+            packages = []
+            for child in packages_ele:
+                if child.tag == 'package':
+                    packages.append(TestCase.Rule.Package.from_element(child))
+            return packages
+
+        class Error():
+            """docstring for Error."""
+            def __init__(self, level, message):
+                self._level = level
+                self._message = message
+
+            @property
+            def level(self):
+                """Return the level."""
+                return self._level
+
+            @property
+            def message(self):
+                """Return the message."""
+                return self._message
+
+            @classmethod
+            def from_element(cls, error_ele):
+                """Return a Errpr instance from an XML element."""
+                level = error_ele.get('level')
+                message = ''
+                for child in error_ele:
+                    if child.tag == 'message':
+                        message = child.text
+                return cls(level, message)
+
+        class Package():
+            """docstring for Package."""
+            def __init__(self, name, path, is_valid, description):
+                self._name = name
+                self._path = path
+                self._is_valid = is_valid
+                self._description = description
+
+            @property
+            def name(self):
+                """Return the name."""
+                return self._name
+
+            @property
+            def path(self):
+                """Return the path."""
+                return self._path
+
+            @property
+            def is_valid(self):
+                """Return the is_valid."""
+                return self._is_valid
+
+            @property
+            def description(self):
+                """Return the description."""
+                return self._description
+
+            @classmethod
+            def from_element(cls, package_ele):
+                """Return a Package instance from an XML element."""
+                is_valid = package_ele.get('isValid')
+                name = package_ele.get('name')
+                path = ""
+                description = ""
+                for child in package_ele:
+                    if child.tag == 'path':
+                        path = child.text
+                    elif child.tag == 'description':
+                        description = child.text
+                return cls(name, path, is_valid, description)
+
 
     @classmethod
     def from_xml_string(cls, xml, schema=TC_SCHEMA):
@@ -128,6 +270,7 @@ class TestCase():
         testable = case_ele.get('testable')
         req_id = None
         text = ""
+        rules = []
         # Loop through the child eles
         for child in case_ele:
             if child.tag == 'id':
@@ -136,5 +279,9 @@ class TestCase():
             elif child.tag == 'requirementText':
                 # Grab the requirement text value
                 text = child.text
+            elif child.tag == 'rules':
+                for rule_ele in child:
+                    rules.append(cls.Rule.from_element(rule_ele))
+
         # Return the TestCase instance
-        return cls(req_id, testable=testable, text=text)
+        return cls(req_id, testable=testable, text=text, rules=rules)

@@ -132,8 +132,15 @@ def _validate_ip(info_pack):
 def _validate_test_case(test_case):
     case = TC.TestCase.from_xml_file(test_case)
     if not case.testable:
-        pprint('Path {}, test case {} @testable="FALSE".'.format(test_case, case.case_id))
+        if not case.unknown:
+            # don't ouput UNKNOWN testablitiy test cases, do output FALSE cases
+            pprint('{}:{} not testable.'.format(case.case_id.specification,
+                                                  case.case_id.requirement_id))
         sys.exit(0)
+    for rule in case.rules:
+        for package in rule.packages:
+            package_path = os.path.join(os.path.dirname(test_case), package.name)
+            _validate_ip(package_path)
     sys.exit(1)
 
 # def _test_case_schema_checks():
