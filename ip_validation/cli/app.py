@@ -91,43 +91,32 @@ def parse_command_line():
 
 def main():
     """Main command line application."""
+    _exit = 0
     # Get input from command line
     args = parse_command_line()
     # If no target files or folders specified then print usage and exit
     if not args.files:
         PARSER.print_help()
-        sys.exit(0)
 
     # Iterate the file arguments
     for file_arg in args.files:
+        _loop_exit = 0
         if args.testCase:
-            _validate_test_case(file_arg)
+            _loop_exit = _validate_test_case(file_arg)
         else:
-            _validate_ip(file_arg)
+            _loop_exit = _validate_ip(file_arg)
+        _exit = _loop_exit if (_loop_exit > 0) else _exit
+    sys.exit(_exit)
 
 def _validate_ip(info_pack):
-    arch_processor = IP.ArchivePackageHandler()
-    # This is a var for the final source to validate
-    to_validate = info_pack
-
-    if not os.path.exists(info_pack):
-        # Skip files that don't exist
-        pprint('Path {} does not exist'.format(info_pack))
-        return
-    if os.path.isfile(info_pack):
-        # Check if file is a archive format
-        if not IP.ArchivePackageHandler.is_archive(info_pack):
-            # If not we can't process so report and iterate
-            pprint('Path {} is not a file we can process.'.format(info_pack))
-            return
-        # Unpack the archive and set the source
-        to_validate = arch_processor.unpack_package(info_pack)
-
+    ret_stat, to_validate = _get_ip_root(info_pack)
     struct_details = IP.validate_package_structure(to_validate)
     pprint('Path {} is dir, struct result is: {}'.format(to_validate,
                                                          struct_details.package_status))
     for error in struct_details.errors:
         pprint(error.to_json())
+
+    return ret_stat, struct_details
 
 def _validate_test_case(test_case):
     case = TC.TestCase.from_xml_file(test_case)
@@ -136,15 +125,32 @@ def _validate_test_case(test_case):
             # don't ouput UNKNOWN testablitiy test cases, do output FALSE cases
             pprint('{}:{} not testable.'.format(case.case_id.specification,
                                                   case.case_id.requirement_id))
-        sys.exit(0)
+        return 0
     for rule in case.rules:
         for package in rule.packages:
             package_path = os.path.join(os.path.dirname(test_case), package.name)
             _validate_ip(package_path)
-    sys.exit(1)
+    return 1
+
+def _get_ip_root(info_pack):
+    arch_processor = IP.ArchivePackageHandler()
+    # This is a var for the final source to validate
+    to_validate = info_pack
+
+    if not os.path.exists(info_pack):
+        # Skip files that don't exist
+        pprint('Path {} does not exist'.format(info_pack))
+        return 1, None
+    if os.path.isfile(info_pack):
+        # Check if file is a archive format
+        if not IP.ArchivePackageHandler.is_archive(info_pack):
+            # If not we can't process so report and iterate
+            pprint('Path {} is not a file we can process.'.format(info_pack))
+            return 2, None
+        # Unpack the archive and set the source
+        to_validate = arch_processor.unpack_package(info_pack)
+    return 0, to_validate
 
 # def _test_case_schema_checks():
-
-
 if __name__ == "__main__":
     main()

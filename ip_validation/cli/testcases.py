@@ -26,12 +26,14 @@
 E-ARK : Information package validation
         E-ARK Test Case processing
 """
+import os.path
+
 import lxml.etree as ET
 
 from importlib_resources import files
 
 import ip_validation.cli.resources as RES
-
+DEFAULT_NAME='testCase.xml'
 TC_SCHEMA = ET.XMLSchema(file=str(files(RES).joinpath('testCase.xsd')))
 
 class TestCase():
@@ -66,6 +68,10 @@ class TestCase():
         return self._testable == 'UNKNOWN'
 
     @property
+    def status(self):
+        return self._testable
+
+    @property
     def references(self):
         """Return the list of relavent requirements."""
         return self._references
@@ -79,6 +85,22 @@ class TestCase():
     def rules(self):
         """Return the rules associated with the test case."""
         return self._rules
+
+    @property
+    def package_count(self):
+        """Return the number of packages in the test case."""
+        count = 0
+        for rule in self.rules:
+            count+=len(rule.packages)
+        return count
+
+    @property
+    def missing_package_count(self):
+        """Return the number of packages in the test case."""
+        count = 0
+        for rule in self.rules:
+            count+=len(rule.missing_packages)
+        return count
 
     def __str__(self):
         return "case_id:" + str(self.case_id) + ", testable:" + \
@@ -153,6 +175,15 @@ class TestCase():
             """Return the corpus packages."""
             return self._packages
 
+        @property
+        def missing_packages(self):
+            """Return a list of missing packages."""
+            missing = []
+            for package in self.packages:
+                if not package.exists:
+                    missing.append(package)
+            return missing
+
         def __str__(self):
             return "rule_id:" + self.rule_id + ", description:" + \
                 self.description + ", error:" + str(self.error)
@@ -224,6 +255,17 @@ class TestCase():
             def path(self):
                 """Return the path."""
                 return self._path
+
+            def resolve_path(self, case_root):
+                """Resolve the path to the corpus package given the test case root."""
+                return os.path.join(case_root, self.path)
+
+            @property
+            def exists(self):
+                """Check if the corpus package exists given the test case root."""
+                if not self.path:
+                    return False
+                return os.path.exists(self.path)
 
             @property
             def is_valid(self):

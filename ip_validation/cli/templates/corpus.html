@@ -1,0 +1,27 @@
+{% extends "page.html" %}
+{% block title %}Corpus Details{% endblock %}
+{% block page_content %}
+  <h2>Corpus: {{ corpus.name }}</h2>
+  <p class="lead">Cases: {{ corpus.case_count}}</p>
+  <p class="lead">Rules: {{ corpus.rule_count}}</p>
+  <p class="lead">Packages: {{ corpus.package_count}}</p>
+  <p class="lead">Missing Packages: {{ corpus.missing_package_count}}</p>
+  <table class="table table-striped">
+    <tr>
+      <th>Test Case</th>
+      <th>Testable</th>
+      <th>Rules</th>
+      <th>Packages</th>
+      <th>Missing Packages</th>
+    </tr>
+    {%- for case in corpus.test_cases -%}
+    <tr>
+      <td>{{ case.case_id.requirement_id }}</td>
+      <td>{{ case.status }}</td>
+      <td>{{ case.rules | length }}</td>
+      <td>{{ case.package_count }}</td>
+      <td>{{ case.missing_package_count }}</td>
+    </tr>
+    {%- endfor %}
+  </table>
+{% endblock page_content %}

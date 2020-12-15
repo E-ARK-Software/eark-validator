@@ -1,0 +1,177 @@
+#!/usr/bin/env python
+# coding=UTF-8
+#
+# E-ARK Validation
+# Copyright (C) 2019
+# All rights reserved.
+#
+# Licensed to the E-ARK project under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership. The E-ARK project licenses
+# this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+"""
+E-ARK : Information package validation
+        E-ARK Test Corpus processing
+"""
+import argparse
+import os.path
+import sys
+
+from jinja2 import Environment, PackageLoader
+from ip_validation.cli.testcases import TestCase, DEFAULT_NAME
+
+__version__ = "0.1.0"
+
+defaults = {
+    'description': """E-ARK Test Case validation (tc-check).
+tc-check is a command-line tool to run test across corpora.""",
+    'epilog': """
+DILCIS Board (http://dilcis.eu)
+See LICENSE for license information.
+GitHub: https://github.com/E-ARK-Software/py-rest-ip-validator
+Author: Carl Wilson (OPF), 2020
+Maintainer: Carl Wilson (OPF), 2020"""
+}
+
+class Corpus():
+    """
+    Encapsulates a test corpus of E-ARK information packages.
+    """
+    def __init__(self, name, root, test_cases=None):
+        self._name = name
+        self._root = root
+        self._test_cases = [] if test_cases is None else test_cases
+
+    @property
+    def name(self):
+        """Return the corpus name."""
+        return self._name
+
+    @property
+    def root(self):
+        """Return the corpus' root directory path."""
+        return self._root
+
+    @property
+    def test_cases(self):
+        """Generator to return test cases in a iterable form."""
+        for case in self._test_cases:
+            yield TestCase.from_xml_file(os.path.join(case, DEFAULT_NAME))
+
+    @property
+    def case_count(self):
+        """Return the number of test cases in the corpus."""
+        return len(self._test_cases)
+
+    @property
+    def rule_count(self):
+        """Return the total number of validation rules in the corpus."""
+        count = 0
+        for case in self.test_cases:
+            count+=len(case.rules)
+        return count
+
+    @property
+    def package_count(self):
+        """Return the total number of test packages in the corpus."""
+        count = 0
+        for case in self.test_cases:
+            count+=case.package_count
+        return count
+
+    @property
+    def missing_package_count(self):
+        """Return the total number of test packages in the corpus."""
+        count = 0
+        for case in self.test_cases:
+            count+=case.missing_package_count
+        return count
+
+    @classmethod
+    def from_root(cls, root, name):
+        """Create a new corpus instance from a root directory."""
+        if not os.path.exists(root) or not os.path.isdir(root):
+            print('submitted path not a dir')
+            return None
+        cases = sorted(_get_test_cases(root), key=lambda x: os.path.basename(x))
+        return cls(name, root, cases)
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+templates_dir = os.path.join(ROOT, 'templates')
+env = Environment( loader = PackageLoader('ip_validation.cli') )
+
+def corpus_html(corpus):
+    """Write an HTML file summarising the corpus."""
+    template = env.get_template('corpus.html')
+    with open('corpus.html', 'w') as filehand:
+        filehand.write(template.render(
+            corpus = corpus,
+        ))
+
+
+def _get_test_cases(root):
+    cases = []
+    for rootdir, subdirs, files in os.walk(root):
+        for file in files:
+            if file == DEFAULT_NAME:
+                cases.append(rootdir)
+        for subdir in subdirs:
+            cases+=(_get_test_cases(subdir))
+    return cases
+
+# Create PARSER
+PARSER = argparse.ArgumentParser(description=defaults['description'], epilog=defaults['epilog'])
+
+def parse_command_line():
+    """Parse command line arguments."""
+    # Add arguments
+    PARSER.add_argument('--verbose', '-v',
+                        action="store_true",
+                        dest="outputVerboseFlag",
+                        default=False,
+                        help="report results in verbose format")
+    PARSER.add_argument('--version',
+                        action='version',
+                        version=__version__)
+    PARSER.add_argument('files',
+                        nargs='*',
+                        default=[],
+                        metavar='FILE',
+                        help='Root IP folders or archived IPs to check.')
+
+    # Parse arguments
+    args = PARSER.parse_args()
+
+    return args
+
+def main():
+    """Main command line application."""
+    _exit = 0
+    # Get input from command line
+    args = parse_command_line()
+    # If no target files or folders specified then print usage and exit
+    if not args.files:
+        PARSER.print_help()
+
+
+    # Iterate the file arguments
+    for file_arg in args.files:
+        corpus = Corpus.from_root(file_arg, 'CSIP')
+        corpus_html(corpus)
+    sys.exit(_exit)
+
+if __name__ == "__main__":
+    main()
