@@ -80,7 +80,7 @@ def validate(digest):
     # Schematron validation profile
     profile = ValidationProfile()
     # IF package is well formed then we can validate it.
-    if struct_details.package_status == IP.StructureStatus.WellFormed:
+    if struct_details.structure_status == IP.StructureStatus.WellFormed:
         # Schema based METS validation first
         validator = MetsValidator(struct_details.path)
         mets_path = os.path.join(struct_details.path, 'METS.xml')
@@ -162,7 +162,7 @@ def api_validate(digest):
     # Schematron validation profile
     profile = ValidationProfile()
     # IF package is well formed then we can validate it.
-    if struct_details.package_status == IP.StructureStatus.WellFormed:
+    if struct_details.structure_status == IP.StructureStatus.WellFormed:
         # Schema based METS validation first
         validator = MetsValidator(struct_details.path)
         mets_path = os.path.join(struct_details.path, 'METS.xml')
