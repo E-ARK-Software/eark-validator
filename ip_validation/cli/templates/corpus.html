@@ -26,7 +26,7 @@
 {% macro case_rows(cases) %}
 {%- for case in cases -%}
   <tr>
-    <td><a href="./{{ case.case_id.requirement_id }}/case.html">{{ case.case_id.requirement_id }}</a></td>
+    <td><a href="./{{ case.case_id.requirement_id }}/index.html">{{ case.case_id.requirement_id }}</a></td>
     <td>{{ case.status }}</td>
     <td>{{ case.rules | length }}</td>
     <td>{{ case.package_count }}</td>

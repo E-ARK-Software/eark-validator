@@ -51,6 +51,8 @@ class TestCase():
         self._references = [] if references is None else references
         self._text = text
         self._rules = [] if rules is None else rules
+        self._package_count = 0
+        self._existing_package_count = 0
 
     @property
     def case_id(self):
@@ -87,6 +89,12 @@ class TestCase():
         """Return the rules associated with the test case."""
         return self._rules
 
+    def resolve_package_paths(self, case_root):
+        """Resolve package paths for all rule packages."""
+        for rule in self.rules:
+            for package in rule.packages:
+                package.resolve_path(case_root)
+
     @property
     def package_count(self):
         """Return the number of packages in the test case."""
@@ -105,7 +113,7 @@ class TestCase():
 
     def __str__(self):
         return "case_id:" + str(self.case_id) + ", testable:" + \
-            self.testable + ", requirement:" + self.requirement_text
+            str(self.testable) + ", requirement:" + self.requirement_text
 
     class CaseId():
         """
@@ -145,8 +153,8 @@ class TestCase():
             return cls(requirement_id, specification, version)
 
         def __str__(self):
-            return "req_id:" + self.requirement_id + ", specification:" + \
-                self.specification + ", version:" + self.version
+            return "req_id:" + str(self.requirement_id) + ", specification:" + \
+                str(self.specification) + ", version:" + str(self.version)
 
     class Rule():
         """docstring for Rule."""
@@ -193,6 +201,11 @@ class TestCase():
                 if package.exists:
                     existing.append(package)
             return existing
+
+        def resolve_package_paths(self, case_root):
+            """Resolve package paths for all rule packages."""
+            for package in self.packages:
+                package.resolve_path(case_root)
 
         def __str__(self):
             return "rule_id:" + self.rule_id + ", description:" + \
@@ -269,7 +282,11 @@ class TestCase():
 
             def resolve_path(self, case_root):
                 """Resolve the path to the corpus package given the test case root."""
-                return os.path.join(case_root, self.path)
+                if self.path:
+                    self._path = os.path.join(case_root, self.name)
+                    if not self.exists:
+                        self._path = os.path.join(case_root, self.path)
+                return self.path
 
             @property
             def exists(self):
@@ -318,7 +335,9 @@ class TestCase():
     def from_xml_file(cls, xml_file, schema=TC_SCHEMA):
         """Create a test case from an XML file."""
         tree = ET.parse(xml_file)
-        return cls.from_element(tree.getroot(), schema)
+        case = cls.from_element(tree.getroot(), schema)
+        case.resolve_package_paths(os.path.abspath(os.path.join(xml_file, os.pardir)))
+        return case
 
     @classmethod
     def from_element(cls, case_ele, schema=TC_SCHEMA):

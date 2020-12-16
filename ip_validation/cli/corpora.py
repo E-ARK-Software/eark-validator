@@ -114,22 +114,39 @@ templates_dir = os.path.join(ROOT, 'templates')
 env = Environment( loader = PackageLoader('ip_validation.cli') )
 
 def corpus_html(root, corpus):
-    """Write an HTML file summarising the corpus."""
+    """Write an HTML file summarising a corpus."""
     template = env.get_template('corpus.html')
     _mkdirs(root)
-    with open(os.path.join(root, 'corpus.html'), 'w') as filehand:
+    with open(os.path.join(root, 'index.html'), 'w') as filehand:
         filehand.write(template.render(
             corpus = corpus,
         ))
 
 def case_html(root, case):
-    """Write an HTML file summarising the corpus."""
+    """Write an HTML file summarising a test case."""
+    if case is None or case.case_id is None or case.case_id.requirement_id is None:
+        return
     template = env.get_template('case.html')
     out_dir = os.path.join(root, case.case_id.requirement_id)
     _mkdirs(out_dir)
-    with open(os.path.join(out_dir, 'case.html'), 'w') as filehand:
+    with open(os.path.join(out_dir, 'index.html'), 'w') as filehand:
         filehand.write(template.render(
             case = case,
+        ))
+    for rule in case.rules:
+        for package in rule.packages:
+            package_html(out_dir, case, rule, package)
+
+def package_html(root, case, rule, package):
+    """Write an HTML file summarising a package."""
+    template = env.get_template('package.html')
+    out_dir = os.path.join(root, package.name)
+    _mkdirs(out_dir)
+    with open(os.path.join(out_dir, 'index.html'), 'w') as filehand:
+        filehand.write(template.render(
+            case = case,
+            rule = rule,
+            package = package,
         ))
 
 def _mkdirs(_dir):

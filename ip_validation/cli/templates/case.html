@@ -31,9 +31,20 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Rule:{{ rule.rule_id }} Packages:{{ rule.existing_packages | length }}/{{ rule.packages | length }}</h5>
-          <h5 class="card-subtitle text-muted">{{ rule.description }}</h5>
+          <h6 class="card-subtitle text-muted">{{ rule.description }}</h6>
           <p class="card-text">{{ rule.error.level }}: {{ rule.error.message }}</p>
+          <p class="card-text">Packages: {{ package_list(rule.packages) }}</p>
         </div>
       </div>
     </li>
 {% endmacro %}
+
+{% macro package_list(packages) %}
+    {% for package in packages -%}
+      <a class="badge badge-{{ badge_class(package) }}" href="./{{ package.name }}/index.html"> {{ package.name }}</a>&nbsp;
+    {%- endfor %}
+{% endmacro %}
+
+{% macro badge_class(package) -%}
+      {{ 'secondary' if not package.exists else 'primary' }}
+{%- endmacro %}

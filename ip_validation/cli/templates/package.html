@@ -1,0 +1,45 @@
+{% extends "page.html" %}
+{% block title %}Package | {{ case.case_id.requirement_id }}.{{ rule.rule_id }}:{{ package.name }}{% endblock %}
+{% block page_content %}
+  <h1>Package {{ case.case_id.requirement_id }}.{{ rule.rule_id }}:{{ package.name }}</h1>
+  <h2>Rule</h2>
+  <p>{{ rule_card(rule) }}</p>
+  <h2>Status</h2>
+  <p>{{ package_card(package) }}</p>
+{% endblock page_content %}
+
+{% macro rule_card(rule) %}
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Rule:{{ rule.rule_id }}</h5>
+        <h5 class="card-subtitle text-muted">{{ rule.description }}</h5>
+        <p class="card-text">{{ rule.error.level }}: {{ rule.error.message }}</p>
+      </div>
+    </div>
+{% endmacro %}
+
+{% macro package_card(package) %}
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Name:{{ package.name }} {{ valid_badge(package) }}</h5>
+        <h5 class="card-subtitle text-muted">{{ package.description }}</h5>
+        <p class="card-text">{{ path_badge(package) }}<code>{{ package.path }}</code></p>
+      </div>
+    </div>
+{% endmacro %}
+
+{% macro valid_badge(package) -%}
+      <span class="badge badge-{{ valid_badge_class(package) }}">Valid:{{ package.is_valid }}</span>
+{%- endmacro %}
+
+{% macro valid_badge_class(package) -%}
+      {{ 'success' if package.is_valid == 'TRUE' else 'danger' }}
+{%- endmacro %}
+
+{% macro path_badge(package) -%}
+      <span class="badge badge-{{ path_badge_class(package) }}">Path:</span>
+{%- endmacro %}
+
+{% macro path_badge_class(package) -%}
+      {{ 'success' if package.exists else 'danger' }}
+{%- endmacro %}
