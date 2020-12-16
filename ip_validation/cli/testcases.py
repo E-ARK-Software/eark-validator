@@ -69,6 +69,7 @@ class TestCase():
 
     @property
     def status(self):
+        """Return the test case status."""
         return self._testable
 
     @property
@@ -78,7 +79,7 @@ class TestCase():
 
     @property
     def requirement_text(self):
-        """Return the requirment text."""
+        """Return the requirement text."""
         return self._text
 
     @property
@@ -184,6 +185,15 @@ class TestCase():
                     missing.append(package)
             return missing
 
+        @property
+        def existing_packages(self):
+            """Return a list of existing packages."""
+            existing = []
+            for package in self.packages:
+                if package.exists:
+                    existing.append(package)
+            return existing
+
         def __str__(self):
             return "rule_id:" + self.rule_id + ", description:" + \
                 self.description + ", error:" + str(self.error)
@@ -240,11 +250,12 @@ class TestCase():
 
         class Package():
             """docstring for Package."""
-            def __init__(self, name, path, is_valid, description):
+            def __init__(self, name, path, is_valid, description, validation_report=None):
                 self._name = name
                 self._path = path
                 self._is_valid = is_valid
                 self._description = description
+                self._validation_report = validation_report
 
             @property
             def name(self):
@@ -276,6 +287,11 @@ class TestCase():
             def description(self):
                 """Return the description."""
                 return self._description
+
+            @property
+            def validation_report(self):
+                """Return the validation report for the package."""
+                return self._validation_report
 
             @classmethod
             def from_element(cls, package_ele):
@@ -323,7 +339,8 @@ class TestCase():
                 text = child.text
             elif child.tag == 'rules':
                 for rule_ele in child:
-                    rules.append(cls.Rule.from_element(rule_ele))
+                    if rule_ele.tag == 'rule':
+                        rules.append(cls.Rule.from_element(rule_ele))
 
         # Return the TestCase instance
         return cls(req_id, testable=testable, text=text, rules=rules)

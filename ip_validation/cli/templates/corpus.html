@@ -1,27 +1,36 @@
 {% extends "page.html" %}
-{% block title %}Corpus Details{% endblock %}
+{% block title %}Corpus | {{ corpus.name }}{% endblock %}
 {% block page_content %}
-  <h2>Corpus: {{ corpus.name }}</h2>
+  <h1>Corpus: {{ corpus.name }}</h1>
   <p class="lead">Cases: {{ corpus.case_count}}</p>
   <p class="lead">Rules: {{ corpus.rule_count}}</p>
-  <p class="lead">Packages: {{ corpus.package_count}}</p>
-  <p class="lead">Missing Packages: {{ corpus.missing_package_count}}</p>
-  <table class="table table-striped">
-    <tr>
-      <th>Test Case</th>
-      <th>Testable</th>
-      <th>Rules</th>
-      <th>Packages</th>
-      <th>Missing Packages</th>
-    </tr>
-    {%- for case in corpus.test_cases -%}
-    <tr>
-      <td>{{ case.case_id.requirement_id }}</td>
-      <td>{{ case.status }}</td>
-      <td>{{ case.rules | length }}</td>
-      <td>{{ case.package_count }}</td>
-      <td>{{ case.missing_package_count }}</td>
-    </tr>
-    {%- endfor %}
+  <p class="lead">Packages defined: {{ corpus.package_count }}</p>
+  <p class="lead">Packages: {{ corpus.package_count - corpus.missing_package_count }}</p>
+  <h2>Test Cases</h2>
+  <table data-toggle="table" data-search="true">
+    <thead>
+      <tr>
+        <th data-field="id" data-sortable="true">Test Case</th>
+        <th data-field="testable" data-sortable="true">Testable</th>
+        <th data-field="rules" data-sortable="true">Rules</th>
+        <th data-field="packages-def" data-sortable="true">Packages defined</th>
+        <th data-field="packages" data-sortable="true">Packages</th>
+      </tr>
+    </thead>
+    <tbody>
+    {{ case_rows(corpus.test_cases) }}
+    </tbody>
   </table>
 {% endblock page_content %}
+
+{% macro case_rows(cases) %}
+{%- for case in cases -%}
+  <tr>
+    <td><a href="./{{ case.case_id.requirement_id }}/case.html">{{ case.case_id.requirement_id }}</a></td>
+    <td>{{ case.status }}</td>
+    <td>{{ case.rules | length }}</td>
+    <td>{{ case.package_count }}</td>
+    <td>{{ case.package_count - case.missing_package_count }}</td>
+  </tr>
+{%- endfor -%}
+{% endmacro %}

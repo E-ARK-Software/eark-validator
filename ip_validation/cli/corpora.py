@@ -106,20 +106,38 @@ class Corpus():
         if not os.path.exists(root) or not os.path.isdir(root):
             print('submitted path not a dir')
             return None
-        cases = sorted(_get_test_cases(root), key=lambda x: os.path.basename(x))
+        cases = _get_test_cases(root)
         return cls(name, root, cases)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 templates_dir = os.path.join(ROOT, 'templates')
 env = Environment( loader = PackageLoader('ip_validation.cli') )
 
-def corpus_html(corpus):
+def corpus_html(root, corpus):
     """Write an HTML file summarising the corpus."""
     template = env.get_template('corpus.html')
-    with open('corpus.html', 'w') as filehand:
+    _mkdirs(root)
+    with open(os.path.join(root, 'corpus.html'), 'w') as filehand:
         filehand.write(template.render(
             corpus = corpus,
         ))
+
+def case_html(root, case):
+    """Write an HTML file summarising the corpus."""
+    template = env.get_template('case.html')
+    out_dir = os.path.join(root, case.case_id.requirement_id)
+    _mkdirs(out_dir)
+    with open(os.path.join(out_dir, 'case.html'), 'w') as filehand:
+        filehand.write(template.render(
+            case = case,
+        ))
+
+def _mkdirs(_dir):
+    try:
+        os.makedirs(_dir)
+    except FileExistsError:
+        # directory already exists
+        pass
 
 
 def _get_test_cases(root):
@@ -170,7 +188,9 @@ def main():
     # Iterate the file arguments
     for file_arg in args.files:
         corpus = Corpus.from_root(file_arg, 'CSIP')
-        corpus_html(corpus)
+        corpus_html('results', corpus)
+        for case in corpus.test_cases:
+            case_html('results', case)
     sys.exit(_exit)
 
 if __name__ == "__main__":

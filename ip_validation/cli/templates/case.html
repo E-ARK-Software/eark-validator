@@ -1,0 +1,39 @@
+{% extends "page.html" %}
+{% block title %}Case | {{ case.case_id.requirement_id }}{% endblock %}
+{% block page_content %}
+  <h1>Case {{ case.case_id.requirement_id }}</h1>
+  {{ case_card(case) }}
+  <h2>Rules</h2>
+  {{ rule_list(case.rules) }}
+{% endblock page_content %}
+
+
+{% macro case_card(case) %}
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{{ case.case_id.specification }}:{{ case.case_id.requirement_id }}</h5>
+      <h5 class="card-subtitle text-muted">Testable: {{ case.status }}</h5>
+      <p class="card-text">{{ case.requirement_text }}</p>
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro rule_list(rules) %}
+  <ul class="list-group list-group-flush">
+    {% for rule in rules %}
+      {{ rule_item(rule) }}
+    {% endfor %}
+  </ul>
+{% endmacro %}
+
+{% macro rule_item(rule) %}
+    <li class="list-group-item">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Rule:{{ rule.rule_id }} Packages:{{ rule.existing_packages | length }}/{{ rule.packages | length }}</h5>
+          <h5 class="card-subtitle text-muted">{{ rule.description }}</h5>
+          <p class="card-text">{{ rule.error.level }}: {{ rule.error.message }}</p>
+        </div>
+      </div>
+    </li>
+{% endmacro %}
