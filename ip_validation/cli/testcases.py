@@ -45,11 +45,12 @@ class TestCase():
      - testable: boolean, True if test case is "testable", False otherwise
      - references: a list of references to relavent requirements.
     """
-    def __init__(self, case_id, testable=True, references=None, text="", rules=None):
+    def __init__(self, case_id, valid, testable=True, references=None, req=None, rules=None):
         self._case_id = case_id
+        self._valid = valid
         self._testable = testable
         self._references = [] if references is None else references
-        self._text = text
+        self._req = req
         self._rules = [] if rules is None else rules
         self._package_count = 0
         self._existing_package_count = 0
@@ -58,6 +59,11 @@ class TestCase():
     def case_id(self):
         """Return the test case id instance."""
         return self._case_id
+
+    @property
+    def valid(self):
+        """Return True if the test case is valid XML against the schema supplied."""
+        return self._valid
 
     @property
     def testable(self):
@@ -80,9 +86,9 @@ class TestCase():
         return self._references
 
     @property
-    def requirement_text(self):
-        """Return the requirement text."""
-        return self._text
+    def requirement(self):
+        """Return the requirement."""
+        return self._req
 
     @property
     def rules(self):
@@ -113,7 +119,7 @@ class TestCase():
 
     def __str__(self):
         return "case_id:" + str(self.case_id) + ", testable:" + \
-            str(self.testable) + ", requirement:" + self.requirement_text
+            str(self.testable) + ", requirement:" + self.requirement
 
     class CaseId():
         """
@@ -155,6 +161,63 @@ class TestCase():
         def __str__(self):
             return "req_id:" + str(self.requirement_id) + ", specification:" + \
                 str(self.specification) + ", version:" + str(self.version)
+
+    class Requirement():
+        """Requirment docstring."""
+        def __init__(self, name, location, cardinality, level, description):
+            self._name = name
+            self._location = location
+            self._cardinality = cardinality
+            self._level = level
+            self._description = description
+
+        @property
+        def name(self):
+            """Return the name."""
+            return self._name
+
+        @property
+        def location(self):
+            """Return the location."""
+            return self._location
+
+        @property
+        def cardinality(self):
+            """Return the cardinality."""
+            return self._cardinality
+
+        @property
+        def level(self):
+            """Return the level."""
+            return self._level
+
+        @property
+        def description(self):
+            """Return the description."""
+            return self._description
+
+        @classmethod
+        def from_element(cls, req_ele):
+            """Create a Requirment from an XML element."""
+            name = ""
+            location = ""
+            cardinality = ""
+            level = ""
+            description = ""
+            for child in req_ele:
+                if child.tag == 'name':
+                    name = child.text
+                elif child.tag == 'description':
+                    description = child.text
+                elif child.tag == 'cardinality':
+                    cardinality = child.text
+                elif child.tag == 'level':
+                    level = child.get('level')
+                elif child.tag == 'location':
+                    location = child.text
+            return cls(name, location, cardinality, level, description)
+
+
 
     class Rule():
         """docstring for Rule."""
@@ -324,29 +387,35 @@ class TestCase():
                         description = child.text
                 return cls(name, path, is_valid, description)
 
-
     @classmethod
     def from_xml_string(cls, xml, schema=TC_SCHEMA):
         """Create a test case from an XML string."""
         tree = ET.fromstring(xml)
-        return cls.from_element(tree.getroot(), schema)
+        return cls._from_xml(tree, schema)
 
     @classmethod
     def from_xml_file(cls, xml_file, schema=TC_SCHEMA):
         """Create a test case from an XML file."""
         tree = ET.parse(xml_file)
-        case = cls.from_element(tree.getroot(), schema)
-        case.resolve_package_paths(os.path.abspath(os.path.join(xml_file, os.pardir)))
-        return case
+        return  cls._from_xml(tree, schema, xml_file=xml_file)
 
     @classmethod
-    def from_element(cls, case_ele, schema=TC_SCHEMA):
+    def _from_xml(cls, tree, schema, xml_file=None):
+        case = cls.from_element(tree.getroot(), schema)
+        if xml_file:
+            case.resolve_package_paths(os.path.abspath(os.path.join(xml_file, os.pardir)))
+        return case
+
+
+
+    @classmethod
+    def from_element(cls, case_ele, schema):
         """Create a TestCase from an XML element."""
         # Grab the testable att
-        schema.validate(case_ele)
+        is_valid = schema.validate(case_ele)
         testable = case_ele.get('testable')
         req_id = None
-        text = ""
+        req = None
         rules = []
         # Loop through the child eles
         for child in case_ele:
@@ -355,11 +424,11 @@ class TestCase():
                 req_id = cls.CaseId.from_element(child)
             elif child.tag == 'requirementText':
                 # Grab the requirement text value
-                text = child.text
+                req = cls.Requirement.from_element(child)
             elif child.tag == 'rules':
                 for rule_ele in child:
                     if rule_ele.tag == 'rule':
                         rules.append(cls.Rule.from_element(rule_ele))
 
         # Return the TestCase instance
-        return cls(req_id, testable=testable, text=text, rules=rules)
+        return cls(req_id, is_valid, testable=testable, req=req, rules=rules)

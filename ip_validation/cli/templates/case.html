@@ -12,8 +12,9 @@
   <div class="card">
     <div class="card-body">
       <h5 class="card-title">{{ case.case_id.specification }}:{{ case.case_id.requirement_id }}</h5>
-      <h5 class="card-subtitle text-muted">Testable: {{ case.status }}</h5>
-      <p class="card-text">{{ case.requirement_text }}</p>
+      <h5 class="card-subtitle text-muted">Testable: {{ case.status }} Schema: {{ case.valid }}</h5>
+      <p class="card-text">{{ case.requirement.name }}</p>
+      <p class="card-text">{{ case.requirement.description }}</p>
     </div>
   </div>
 {% endmacro %}

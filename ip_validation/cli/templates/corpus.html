@@ -12,6 +12,7 @@
       <tr>
         <th data-field="id" data-sortable="true">Test Case</th>
         <th data-field="testable" data-sortable="true">Testable</th>
+        <th data-field="valid" data-sortable="true">XSD Valid</th>
         <th data-field="rules" data-sortable="true">Rules</th>
         <th data-field="packages-def" data-sortable="true">Packages defined</th>
         <th data-field="packages" data-sortable="true">Packages</th>
@@ -28,6 +29,7 @@
   <tr>
     <td><a href="./{{ case.case_id.requirement_id }}/index.html">{{ case.case_id.requirement_id }}</a></td>
     <td>{{ case.status }}</td>
+    <td>{{ case.valid }}</td>
     <td>{{ case.rules | length }}</td>
     <td>{{ case.package_count }}</td>
     <td>{{ case.package_count - case.missing_package_count }}</td>
