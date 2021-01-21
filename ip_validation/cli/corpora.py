@@ -27,11 +27,13 @@ E-ARK : Information package validation
         E-ARK Test Corpus processing
 """
 import argparse
+from datetime import datetime
 import os.path
 import sys
 
 from jinja2 import Environment, PackageLoader
 from ip_validation.cli.testcases import TestCase, DEFAULT_NAME
+from ip_validation.infopacks.information_package import Specification
 
 __version__ = "0.1.0"
 
@@ -50,10 +52,10 @@ class Corpus():
     """
     Encapsulates a test corpus of E-ARK information packages.
     """
-    def __init__(self, name, root, test_cases=None):
+    def __init__(self, name, root, case_paths=None):
         self._name = name
         self._root = root
-        self._test_cases = [] if test_cases is None else test_cases
+        self._cases = {} if case_paths is None else self._load_cases(case_paths)
 
     @property
     def name(self):
@@ -66,21 +68,21 @@ class Corpus():
         return self._root
 
     @property
-    def test_cases(self):
+    def cases(self):
         """Generator to return test cases in a iterable form."""
-        for case in self._test_cases:
-            yield TestCase.from_xml_file(os.path.join(case, DEFAULT_NAME))
+        for case in self._cases.values():
+            yield case
 
     @property
     def case_count(self):
         """Return the number of test cases in the corpus."""
-        return len(self._test_cases)
+        return len(self._cases)
 
     @property
     def rule_count(self):
         """Return the total number of validation rules in the corpus."""
         count = 0
-        for case in self.test_cases:
+        for case in self.cases:
             count+=len(case.rules)
         return count
 
@@ -88,7 +90,7 @@ class Corpus():
     def package_count(self):
         """Return the total number of test packages in the corpus."""
         count = 0
-        for case in self.test_cases:
+        for case in self.cases:
             count+=case.package_count
         return count
 
@@ -96,15 +98,31 @@ class Corpus():
     def missing_package_count(self):
         """Return the total number of test packages in the corpus."""
         count = 0
-        for case in self.test_cases:
+        for case in self.cases:
             count+=case.missing_package_count
         return count
+
+    def case_by_id(self, case_id):
+        """Return an individual test case by ID."""
+        case = self._cases.get(case_id, None)
+        return case
+
+    def __str__(self):
+        return "name:" + self.name + ", root:" + self.root + ", cases:" + str(self.case_count) + \
+            ", rules:" + str(self.rule_count) + ", packages:" + str(self.package_count)
+
+    @classmethod
+    def _load_cases(cls, case_paths):
+        cases = {}
+        for path in case_paths:
+            case = TestCase.from_xml_file(os.path.join(path, DEFAULT_NAME))
+            cases[case.case_id.requirement_id] = case
+        return cases
 
     @classmethod
     def from_root(cls, root, name):
         """Create a new corpus instance from a root directory."""
         if not os.path.exists(root) or not os.path.isdir(root):
-            print('submitted path not a dir')
             return None
         cases = _get_test_cases(root)
         return cls(name, root, cases)
@@ -113,13 +131,15 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 templates_dir = os.path.join(ROOT, 'templates')
 env = Environment( loader = PackageLoader('ip_validation.cli') )
 
-def corpus_html(root, corpus):
+def corpus_html(root, corpus, specification):
     """Write an HTML file summarising a corpus."""
     template = env.get_template('corpus.html')
+    template.globals['now'] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     _mkdirs(root)
     with open(os.path.join(root, 'index.html'), 'w') as filehand:
         filehand.write(template.render(
             corpus = corpus,
+            specification = specification,
         ))
 
 def case_html(root, case):
@@ -201,12 +221,12 @@ def main():
     if not args.files:
         PARSER.print_help()
 
-
     # Iterate the file arguments
+    specification = Specification.from_xml_file()
     for file_arg in args.files:
         corpus = Corpus.from_root(file_arg, 'CSIP')
-        corpus_html('results', corpus)
-        for case in corpus.test_cases:
+        corpus_html('results', corpus, specification)
+        for case in corpus.cases:
             case_html('results', case)
     sys.exit(_exit)
 

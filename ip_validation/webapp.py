@@ -45,4 +45,4 @@ logging.debug("Configured logging.")
 
 # Import the application routes
 logging.info("Setting up application routes")
-from .controller import ROUTES
+from .controller import ROUTES # pylint: disable-msg=W0611, C0413

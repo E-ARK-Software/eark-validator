@@ -33,6 +33,11 @@ import lxml.etree as ET
 from importlib_resources import files
 
 import ip_validation.cli.resources as RES
+import ip_validation.infopacks.structure as STRUCT
+
+from ip_validation.infopacks.mets import MetsValidator
+from ip_validation.infopacks.rules import ValidationProfile
+
 DEFAULT_NAME='testCase.xml'
 TC_SCHEMA = ET.XMLSchema(file=str(files(RES).joinpath('testCase.xsd')))
 
@@ -101,6 +106,10 @@ class TestCase():
             for package in rule.packages:
                 package.resolve_path(case_root)
 
+    def validate_packages(self):
+        for rule in self.rules:
+            rule.validate_packages()
+
     @property
     def package_count(self):
         """Return the number of packages in the test case."""
@@ -162,63 +171,6 @@ class TestCase():
             return "req_id:" + str(self.requirement_id) + ", specification:" + \
                 str(self.specification) + ", version:" + str(self.version)
 
-    class Requirement():
-        """Requirment docstring."""
-        def __init__(self, name, location, cardinality, level, description):
-            self._name = name
-            self._location = location
-            self._cardinality = cardinality
-            self._level = level
-            self._description = description
-
-        @property
-        def name(self):
-            """Return the name."""
-            return self._name
-
-        @property
-        def location(self):
-            """Return the location."""
-            return self._location
-
-        @property
-        def cardinality(self):
-            """Return the cardinality."""
-            return self._cardinality
-
-        @property
-        def level(self):
-            """Return the level."""
-            return self._level
-
-        @property
-        def description(self):
-            """Return the description."""
-            return self._description
-
-        @classmethod
-        def from_element(cls, req_ele):
-            """Create a Requirment from an XML element."""
-            name = ""
-            location = ""
-            cardinality = ""
-            level = ""
-            description = ""
-            for child in req_ele:
-                if child.tag == 'name':
-                    name = child.text
-                elif child.tag == 'description':
-                    description = child.text
-                elif child.tag == 'cardinality':
-                    cardinality = child.text
-                elif child.tag == 'level':
-                    level = child.get('level')
-                elif child.tag == 'location':
-                    location = child.text
-            return cls(name, location, cardinality, level, description)
-
-
-
     class Rule():
         """docstring for Rule."""
         def __init__(self, rule_id, description, error, packages):
@@ -269,6 +221,10 @@ class TestCase():
             """Resolve package paths for all rule packages."""
             for package in self.packages:
                 package.resolve_path(case_root)
+
+        def validate_packages(self):
+            for package in self.packages:
+                package.validate()
 
         def __str__(self):
             return "rule_id:" + self.rule_id + ", description:" + \
@@ -332,6 +288,9 @@ class TestCase():
                 self._is_valid = is_valid
                 self._description = description
                 self._validation_report = validation_report
+                self.schema_result = False
+                self.schematron_result = False
+                self.profile_results = {}
 
             @property
             def name(self):
@@ -373,6 +332,30 @@ class TestCase():
                 """Return the validation report for the package."""
                 return self._validation_report
 
+            @property
+            def validation_result(self):
+                """Return the validation report for the package."""
+                return self._validation_report.status == STRUCT.StructureStatus.WellFormed and \
+                    self.schema_result and self.schematron_result
+
+            def validate(self):
+                """Validate the package."""
+                if self.exists:
+                    profile = ValidationProfile()
+                    struct_report = STRUCT.validate_package_structure(self.path)
+                    # IF package is well formed then we can validate it.
+                    if struct_report.status == STRUCT.StructureStatus.WellFormed:
+                        # Schema based METS validation first
+                        validator = MetsValidator(self.path)
+                        mets_path = os.path.join(self.path, 'METS.xml')
+                        self.schema_result = validator.validate_mets(mets_path)
+                        # Now grab any errors
+                        if self.schema_result is True:
+                            profile.validate(mets_path)
+                            self.profile_results = profile.get_results()
+                            self.schematron_result=profile.is_valid
+                    self._validation_report = STRUCT.validate_package_structure(self.path)
+
             @classmethod
             def from_element(cls, package_ele):
                 """Return a Package instance from an XML element."""
@@ -404,9 +387,8 @@ class TestCase():
         case = cls.from_element(tree.getroot(), schema)
         if xml_file:
             case.resolve_package_paths(os.path.abspath(os.path.join(xml_file, os.pardir)))
+        case.validate_packages()
         return case
-
-
 
     @classmethod
     def from_element(cls, case_ele, schema):
@@ -424,7 +406,7 @@ class TestCase():
                 req_id = cls.CaseId.from_element(child)
             elif child.tag == 'requirementText':
                 # Grab the requirement text value
-                req = cls.Requirement.from_element(child)
+                req = child.text
             elif child.tag == 'rules':
                 for rule_ele in child:
                     if rule_ele.tag == 'rule':

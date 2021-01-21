@@ -21,15 +21,20 @@
 {% macro package_card(package) %}
     <div class="card">
       <div class="card-body">
-        <h5 class="card-title">Name:{{ package.name }} {{ valid_badge(package) }}</h5>
-        <h5 class="card-subtitle text-muted">{{ package.description }}</h5>
+        <h5 class="card-title">Name:{{ package.name }}</h5>
+        <h5 class="card-subtitle">Expected:{{ valid_badge(package) }}</h5>
+        <p class="card-text">Actual: Structure {{ package.validation_report.status }}</p>
+        <p class="card-text">Actual: Schema {{ validation_badge(package.schema_result) }}</p>
+        <p class="card-text">Actual: Schematron {{ validation_badge(package.schematron_result) }}</p>
+        <p class="card-text text-muted">{{ package.description }}</p>
         <p class="card-text">{{ path_badge(package) }}<code>{{ package.path }}</code></p>
+        <p class="card-text"><a href="{{ package.path }}/METS.xml">View METS</a></p>
       </div>
     </div>
 {% endmacro %}
 
 {% macro valid_badge(package) -%}
-      <span class="badge badge-{{ valid_badge_class(package) }}">Valid:{{ package.is_valid }}</span>
+      <span class="badge badge-{{ valid_badge_class(package) }}">{{ "VALID" if package.is_valid else "INVALID" }}</span>
 {%- endmacro %}
 
 {% macro valid_badge_class(package) -%}
@@ -43,3 +48,11 @@
 {% macro path_badge_class(package) -%}
       {{ 'success' if package.exists else 'danger' }}
 {%- endmacro %}
+
+{% macro validation_badge(result) %}
+  <span class="{{ validation_badge_class(result) }}">{% if result == true %}Valid{% else %}Invalid{% endif %}</span>
+{% endmacro %}
+
+{% macro validation_badge_class(result) %}
+  badge badge-{% if result == true %}success{% else %}danger{% endif %}
+{% endmacro %}

@@ -34,16 +34,39 @@
           <h5 class="card-title">Rule:{{ rule.rule_id }} Packages:{{ rule.existing_packages | length }}/{{ rule.packages | length }}</h5>
           <h6 class="card-subtitle text-muted">{{ rule.description }}</h6>
           <p class="card-text">{{ rule.error.level }}: {{ rule.error.message }}</p>
-          <p class="card-text">Packages: {{ package_list(rule.packages) }}</p>
+          <p class="card-text">Packages: {{ package_table(rule.packages) }}</p>
         </div>
       </div>
     </li>
 {% endmacro %}
 
 {% macro package_list(packages) %}
+  <ul class="list-group list-group-flush">
     {% for package in packages -%}
-      <a class="badge badge-{{ badge_class(package) }}" href="./{{ package.name }}/index.html"> {{ package.name }}</a>&nbsp;
+      <li><a class="badge badge-{{ badge_class(package) }}" href="./{{ package.name }}/index.html"> {{ package.name }}</a></li>
     {%- endfor %}
+  </ul>
+{% endmacro %}
+
+{% macro package_table(packages) %}
+  <table data-toggle="table">
+    <thead class="thead-dark">
+      <tr>
+        <th data-field="name">Name</th>
+        <th data-field="expected">Expected Result</th>
+        <th data-field="rules">Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for package in packages -%}
+        <tr>
+          <td class="table-{{ badge_class(package) }}"><a href="./{{ package.name }}/index.html">{{ package.name }}</a></td>
+          <td>{{ 'Valid' if package.is_valid  == 'TRUE' else 'Invalid' }}</td>
+          <td>{{ 'Valid' if package.validation_result == 'TRUE' else 'Invalid' }}</td>
+        </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
 {% endmacro %}
 
 {% macro badge_class(package) -%}

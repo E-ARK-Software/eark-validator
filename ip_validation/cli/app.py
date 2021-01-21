@@ -32,7 +32,7 @@ import os.path
 import sys
 
 import ip_validation.cli.testcases as TC
-import ip_validation.infopacks.information_package as IP
+import ip_validation.infopacks.structure as STRUCT
 
 __version__ = "0.1.0"
 
@@ -110,9 +110,9 @@ def main():
 
 def _validate_ip(info_pack):
     ret_stat, to_validate = _get_ip_root(info_pack)
-    struct_details = IP.validate_package_structure(to_validate)
+    struct_details = STRUCT.validate_package_structure(to_validate)
     pprint('Path {} is dir, struct result is: {}'.format(to_validate,
-                                                         struct_details.package_status))
+                                                         struct_details.status))
     for error in struct_details.errors:
         pprint(error.to_json())
 
@@ -133,7 +133,7 @@ def _validate_test_case(test_case):
     return 1
 
 def _get_ip_root(info_pack):
-    arch_processor = IP.ArchivePackageHandler()
+    arch_processor = STRUCT.ArchivePackageHandler()
     # This is a var for the final source to validate
     to_validate = info_pack
 
@@ -143,7 +143,7 @@ def _get_ip_root(info_pack):
         return 1, None
     if os.path.isfile(info_pack):
         # Check if file is a archive format
-        if not IP.ArchivePackageHandler.is_archive(info_pack):
+        if not STRUCT.ArchivePackageHandler.is_archive(info_pack):
             # If not we can't process so report and iterate
             pprint('Path {} is not a file we can process.'.format(info_pack))
             return 2, None

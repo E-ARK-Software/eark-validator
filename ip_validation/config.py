@@ -26,7 +26,7 @@
 import os.path
 import tempfile
 
-from flask_debugtoolbar import DebugToolbarExtension
+# from flask_debugtoolbar import DebugToolbarExtension
 
 from .const import ENV_CONF_PROFILE, ENV_CONF_FILE
 
