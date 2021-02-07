@@ -33,8 +33,7 @@ import sys
 
 from jinja2 import Environment, PackageLoader
 from ip_validation.cli.testcases import TestCase, DEFAULT_NAME
-from ip_validation.infopacks.information_package import Specification
-
+from ip_validation.infopacks.specification import Specification
 __version__ = "0.1.0"
 
 defaults = {

@@ -34,7 +34,7 @@ from ip_validation.infopacks.mets import MetsValidator
 
 from ip_validation.webapp import APP, __version__
 from ip_validation.infopacks.rules import ValidationProfile
-import ip_validation.infopacks.information_package as IP
+from ip_validation.infopacks.structure import validate_package_structure, StructureStatus
 import ip_validation.utils as UTILS
 
 ROUTES = True
@@ -61,7 +61,7 @@ def get_specifications():
     return render_template('specifications.html')
 
 @APP.route("/specifications/<string:spec_name>/")
-def get_specification(spec_name):
+def get_specification():
     """Get """
     return render_template('blobstore.html')
 
@@ -71,7 +71,7 @@ def validate(digest):
     # Get the validation path ready
     to_validate = os.path.join(APP.config['UPLOAD_FOLDER'], digest)
     # Validate package structure
-    struct_details = IP.validate_package_structure(to_validate)
+    struct_details = validate_package_structure(to_validate)
     # Schema and schematron validation to be factored out.
     # initialise schema and schematron validation structures
     schema_result = None
@@ -80,10 +80,11 @@ def validate(digest):
     # Schematron validation profile
     profile = ValidationProfile()
     # IF package is well formed then we can validate it.
-    if struct_details.structure_status == IP.StructureStatus.WellFormed:
+    logging.debug(str(struct_details))
+    if struct_details.status == StructureStatus.WellFormed:
         # Schema based METS validation first
-        validator = MetsValidator(struct_details.path)
-        mets_path = os.path.join(struct_details.path, 'METS.xml')
+        validator = MetsValidator(to_validate)
+        mets_path = os.path.join(to_validate, 'METS.xml')
         schema_result = validator.validate_mets(mets_path)
         # Now grab any errors
         schema_errors = validator.validation_errors
@@ -151,7 +152,7 @@ def api_validate(digest):
     # Get the validation path ready
     to_validate = os.path.join(APP.config['UPLOAD_FOLDER'], digest)
     # Validate package structure
-    struct_details = IP.validate_package_structure(to_validate)
+    struct_details = validate_package_structure(to_validate)
     # Schema and schematron validation to be factored out.
     # initialise schema and schematron validation structures
     schema_valid = None
@@ -161,11 +162,12 @@ def api_validate(digest):
     profile_errors = []
     # Schematron validation profile
     profile = ValidationProfile()
+    print(str(struct_details))
     # IF package is well formed then we can validate it.
-    if struct_details.structure_status == IP.StructureStatus.WellFormed:
+    if struct_details.status == StructureStatus.WellFormed:
         # Schema based METS validation first
-        validator = MetsValidator(struct_details.path)
-        mets_path = os.path.join(struct_details.path, 'METS.xml')
+        validator = MetsValidator(to_validate)
+        mets_path = os.path.join(to_validate, 'METS.xml')
         schema_valid = validator.validate_mets(mets_path)
         # Now grab any errors
         schema_errors = validator.validation_errors

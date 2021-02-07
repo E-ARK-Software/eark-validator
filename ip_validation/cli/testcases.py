@@ -50,15 +50,15 @@ class TestCase():
      - testable: boolean, True if test case is "testable", False otherwise
      - references: a list of references to relavent requirements.
     """
-    def __init__(self, case_id, valid, testable=True, references=None, req=None, rules=None):
+    def __init__(self, case_id, valid, description, testable=True,
+                 references=None, req=None, rules=None):
         self._case_id = case_id
         self._valid = valid
+        self._description = description
         self._testable = testable
         self._references = [] if references is None else references
         self._req = req
         self._rules = [] if rules is None else rules
-        self._package_count = 0
-        self._existing_package_count = 0
 
     @property
     def case_id(self):
@@ -69,6 +69,11 @@ class TestCase():
     def valid(self):
         """Return True if the test case is valid XML against the schema supplied."""
         return self._valid
+
+    @property
+    def description(self):
+        """Return the test case description."""
+        return self._description
 
     @property
     def testable(self):
@@ -107,6 +112,7 @@ class TestCase():
                 package.resolve_path(case_root)
 
     def validate_packages(self):
+        """Validate all of a test cases packages."""
         for rule in self.rules:
             rule.validate_packages()
 
@@ -223,6 +229,7 @@ class TestCase():
                 package.resolve_path(case_root)
 
         def validate_packages(self):
+            """Validate all packages in a rule."""
             for package in self.packages:
                 package.validate()
 
@@ -398,6 +405,7 @@ class TestCase():
         testable = case_ele.get('testable')
         req_id = None
         req = None
+        description = None
         rules = []
         # Loop through the child eles
         for child in case_ele:
@@ -407,10 +415,13 @@ class TestCase():
             elif child.tag == 'requirementText':
                 # Grab the requirement text value
                 req = child.text
+            elif child.tag == 'description':
+                # Grab the requirement text value
+                description = child.text
             elif child.tag == 'rules':
                 for rule_ele in child:
                     if rule_ele.tag == 'rule':
                         rules.append(cls.Rule.from_element(rule_ele))
 
         # Return the TestCase instance
-        return cls(req_id, is_valid, testable=testable, req=req, rules=rules)
+        return cls(req_id, is_valid, description, testable=testable, req=req, rules=rules)

@@ -30,67 +30,23 @@ import tempfile
 import zipfile
 
 from ip_validation.infopacks.rules import Severity
+import ip_validation.infopacks.specification as SPECS
+
 import ip_validation.utils as UTILS
 
 MD_DIR = "metadata"
 REPS_DIR = "representations"
 SCHEMA_DIR = "schemas"
 METS_NAME = 'METS.xml'
-
-# Simple definition of package structure errors.
-STRUCT_ERRORS = {
-    1: """Any Information Package MUST be included within a single physical root
-       folder (known as the “Information Package root folder”). For packages
-       presented in an archive format, see CSIPSTR3, the archive MUST unpack to
-       a single root folder.""",
-    2: """The Information Package root folder SHOULD be named with the ID or
-       name of the Information Package, that is the value of the package
-       METS.xml’s root <mets> element’s @OBJID attribute.""",
-    3: """The Information Package root folder MAY be compressed (for example by
-       using TAR or ZIP). Which specific compression format to use needs to be
-       stated in the Submission Agreement.""",
-    4: """The Information Package root folder MUST include a file named
-       METS.xml. This file MUST contain metadata that identifies the package,
-       provides a high-level package description, and describes its structure,
-       including pointers to constituent representations.""",
-    5: """The Information Package root folder SHOULD include a folder named
-       metadata, which SHOULD include metadata relevant to the whole package.""",
-    6: """If preservation metadata are available, they SHOULD be included in
-       sub-folder preservation.""",
-    7: """If descriptive metadata are available, they SHOULD be included in
-       sub-folder descriptive.""",
-    8: """If any other metadata are available, they MAY be included in
-       separate sub-folders, for example an additional folder named other.""",
-    9: """The Information Package folder SHOULD include a folder named
-       representations.""",
-    10: """The representations folder SHOULD include a sub-folder for each
-        individual representation (i.e. the “representation folder”). Each
-        representation folder should have a string name that is unique within
-        the package scope. For example the name of the representation and/or its
-        creation date might be good candidates as a representation sub-folder
-        name.""",
-    11: """The representation folder SHOULD include a sub-folder named data
-        which MAY include all data constituting the representation.""",
-    12: """The representation folder SHOULD include a metadata file named
-        METS.xml which includes information about the identity and structure of
-        the representation and its components. The recommended best practice is
-        to always have a METS.xml in the representation folder.""",
-    13: """The representation folder SHOULD include a sub-folder named metadata
-        which MAY include all metadata about the specific representation.""",
-    14: """The Information Package MAY be extended with additional sub-folders.""",
-    15: """We recommend including all XML schema documents for any structured
-        metadata within package. These schema documents SHOULD be placed in a
-        sub-folder called schemas within the Information Package root folder
-        and/or the representation folder.""",
-    16: """We recommend including any supplementary documentation for the
-        package or a specific representation within the package. Supplementary
-        documentation SHOULD be placed in a sub-folder called documentation
-        within the Information Package root folder and/or the representation
-        folder."""
-}
+STR_REQ_PREFIX = "CSIPSTR"
 SUB_MESS_NOT_EXIST = 'Path {} does not exist'
 SUB_MESS_NOT_ARCH = 'Path {} is not a directory or archive format file.'
-
+# Map requirement levels to severity
+LEVEL_SEVERITY = {
+    'MUST': Severity.Error,
+    'SHOULD': Severity.Warn,
+    'MAY': Severity.Info
+}
 @unique
 class StructureStatus(Enum):
     """Enum covering information package validation statuses."""
@@ -99,7 +55,6 @@ class StructureStatus(Enum):
     NotWellFormed = 2
     # Package structure is OK
     WellFormed = 3
-
 
 class StructureReport:
     """Stores the vital facts and figures about a package."""
@@ -138,6 +93,7 @@ class StructureReport:
 
     @property
     def messages(self):
+        """Generator that yields all of the messages in the report."""
         for entry in self.errors:
             yield entry
         for entry in self.warnings:
@@ -167,8 +123,7 @@ class StructureReport:
         root = path
         if not os.path.exists(path):
             # If it doesn't exist then add an error message
-            rep.add_error(StructError.from_values(1, severity=Severity.Error,
-                                                     sub_message=SUB_MESS_NOT_EXIST.format(path)))
+            rep.add_error(StructError.from_rule_no(1, sub_message=SUB_MESS_NOT_EXIST.format(path)))
         elif os.path.isfile(path):
             if ArchivePackageHandler.is_archive(path):
                 arch_handler = ArchivePackageHandler()
@@ -179,8 +134,8 @@ class StructureReport:
                         if os.path.isdir(ent_path):
                             root = ent_path
             else:
-                rep.add_error(StructError.from_values(1, severity=Severity.Error,
-                                                      sub_message=SUB_MESS_NOT_ARCH.format(path)))
+                rep.add_error(StructError.from_rule_no(1,
+                                                     sub_message=SUB_MESS_NOT_ARCH.format(path)))
 
         struct_checker = StructureChecker.from_directory(root)
         rep.add_errors(struct_checker.validate_manifest())
@@ -194,18 +149,20 @@ class StructureReport:
     def __str__(self):
         return "status:" + str(self.status)
 
+import pprint
 class StructError():
     """Encapsulates an individual validation test result."""
-    def __init__(self, rule_id, severity, message, sub_message):
-        self._rule_id = rule_id
-        self.severity = severity
-        self._message = message
+    def __init__(self, requirement, sub_message):
+        pprint.pprint("REQ")
+        pprint.pprint(str(requirement))
+        self._requirement = requirement
+        self.severity = LEVEL_SEVERITY.get(requirement.level, Severity.Unknown)
         self._sub_message = sub_message
 
     @property
-    def rule_id(self):
+    def id(self): # pylint: disable-msg=C0103
         """Get the rule_id."""
-        return self._rule_id
+        return self._requirement.id
 
     @property
     def severity(self):
@@ -236,7 +193,7 @@ class StructError():
     @property
     def message(self):
         """Get the message."""
-        return self._message
+        return self._requirement.message
 
     @property
     def sub_message(self):
@@ -245,20 +202,28 @@ class StructError():
 
     def to_json(self):
         """Output the message in JSON format."""
-        return {"rule_id" : self.rule_id, "severity" : str(self.severity.name),
+        return {"id" : self.id, "severity" : str(self.severity.name),
                 "message" : self.message, "sub_message" : self.sub_message}
 
     def __str__(self):
-        return 'id:{}, severity:{}, message:{}, sub_message:{}'.format(self.rule_id,
+        return 'id:{}, severity:{}, message:{}, sub_message:{}'.format(self.id,
                                                                        str(self.severity.name),
                                                                        self.message,
                                                                        self.sub_message)
+    @classmethod
+    def from_rule_no(cls, rule_no, sub_message=None):
+        """Create an StructError from values supplied."""
+        requirement = SPECS.Specification.StructuralRequirement.from_rule_no(rule_no)
+        pprint.pprint("NOREQ")
+        pprint.pprint(str(requirement))
+        return StructError(requirement, sub_message)
 
     @classmethod
-    def from_values(cls, rule_id, severity=Severity.Error, sub_message=''):
+    def from_values(cls, requirement, sub_message=None):
         """Create an StructError from values supplied."""
-        return StructError('CSIPSTR{}'.format(rule_id), severity,
-                           STRUCT_ERRORS.get(rule_id), sub_message)
+        pprint.pprint("VALREQ")
+        pprint.pprint(str(requirement))
+        return StructError(requirement, sub_message)
 
 class ArchivePackageHandler():
     """Class to handle archive / compressed information packages."""
@@ -316,25 +281,25 @@ class StructureChecker():
         # [CSIPSTR12] Does each representation folder have a METS.xml file? (W)
         if not self.has_mets:
             if is_root:
-                validation_errors.append(StructError.from_values(4))
+                validation_errors.append(StructError.from_rule_no(4))
             else:
-                validation_errors.append(StructError.from_values(12, severity=Severity.Warn))
+                validation_errors.append(StructError.from_rule_no(12))
         # [CSIPSTR5] Is there a first level folder called metadata?
         # [CSIPSTR13] Does each representation folder have a metadata folder (W)
         if not self.has_md:
             if is_root:
-                validation_errors.append(StructError.from_values(5, severity=Severity.Warn))
+                validation_errors.append(StructError.from_rule_no(5))
             else:
-                validation_errors.append(StructError.from_values(13, severity=Severity.Warn))
+                validation_errors.append(StructError.from_rule_no(13))
         # [CSIPSTR15] Is there a schemas folder at the root level/representations? (W)
         if not self.has_schema:
-            validation_errors.append(StructError.from_values(15, severity=Severity.Warn))
+            validation_errors.append(StructError.from_rule_no(15))
         # [CSIPSTR11] Does each representation folder have a sub folder called data? (W)
         if not self.has_data and not is_root:
-            validation_errors.append(StructError.from_values(11, severity=Severity.Warn))
+            validation_errors.append(StructError.from_rule_no(11))
         # [CSIPSTR9] Is there a first level folder called representations (W)
         if not self.has_reps and is_root:
-            validation_errors.append(StructError.from_values(9, severity=Severity.Warn))
+            validation_errors.append(StructError.from_rule_no(9))
         return validation_errors
 
     @classmethod
@@ -372,5 +337,5 @@ class StructureChecker():
 class PackageStructError(RuntimeError):
     """Exception to signal fatal pacakge structure errors."""
     def __init__(self, arg):
-        super(PackageStructError, self).__init__()
+        super().__init__()
         self.args = arg
