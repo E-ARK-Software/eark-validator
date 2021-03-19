@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- E-ARK DIP METS Profile 2.0 -->
+<METS_Profile
+    xmlns="http://www.loc.gov/METS_Profile/v2"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:mets="http://www.loc.gov/METS/"
+    xmlns:csip="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"
+    xmlns:sip="https://DILCIS.eu/XML/METS/SIPExtensionMETS"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xsi:schemaLocation="http://www.loc.gov/METS_Profile/v2 http://www.loc.gov/standards/mets/profile_docs/mets.profile.v2-0.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.w3.org/1999/xlink http://www.loc.gov/standards/mets/xlink.xsd"
+    STATUS="provisional"
+    REGISTRATION="unregistered"
+    ID="DIPV2.0.4">
+    <URI LOCTYPE="URL" ASSIGNEDBY="local">https://earkdip.dilcis.eu/profile/E-ARK-DIP.xml</URI>
+    <title>E-ARK DIP METS Profile</title>
+    <abstract>This is the extension of the E-ARK CSIP profile for creation of a E-ARK DIP. The profile describes the Dissemination Information Package (DIP) specification and the implementation of METS for packaging OAIS conformant Information Packages. The profile is accompanied with a textuall document explaning the details of use of this profile.
+        This will enable repository interoperability and assist in the management of the preservation of digital content.</abstract>
+    <date>2020-06-12T09:00:00</date>
+    <contact>
+        <institution>DILCIS Board</institution>
+        <address>http://dilcis.eu/</address>
+        <email>info@dilcis.eu</email>
+    </contact>
+    <related_profile RELATIONSHIP="Extends" URI="https://earkcsip.dilcis.eu/profile/E-ARK-CSIP.xml">E-ARK CSIP METS Profile 2.0</related_profile>
+    <profile_context>
+        <resource_model>
+          <head>E-ARK DIP profile</head>
+            <p xmlns="http://www.w3.org/1999/xhtml">This profile together with the E-ARK SIP document describes an DIP conforming to the E-ARK SIP.</p>
+          <head>Principles for a package conforming to the Common Specification for Information Packages (CSIP)</head>
+            <p xmlns="http://www.w3.org/1999/xhtml"><a href="http://earkcsip.dilcis.eu/specification/specification/principles/">CSIP Principles</a></p>
+         </resource_model>
+    </profile_context>
+    <external_schema>
+        <name>E-ARK SIP METS Extension</name>
+        <URL>http://earksip.dilcis.eu/schema/DILCISExtensionSIPMETS.xsd</URL>
+        <context>XML-schema for the attributes added by SIP and reused in the DIP</context>
+        <note>
+            <p xmlns="http://www.w3.org/1999/xhtml">An extension schema with the added attributes for use in this profile.</p>
+            <p xmlns="http://www.w3.org/1999/xhtml">The schema is used with a namespace prefix of sip.</p>
+        </note>
+    </external_schema>
+    <description_rules>
+        <p xmlns="http://www.w3.org/1999/xhtml">The filepath must be decoded consistently throughout all file references within the information package.</p>
+    </description_rules>
+    <controlled_vocabularies>
+        <vocabulary ID="VocabularyOAISPackageType">
+            <name>OAIS Package type</name>
+            <maintenance_agency>DILCIS Board</maintenance_agency>
+            <URI>http://earkcsip.dilcis.eu/schema/CSIPVocabularyOAISPackageType.xml</URI>
+            <context>Values for `@csip:OAISPACKAGETYPE`</context>
+            <description>
+                <p xmlns="http://www.w3.org/1999/xhtml">Describes the OAIS type the package belongs to in the OAIS reference model.</p>
+            </description>
+        </vocabulary>
+        <vocabulary ID="VocabularyStatus">
+            <name>dmdSec status</name>
+            <maintenance_agency>DILCIS Board</maintenance_agency>
+            <URI>http://earkcsip.dilcis.eu/schema/CSIPVocabularyStatus.xml</URI>
+            <context>Values for `dmdSec/@STATUS`</context>
+            <description>
+                <p xmlns="http://www.w3.org/1999/xhtml">Describes the status of the descriptive metadata section (dmdSec) which is supported by the profile.</p>
+            </description>
+        </vocabulary>
+    </controlled_vocabularies>
+    <structural_requirements>
+        <metsRootElement ID="metsRootElement">
+            <requirement ID="DIP1" REQLEVEL="MUST" EXAMPLES="metsRootElementExample1 metsRootElementExample2">
+                <description>
+                    <head>Package Identifier</head>
+                    <p xmlns="http://www.w3.org/1999/xhtml">Note that the value of the `mets/@OBJID attribute` for the DIP is expected to be different from the SIP and AIP to reflect the creation of a new package.</p>
+                    <dl xmlns="http://www.w3.org/1999/xhtml">
+                        <dt>METS XPath</dt><dd>mets/@OBJID</dd>
+                        <dt>Cardinality</dt><dd>1..1</dd>
+                    </dl>
+                </description>
+            </requirement>
+            <requirement ID="DIP2" REQLEVEL="MUST" EXAMPLES="metsRootElementExample1">
+                <description>
+                    <head>METS Profile</head>
+                    <p xmlns="http://www.w3.org/1999/xhtml">The value is set to "https://earkdip.dilcis.eu/profile/E-ARK-DIP.xml".</p>
+                    <dl xmlns="http://www.w3.org/1999/xhtml">
+                        <dt>METS XPath</dt><dd>mets/@PROFILE</dd>
+                        <dt>Cardinality</dt><dd>1..1</dd>
+                    </dl>
+                </description>
+            </requirement>
+        </metsRootElement>
+        <metsHdr ID="metsHeaderElement">
+            <requirement ID="DIP3" REQLEVEL="MUST" RELATEDMAT="VocabularyOAISPackageType" EXAMPLES="metsHdrElementExample1">
+                <description>
+                    <head>OAIS Package type information</head>
+                    <p xmlns="http://www.w3.org/1999/xhtml">The in CSIP added attribute `@csip:OAISPACKAGETYPE` is used with the value "DIP".</p>
+                    <dl xmlns="http://www.w3.org/1999/xhtml">
+                        <dt>METS XPath</dt><dd>metsHdr[@csip:OAISPACKAGETYPE=`DIP`]</dd>
+                        <dt>Cardinality</dt><dd>1..1</dd>
+                    </dl>
+                </description>
+            </requirement>
+        </metsHdr>
+        <dmdSec ID="dmdSecElement">
+            <requirement ID="DIP4" REQLEVEL="SHOULD" RELATEDMAT="VocabularyStatus" EXAMPLES="dmdSecExample1">
+                <description>
+                    <head>Status of the descriptive metadata</head>
+                    <p xmlns="http://www.w3.org/1999/xhtml">Indicates the status of the package using a fixed vocabulary. The status SHOULD in a DIP be set to "CURRENT".</p>
+                    <dl xmlns="http://www.w3.org/1999/xhtml">
+                        <dt>METS XPath</dt><dd>dmdSec/@STATUS</dd>
+                        <dt>Cardinality</dt><dd>0..1</dd>
+                    </dl>
+                </description>
+            </requirement>
+        </dmdSec>
+        <amdSec ID="amdSecElement">
+            <requirement ID="REF_CSIP_1" REQLEVEL="SHOULD">
+                <description>
+                    <head>Administrative metadata</head>
+                    <p xmlns="http://www.w3.org/1999/xhtml">The DIP &lt;amdSec&gt; element should comply with <a href="http://earkcsip.dilcis.eu/#534-use-of-the-mets-administrative-metadata-section-element-amdsec"> amdSec requirements in the CSIP profile.</a></p>
+                </description>
+            </requirement>
+        </amdSec>
+        <fileSec ID="fileSecElement">
+            <requirement ID="REF_CSIP_2"  REQLEVEL="SHOULD">
+                <description>
+                    <head>File section</head>
+                    <p xmlns="http://www.w3.org/1999/xhtml">The DIP fileSec element should comply with <a href="http://earkcsip.dilcis.eu/#535-use-of-the-mets-file-section-element-filesec"> fileSec requirements in the CSIP profile.</a></p>
+                </description>
+            </requirement>
+        </fileSec>
+        <structMap ID="structMapElement">
+          <requirement ID="REF_CSIP_3"  REQLEVEL="SHOULD">
+              <description>
+                <head>Structural description of the package</head>
+                  <p xmlns="http://www.w3.org/1999/xhtml">The DIP structMap element should comply with <a href="http://earkcsip.dilcis.eu/#536-use-of-the-mets-structural-map-structmap"> structMap requirements in the CSIP profile.</a></p>
+              </description>
+          </requirement>
+         </structMap>
+         <structLink ID="structLinkElement">
+            <requirement ID="REF_METS_1"  REQLEVEL="MAY">
+                <description>
+                    <head>structLink</head>
+                    <p xmlns="http://www.w3.org/1999/xhtml">Section not defined or used in CSIP or DIP, additional own uses may occur.</p>
+                    <p xmlns="http://www.w3.org/1999/xhtml">Information regarding the structural links is found in the <a href="http://www.loc.gov/standards/mets/METSPrimer.pdf">METS Primer</a></p>                </description>
+            </requirement>
+        </structLink>
+        <behaviorSec ID="behaviorSecElement">
+            <requirement ID="REF_METS_2" REQLEVEL="MAY">
+                <description>
+                    <head>behaviorSec</head>
+                    <p xmlns="http://www.w3.org/1999/xhtml">Section not defined or used in CSIP or DIP, additional own uses may occur.</p>
+                    <p xmlns="http://www.w3.org/1999/xhtml">Information regarding the behavior section is found in the <a href="http://www.loc.gov/standards/mets/METSPrimer.pdf">METS Primer</a></p>
+                </description>
+            </requirement>
+        </behaviorSec>
+    </structural_requirements>
+    <technical_requirements>
+        <content_files>
+            <requirement>
+                <description>
+                    <p xmlns="http://www.w3.org/1999/xhtml">Requirements not stated in CSIP or DIP</p>
+                </description>
+            </requirement>
+        </content_files>
+        <behavior_files>
+            <requirement>
+                <description>
+                    <p xmlns="http://www.w3.org/1999/xhtml">Requirements not stated in CSIP or DIP</p>
+                </description>
+            </requirement>
+        </behavior_files>
+        <metadata_files>
+            <requirement>
+                <description>
+                    <p xmlns="http://www.w3.org/1999/xhtml">Requirements not stated in CSIP or DIP</p>
+                </description>
+            </requirement>
+        </metadata_files>
+    </technical_requirements>
+    <tool>
+        <name>ESSArch (ETP, ETA, EPP, ECORE)</name>
+        <URI>https://github.com/ESSolutions</URI>
+        <description>
+            <p xmlns="http://www.w3.org/1999/xhtml">A suite of tools for e-archiving and digital preservation. The tools provide functionality for producers to archive digital information, for archives to preserve digital information and for consumers to access archived information.</p>
+        </description>
+        <note>
+            <p xmlns="http://www.w3.org/1999/xhtml">ES Solutions - www.essolutions.se</p>
+        </note>
+    </tool>
+    <tool>
+        <name>RODA</name>
+        <URI>http://github.com/keeps/roda</URI>
+        <description>
+            <p xmlns="http://www.w3.org/1999/xhtml">RODA is a digital repository solution that delivers functionality for all the main units of the OAIS reference model. RODA is capable of ingesting, managing and providing access to the various types of digital objects produced by large corporations or public bodies. RODA is based on open-source technologies and is supported by existing standards such as the Open Archival Information System (OAIS), Metadata Encoding and Transmission Standard (METS), Encoded Archival Description (EAD), Dublin Core (DC) and PREMIS (Preservation Metadata).</p>
+        </description>
+        <note>
+            <p xmlns="http://www.w3.org/1999/xhtml">RODA is licensed under LGPLv3 for all source-code including interoperability libraries like SIP manipulation libraries.</p>
+        </note>
+    </tool>
+    <tool>
+        <name>RODA-in</name>
+        <URI>https://rodain.roda-community.org</URI>
+        <description>
+            <p xmlns="http://www.w3.org/1999/xhtml">RODA-in is a tool specially designed for producers and archivists to create Submission Information Packages (SIP) ready to be submitted to an Open Archival Information System (OAIS). The tool creates SIPs from files and folders available on the local file system.</p>
+            <p xmlns="http://www.w3.org/1999/xhtml">
+            RODA-in supports several Submission Information Package formats such as BagIt, E-ARK SIP and the Hungarian SIP format.
+            </p>
+        </description>
+        <note>
+        <p xmlns="http://www.w3.org/1999/xhtml">RODA-in is licensed under LGPLv3.</p>
+        </note>
+    </tool>
+    <Example ID="metsRootElementExample1" LABEL="METS root element showing use of `csip:@OTHERTYPE` attribute when an appropriate package content category value is not available in the vocabulary. The `@TYPE` attribute value is set to OTHER.">
+        <mets:mets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:mets="http://www.loc.gov/METS/"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            xmlns:csip="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"
+            xmlns:sip="https://DILCIS.eu/XML/METS/SIPExtensionMETS"
+            OBJID="uuid-4422c185-5407-4918-83b1-7abfa77de182"
+            LABEL="Sample E-ARK DIP Information Package"
+            TYPE="OTHER"
+            csip:OTHERTYPE="Patterns"
+            PROFILE="https://earkdip.dilcis.eu/profile/E-ARK-DIP.xml"
+            xsi:schemaLocation="http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.w3.org/1999/xlink http://www.loc.gov/standards/mets/xlink.xsd https://dilcis.eu/XML/METS/CSIPExtensionMETS https://earkcsip.dilcis.eu/schema/DILCISExtensionMETS.xsd https://DILCIS.eu/XML/METS/SIPExtensionMETS  https://earksip.dilcis.eu/schema/DILCISExtensionSIPMETS.xsd">
+        </mets:mets>
+    </Example>
+    <Example ID="metsRootElementExample2" LABEL="METS root element illustrating the use of a custom `csip:@OTHERCONTENTINFORMATIONTYPE` attribute value when the correct content type value does note exist in the vocabulary. The `csip:@CONTENTINFORMATIONTYPE` attribute value is set to OTHER.">
+        <mets:mets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:mets="http://www.loc.gov/METS/"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            xmlns:csip="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"
+            xmlns:sip="https://DILCIS.eu/XML/METS/SIPExtensionMETS"
+            OBJID="uuid-4422c185-5407-4918-83b1-7abfa77de182"
+            LABEL="Sample E-ARK DIP Information Package"
+            TYPE="Datasets"
+            csip:CONTENTINFORMATIONTYPE="OTHER"
+            csip:OTHERCONTENTINFORMATIONTYPE="Own defined content information type"
+            PROFILE="https://earkdip.dilcis.eu/profile/E-ARK-DIP.xml"
+            xsi:schemaLocation="http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.w3.org/1999/xlink http://www.loc.gov/standards/mets/xlink.xsd https://DILCIS.eu/XML/METS/CSIPExtensionMETS  https://earkcsip.dilcis.eu/schema/DILCISExtensionMETS.xsd https://DILCIS.eu/XML/METS/SIPExtensionMETS https://earksip.dilcis.eu/schema/DILCISExtensionSIPMETS.xsd">
+        </mets:mets>
+    </Example>
+    <Example ID="metsHdrElementExample1" LABEL="METS agent example of the mandatory agent">
+        <mets:metsHdr CREATEDATE="2018-04-24T14:37:49.602+01:00" LASTMODDATE="2018-04-24T14:37:49.602+01:00" RECORDSTATUS="NEW" csip:OAISPACKAGETYPE="DIP">
+            <mets:agent ROLE="CREATOR" TYPE="OTHER" OTHERTYPE="SOFTWARE">
+                <mets:name>RODA-in</mets:name>
+                <mets:note csip:NOTETYPE="SOFTWARE VERSION">2.1.0-beta.7</mets:note>
+            </mets:agent>
+        </mets:metsHdr>
+    </Example>
+    <Example ID="dmdSecExample1" LABEL="METS example of referencing the descriptive metadata which is described with an EAD document">
+        <mets:dmdSec ID="dmdExmpl.ead" CREATED="2018-04-24T14:37:49.609+01:00" STATUS="CURRENT">
+            <mets:mdRef LOCTYPE="URL" MDTYPE="EAD" xlink:type="simple"  xlink:href="metadata/descriptive/ead2002.xml" MIMETYPE="application/xml" SIZE="903" CREATED="2018-04-24T14:37:49.609+01:00" CHECKSUM="F24263BF09994749F335E1664DCE0086DB6DCA323FDB6996938BCD28EA9E8153" CHECKSUMTYPE="SHA-256"/>
+        </mets:dmdSec>
+    </Example>
+    <Appendix NUMBER="1" LABEL="Example of a whole METS document describing an dissimination information package with no representations.">
+        <mets:mets
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:mets="http://www.loc.gov/METS/"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            xmlns:csip="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"
+            xmlns:sip="https://DILCIS.eu/XML/METS/SIPExtensionMETS"
+            OBJID="uuid-4422c185-5407-4918-83b1-7abfa77de182"
+            LABEL="Accounting records of 2017"
+            TYPE="OTHER"
+            csip:OTHERTYPE="Accounting"
+            PROFILE="https://earkdip.dilcis.eu/profile/E-ARK-DIP.xml"
+            xsi:schemaLocation="http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.w3.org/1999/xlink http://www.loc.gov/standards/mets/xlink.xsd https://DILCIS.eu/XML/METS/CSIPExtensionMETS https://earkcsip.dilcis.eu/schema/DILCISExtensionMETS.xsd https://DILCIS.eu/XML/METS/SIPExtensionMETS  https://earksip.dilcis.eu/schema/DILCISExtensionSIPMETS.xsd">
+            <mets:metsHdr
+                CREATEDATE="2018-04-24T14:37:49.602+01:00"
+                LASTMODDATE="2018-04-24T14:37:49.602+01:00"
+                RECORDSTATUS="NEW"
+                csip:OAISPACKAGETYPE="SIP">
+                <mets:agent ROLE="CREATOR" TYPE="OTHER" OTHERTYPE="SOFTWARE">
+                    <mets:name>RODA-in</mets:name>
+                    <mets:note csip:NOTETYPE="SOFTWARE VERSION">2.1.0-beta.7</mets:note>
+                </mets:agent>
+            </mets:metsHdr>
+            <mets:dmdSec ID="appndx1.dmd.ead" CREATED="2018-04-24T14:37:49.609+01:00" STATUS="CURRENT">
+                <mets:mdRef
+                    LOCTYPE="URL"
+                    MDTYPE="EAD"
+                    MDTYPEVERSION="2002"
+                    xlink:type="simple"
+                    xlink:href="metadata/descriptive/ead2002.xml"
+                    SIZE="903"
+                    CREATED="2018-04-24T14:37:49.609+01:00"
+                    CHECKSUM="F24263BF09994749F335E1664DCE0086DB6DCA323FDB6996938BCD28EA9E8153"
+                    CHECKSUMTYPE="SHA-256"/>
+            </mets:dmdSec>
+            <mets:amdSec>
+                <mets:digiprovMD ID="appndx1.digiprov.premis" CREATED="2018-04-24T14:37:52.783+01:00">
+                    <mets:mdRef
+                        LOCTYPE="URL"
+                        xlink:type="simple"
+                        xlink:href="metadata/preservation/premis1.xml"
+                        MDTYPE="PREMIS"
+                        MDTYPEVERSION="3.0"
+                        MIMETYPE="text/xml"
+                        SIZE="1211"
+                        CREATED="2018-04-24T14:37:52.783+01:00"
+                        CHECKSUM="8aa278038dbad54bbf142e7d72b493e2598a94946ea1304dc82a79c6b4bac3d5"
+                        CHECKSUMTYPE="SHA-256"
+                        LABEL="premis1.xml"/>
+                </mets:digiprovMD>
+                <mets:digiprovMD ID="appndx1.digiprov.premis2" CREATED="2018-04-24T14:47:52.783+01:00">
+                    <mets:mdRef
+                        LOCTYPE="URL"
+                        xlink:type="simple"
+                        xlink:href="metadata/preservation/premis2.xml"
+                        MDTYPE="PREMIS"
+                        MDTYPEVERSION="3.0"
+                        MIMETYPE="text/xml"
+                        SIZE="2854"
+                        CREATED="2018-04-24T14:37:52.783+01:00"
+                        CHECKSUM="d1dfa585dcc9d87268069dc58d5e47956434ec3db4087a75a3885d287f15126f"
+                        CHECKSUMTYPE="SHA-256"
+                        LABEL="premis2.xml"/>
+                </mets:digiprovMD>
+            </mets:amdSec>
+            <mets:fileSec ID="appndx1.filesec">
+                <mets:fileGrp ID="appndx1.filegrp.doc" USE="Documentation">
+                    <mets:file
+                        ID="appndx1.file.docx"
+                        MIMETYPE="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        SIZE="2554366"
+                        CREATED="2012-08-15T12:08:15.432+01:00"
+                        CHECKSUM="91B7A2C0A1614AA8F3DAF11DB4A1C981F14BAA25E6A0336F715B7C513E7A1557"
+                        CHECKSUMTYPE="SHA-256"
+                        sip:FILEFORMATNAME="Microsoft Word for Windows"
+                        sip:FILEFORMATVERSION="2007 onwards"
+                        sip:FORMATREGISTRY="PRONOM"
+                        sip:FORMATREGISTRYKEY="fmt/412">
+                        <mets:FLocat LOCTYPE="URL" xlink:type="simple" xlink:href="documentation/File.docx"/>
+                    </mets:file>
+                    <mets:file
+                        ID="appndx1.file.docx2"
+                        MIMETYPE="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        SIZE="2554366"
+                        CREATED="2012-08-15T12:08:15.432+01:00"
+                        CHECKSUM="91B7A2C0A1614AA8F3DAF11DB4A1C981F14BAA25E6A0336F715B7C513E7A1557"
+                        CHECKSUMTYPE="SHA-256"
+                        sip:FILEFORMATNAME="Microsoft Word for Windows"
+                        sip:FILEFORMATVERSION="2007 onwards"
+                        sip:FORMATREGISTRY="PRONOM"
+                        sip:FORMATREGISTRYKEY="fmt/412">
+                        <mets:FLocat LOCTYPE="URL" xlink:type="simple" xlink:href="documentation/File2.docx"/>
+                    </mets:file>
+                </mets:fileGrp>
+                <mets:fileGrp ID="appndx1.filegrp.schm" USE="Schemas">
+                    <mets:file
+                        ID="appndx1.file.ead.xsd"
+                        MIMETYPE="application/xml"
+                        SIZE="123917"
+                        CREATED="2018-04-24T14:37:49.617+01:00"
+                        CHECKSUM="0BF9E16ADE296EF277C7B8E5D249D300F1E1EB59F2DCBD89644B676D66F72DCC"
+                        CHECKSUMTYPE="SHA-256"
+                        sip:FILEFORMATNAME="XML Schema Definition"
+                        sip:FORMATREGISTRY="PRONOM"
+                        sip:FORMATREGISTRYKEY="x-fmt/280">
+                        <mets:FLocat LOCTYPE="URL" xlink:type="simple" xlink:href="schemas/ead2002.xsd"/>
+                    </mets:file>
+                </mets:fileGrp>
+                <mets:fileGrp
+                    ID="appndx1.filegrp.reps"
+                    USE="Representations/Submission/Data"
+                    csip:CONTENTINFORMATIONTYPE="SIARDDK">
+                    <mets:file
+                        ID="appndx1.file.siard"
+                        MIMETYPE="application/xml"
+                        SIZE="1338744"
+                        CREATED="2018-04-24T14:37:49.617+01:00"
+                        CHECKSUM="7176A627870CFA3854468EC43C5A56F9BD8B30B50A983B8162BF56298A707667"
+                        CHECKSUMTYPE="SHA-256"
+                        ADMID="appndx1.digiprov.premis2 appndx1.digiprov.premis"
+                        sip:FILEFORMATNAME="Extensible Markup Language"
+                        sip:FILEFORMATVERSION="1.0"
+                        sip:FORMATREGISTRY="PRONOM"
+                        sip:FORMATREGISTRYKEY="fmt/101">
+                        <mets:FLocat LOCTYPE="URL" xlink:type="simple" xlink:href="representations/submission/data/SIARD.xml"/>
+                    </mets:file>
+                </mets:fileGrp>
+            </mets:fileSec>
+            <mets:structMap ID="appndx1.structmap" TYPE="PHYSICAL" LABEL="CSIP">
+                <mets:div ID="appdx1.div.struct" LABEL="uuid-4422c185-5407-4918-83b1-7abfa77de182">
+                    <mets:div
+                        ID="appdx1.div.md"
+                        LABEL="Metadata"
+                        ADMID="appndx1.digiprov.premis appndx1.digiprov.premis2"
+                        DMDID="appndx1.dmd.ead"/>
+                    <mets:div
+                        ID="appdx1.div.doc"
+                        LABEL="Documentation">
+                      <mets:fptr FILEID="appndx1.filegrp.doc"/>
+                    </mets:div>
+                    <mets:div
+                        ID="appdx1.div.schm"
+                        LABEL="Schemas">
+                        <mets:fptr FILEID="appndx1.filegrp.schm"/>
+                    </mets:div>
+                    <mets:div
+                        ID="appdx1.div.reps"
+                        LABEL="Representations">
+                        <mets:fptr FILEID="appndx1.filegrp.reps"/>
+                    </mets:div>
+                </mets:div>
+            </mets:structMap>
+        </mets:mets>
+    </Appendix>
+
+</METS_Profile>

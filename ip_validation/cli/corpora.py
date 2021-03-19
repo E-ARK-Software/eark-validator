@@ -130,11 +130,21 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 templates_dir = os.path.join(ROOT, 'templates')
 env = Environment( loader = PackageLoader('ip_validation.cli') )
 
+def app_html(root):
+    """Write an HTML file home page."""
+    template = env.get_template('home.html')
+    _mkdirs(root)
+    with open(os.path.join(root, 'index.html'), 'w') as filehand:
+        filehand.write(template.render())
+
 def corpus_html(root, corpus, specification):
     """Write an HTML file summarising a corpus."""
+    if (root is None) | (corpus is None) | (specification is None):
+        return
     template = env.get_template('corpus.html')
     template.globals['now'] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     _mkdirs(root)
+    print('{}'.format(corpus))
     with open(os.path.join(root, 'index.html'), 'w') as filehand:
         filehand.write(template.render(
             corpus = corpus,
@@ -220,13 +230,24 @@ def main():
     if not args.files:
         PARSER.print_help()
 
+    app_html('results')
     # Iterate the file arguments
-    specification = Specification.from_xml_file()
     for file_arg in args.files:
-        corpus = Corpus.from_root(file_arg, 'CSIP')
-        corpus_html('results', corpus, specification)
+        specification = Specification.csip()
+        corpus = Corpus.from_root(os.path.join(file_arg, 'csip'), 'CSIP')
+        corpus_html(os.path.join('results', 'CSIP'), corpus, specification)
         for case in corpus.cases:
-            case_html('results', case)
+            case_html(os.path.join('results', 'CSIP'), case)
+        specification = Specification.sip()
+        corpus = Corpus.from_root(os.path.join(file_arg, 'sip'), 'SIP')
+        corpus_html(os.path.join('results', 'SIP'), corpus, specification)
+        for case in corpus.cases:
+            case_html(os.path.join('results', 'SIP'), case)
+        specification = Specification.dip()
+        corpus = Corpus.from_root(os.path.join(file_arg, 'dip'), 'DIP')
+        corpus_html(os.path.join('results', 'DIP'), corpus, specification)
+        for case in corpus.cases:
+            case_html(os.path.join('results', 'DIP'), case)
     sys.exit(_exit)
 
 if __name__ == "__main__":

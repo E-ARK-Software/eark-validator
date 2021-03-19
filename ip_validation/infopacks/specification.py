@@ -31,7 +31,9 @@ import ip_validation.cli.resources as RES
 from ip_validation.infopacks.struct_reqs import STRUCT_REQS
 
 METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(RES).joinpath('mets.profile.v2-0.xsd')))
-METS_PROF = str(files(RES).joinpath('E-ARK-CSIP.xml'))
+CSIP_XML = str(files(RES).joinpath('E-ARK-CSIP.xml'))
+SIP_XML = str(files(RES).joinpath('E-ARK-SIP.xml'))
+DIP_XML = str(files(RES).joinpath('E-ARK-DIP.xml'))
 METS_NS = '{http://www.loc.gov/METS_Profile/v2}'
 
 class Specification:
@@ -98,7 +100,22 @@ class Specification:
         return cls._from_xml(tree, schema)
 
     @classmethod
-    def from_xml_file(cls, xml_file=METS_PROF, schema=METS_PROF_SCHEMA):
+    def csip(cls):
+        """Create a Specification from an XML file with CSIP."""
+        return  cls.from_xml_file(xml_file=CSIP_XML, schema=METS_PROF_SCHEMA)
+
+    @classmethod
+    def sip(cls):
+        """Create a Specification from an XML file with SIP."""
+        return  cls.from_xml_file(xml_file=SIP_XML, schema=METS_PROF_SCHEMA)
+
+    @classmethod
+    def dip(cls):
+        """Create a Specification from an XML file with DIP."""
+        return  cls.from_xml_file(xml_file=DIP_XML, schema=METS_PROF_SCHEMA)
+
+    @classmethod
+    def from_xml_file(cls, xml_file=CSIP_XML, schema=METS_PROF_SCHEMA):
         """Create a Specification from an XML file."""
         tree = ET.parse(xml_file)
         return  cls._from_xml(tree, schema)
