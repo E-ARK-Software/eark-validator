@@ -85,8 +85,13 @@ class Specification:
         return requirements
 
     @property
+    def section_count(self):
+        """Get the specification sections."""
+        return len(self._requirements)
+
+    @property
     def sections(self):
-        """Get the specification rules."""
+        """Get the specification sections."""
         return self._requirements.keys()
 
     def __str__(self):
@@ -102,7 +107,7 @@ class Specification:
     @classmethod
     def csip(cls):
         """Create a Specification from an XML file with CSIP."""
-        return  cls.from_xml_file(xml_file=CSIP_XML, schema=METS_PROF_SCHEMA)
+        return  cls.from_xml_file(xml_file=CSIP_XML, schema=METS_PROF_SCHEMA, add_struct=True)
 
     @classmethod
     def sip(cls):
@@ -115,23 +120,22 @@ class Specification:
         return  cls.from_xml_file(xml_file=DIP_XML, schema=METS_PROF_SCHEMA)
 
     @classmethod
-    def from_xml_file(cls, xml_file=CSIP_XML, schema=METS_PROF_SCHEMA):
+    def from_xml_file(cls, xml_file=CSIP_XML, schema=METS_PROF_SCHEMA, add_struct=False):
         """Create a Specification from an XML file."""
         tree = ET.parse(xml_file)
-        return  cls._from_xml(tree, schema)
+        return  cls._from_xml(tree, schema, add_struct=add_struct)
 
     @classmethod
-    def _from_xml(cls, tree, schema,):
-        spec = cls.from_element(tree.getroot(), schema)
+    def _from_xml(cls, tree, schema, add_struct=False):
+        spec = cls.from_element(tree.getroot(), schema=schema, add_struct=add_struct)
         return spec
 
     @classmethod
-    def from_element(cls, spec_ele, schema=METS_PROF_SCHEMA):
+    def from_element(cls, spec_ele, schema=METS_PROF_SCHEMA, add_struct=False):
         """Create a Specification from an XML element."""
         # is_valid = schema.assertValid(spec_ele)
         # if not is_valid:
         #     raise ValueError('Specification invalid')
-        # Grab the testable att
         version = spec_ele.get('ID')
         name = date = ''
         requirements = {}
@@ -152,9 +156,10 @@ class Specification:
                         if not requirement.id.startswith('REF_'):
                             reqs.append(cls.Requirement.from_element(req_ele))
                     requirements[section] = reqs
-        # Add the structural requirements
-        struct_reqs = Specification.StructuralRequirement._get_struct_reqs()
-        requirements['structure'] = struct_reqs
+        if add_struct:
+            # Add the structural requirements
+            struct_reqs = Specification.StructuralRequirement._get_struct_reqs()
+            requirements['structure'] = struct_reqs
         # Return the TestCase instance
         return cls(name, version, date, requirements=requirements)
 
@@ -259,3 +264,9 @@ class Specification:
                                                                 level=req.get('level'),
                                                                 message=req.get('message')))
             return reqs
+
+SPECIFICATIONS = {
+    'CSIP': Specification.csip(),
+    'SIP': Specification.sip(),
+    'DIP': Specification.dip()
+}

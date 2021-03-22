@@ -1,5 +1,40 @@
 {% extends "page.html" %}
-{% block title %}Reporter{% endblock %}
+{% block title %}Overview{% endblock %}
 {% block page_content %}
-  <h1>E-ARK Corpus Coverage Tool</h1>
+  <section class="jumbotron text-center">
+    <div class="container">
+      <h1>E-ARK Specification Test Coverage</h1>
+      <p class="lead text-muted">Test coverage for the E-ARK Information Package Specifications.</p>
+    </div>
+  </section>
+  <div class="album py-5 bg-light">
+     <div class="container">
+       <h2>Information Package Specifications</h2>
+       <div class="row">
+         {% for key, specification in specifications.items() %}
+         <div class="col-md-4">
+           <div class="card mb-4 shadow-sm">
+             <div class="card-body">
+               <h5 class="card-title">{{ specification.name }}</h5>
+               <h6 class="card-subtitle mb-2 text-muted">{{ specification.version }} {{ specification.date }}</h6>
+               <p class="card-text">
+                 <ul>
+                   <li>{{ specification.requirement_count }} requirements.</li>
+                   {% if corpora[key] is defined %}
+                   <li>{{ corpora[key].case_count }} test cases.</li>
+                   <li>{{ corpora[key].rule_count }} validation rules.</li>
+                   <li>{{ corpora[key].package_count - corpora[key].missing_package_count }}/{{ corpora[key].package_count }} packages.</li>
+                   {% endif %}
+                 </ul>
+               </p>
+               <div class="d-flex justify-content-between align-items-center">
+                 <small class="text-muted">WIP</small>
+               </div>
+             </div>
+           </div>
+         </div>
+         {% endfor %}
+       </div>
+     </div>
+   </div>
 {% endblock page_content %}
