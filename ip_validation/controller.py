@@ -55,7 +55,6 @@ def full_report():
         logging.debug("JSON file report for %s:%s")
     logging.debug("XML file report for %s:%s")
 
-<<<<<<< Updated upstream
 @APP.route("/specifications/")
 def get_specifications():
     """Get """
@@ -66,8 +65,6 @@ def get_specification():
     """Get """
     return render_template('blobstore.html')
 
-=======
->>>>>>> Stashed changes
 @APP.route("/validate/<string:digest>/", endpoint="validate")
 def validate(digest):
     """Display validation results."""

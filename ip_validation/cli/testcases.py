@@ -50,14 +50,12 @@ class TestCase():
      - testable: boolean, True if test case is "testable", False otherwise
      - references: a list of references to relavent requirements.
     """
-    def __init__(self, case_id, valid, description, testable=True,
-                 references=None, req=None, rules=None):
+    def __init__(self, case_id, details, valid, testable=True,
+                 rules=None):
         self._case_id = case_id
         self._valid = valid
-        self._description = description
+        self._details = details
         self._testable = testable
-        self._references = [] if references is None else references
-        self._req = req
         self._rules = [] if rules is None else rules
 
     @property
@@ -73,7 +71,7 @@ class TestCase():
     @property
     def description(self):
         """Return the test case description."""
-        return self._description
+        return self._details.description
 
     @property
     def testable(self):
@@ -93,12 +91,12 @@ class TestCase():
     @property
     def references(self):
         """Return the list of relavent requirements."""
-        return self._references
+        return self._details.references
 
     @property
     def requirement(self):
         """Return the requirement."""
-        return self._req
+        return self._details.requirement
 
     @property
     def rules(self):
@@ -134,7 +132,7 @@ class TestCase():
 
     def __str__(self):
         return "case_id:" + str(self.case_id) + ", testable:" + \
-            str(self.testable) + ", requirement:" + self.requirement
+            str(self.testable)
 
     class CaseId():
         """
@@ -170,12 +168,48 @@ class TestCase():
             """Create a TestCase from an XML element."""
             requirement_id = case_id_ele.get('requirementId')
             specification = case_id_ele.get('specification')
+            specification = specification[len('E-ARK '):] \
+                if specification.startswith('E-ARK ') else specification
             version = case_id_ele.get('version')
             return cls(requirement_id, specification, version)
 
         def __str__(self):
             return "req_id:" + str(self.requirement_id) + ", specification:" + \
                 str(self.specification) + ", version:" + str(self.version)
+
+    class CaseDetails():
+        """
+        Encapsulates the details of an E-ARK test case.
+
+        Parameters / attributes
+         - case_id: a CaseId instance that is the compound test case id.
+         - testable: boolean, True if test case is "testable", False otherwise
+         - references: a list of references to relavent requirements.
+        """
+        def __init__(self, requirement, description, references=None):
+            self._req = requirement
+            self._description = description
+            self._references = [] if references is None else references
+
+        @property
+        def requirement(self):
+            """Return the requirement."""
+            return self._req
+
+        @property
+        def description(self):
+            """Return the test case description."""
+            return self._description
+
+        @property
+        def references(self):
+            """Return the list of relavent requirements."""
+            return self._references
+
+        def __str__(self):
+            return "requirement:" + self.requirement + ", description:" + \
+                self.description
+
 
     class Rule():
         """docstring for Rule."""
@@ -380,8 +414,11 @@ class TestCase():
     @classmethod
     def from_xml_string(cls, xml, schema=TC_SCHEMA):
         """Create a test case from an XML string."""
-        tree = ET.fromstring(xml)
-        return cls._from_xml(tree, schema)
+        try:
+            ele = ET.fromstring(xml)
+        except ET.XMLSyntaxError as xml_excep:
+            raise ValueError('String parameter "xml" not valid test case XML.') from xml_excep
+        return cls.from_element(ele, schema)
 
     @classmethod
     def from_xml_file(cls, xml_file, schema=TC_SCHEMA):
@@ -424,4 +461,76 @@ class TestCase():
                         rules.append(cls.Rule.from_element(rule_ele))
 
         # Return the TestCase instance
-        return cls(req_id, is_valid, description, testable=testable, req=req, rules=rules)
+        details = TestCase.CaseDetails(req, description)
+        return cls(req_id, details, is_valid, testable=testable, rules=rules)
+
+class GitTestCase():
+    """A wrapper around test cases held in a git repository."""
+    def __init__(self, ref, path, test_case):
+        self._ref = ref
+        self._path = path
+        self._tc = test_case
+
+    @property
+    def ref(self):
+        """Return the git reference for this test case."""
+        return self._ref
+
+    @property
+    def path(self):
+        """Return the git path for this test case."""
+        return self._path
+
+    @property
+    def test_case(self):
+        """Return the test case."""
+        return self._tc
+
+    @property
+    def case_id(self):
+        """Return the test case id instance."""
+        return self._tc.case_id
+
+    @property
+    def valid(self):
+        """Return True if the test case is valid XML against the schema supplied."""
+        return self._tc.valid
+
+    @property
+    def description(self):
+        """Return the test case description."""
+        return self._tc.details.description
+
+    @property
+    def testable(self):
+        """Return True if the test case is considered testable, otherwise False."""
+        return self._tc.testable
+
+    @property
+    def unknown(self):
+        """Return True if the test case testability is unknown, otherwise False."""
+        return self._tc.unknown
+
+    @property
+    def status(self):
+        """Return the test case status."""
+        return self._tc.status
+
+    @property
+    def references(self):
+        """Return the list of relavent requirements."""
+        return self._tc.details.references
+
+    @property
+    def requirement(self):
+        """Return the requirement."""
+        return self._tc.details.requirement
+
+    @property
+    def rules(self):
+        """Return the rules associated with the test case."""
+        return self._tc.rules
+
+    def __str__(self):
+        return 'ref:' + str(self.ref) + ', path:' + str(self.path) \
+            + ', case:' + str(self.test_case)
