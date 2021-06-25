@@ -120,6 +120,7 @@ def _validate_ip(info_pack):
 
 def _validate_test_case(test_case):
     case = TC.TestCase.from_xml_file(test_case)
+    ret_val = 0
     if not case.testable:
         if not case.unknown:
             # don't ouput UNKNOWN testablitiy test cases, do output FALSE cases
@@ -130,12 +131,12 @@ def _validate_test_case(test_case):
         for package in rule.packages:
             if package.implemented:
                 package_path = os.path.join(os.path.dirname(test_case), package.name)
-                _validate_ip(package_path)
+                ret_val, struct_details = _validate_ip(package_path)
             else:
                 pprint('{}:{}, package:{} is not implemented.'.format(case.case_id.specification,
                                                       case.case_id.requirement_id, package.name))
 
-    return 1
+    return ret_val
 
 def _get_ip_root(info_pack):
     arch_processor = IP.ArchivePackageHandler()
