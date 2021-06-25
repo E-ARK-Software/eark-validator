@@ -22,19 +22,19 @@
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">Name:{{ package.name }}</h5>
-        <h5 class="card-subtitle">Expected:{{ valid_badge(package) }}</h5>
+        <h5 class="card-subtitle">Expected: {{ valid_badge(package) }}</h5>
         <p class="card-text">Actual: Structure {{ package.validation_report.status }}</p>
         <p class="card-text">Actual: Schema {{ validation_badge(package.schema_result) }}</p>
         <p class="card-text">Actual: Schematron {{ validation_badge(package.schematron_result) }}</p>
         <p class="card-text text-muted">{{ package.description }}</p>
-        <p class="card-text">{{ path_badge(package) }}<code>{{ package.path }}</code></p>
-        <p class="card-text"><a href="{{ package.path }}/METS.xml">View METS</a></p>
+        <p class="card-text">{{ path_badge(package) }} <code>{{ package.path }}</code></p>
+        <p class="card-text"><a class="{{ button_class(exists) }}"{{ download_enabled(exists) }} href="{{ package.name }}.zip">{{ button_text(exists) }}</a></p>
       </div>
     </div>
 {% endmacro %}
 
 {% macro valid_badge(package) -%}
-      <span class="badge badge-{{ valid_badge_class(package) }}">{{ "VALID" if package.is_valid else "INVALID" }}</span>
+      <span class="badge badge-{{ valid_badge_class(package) }}">{{ "VALID" if package.is_valid == 'TRUE' else "INVALID" }}</span>
 {%- endmacro %}
 
 {% macro valid_badge_class(package) -%}
@@ -42,7 +42,7 @@
 {%- endmacro %}
 
 {% macro path_badge(package) -%}
-      <span class="badge badge-{{ path_badge_class(package) }}">Path:</span>
+      <span class="badge badge-{{ path_badge_class(package) }}">Path: </span>
 {%- endmacro %}
 
 {% macro path_badge_class(package) -%}
@@ -53,6 +53,18 @@
   <span class="{{ validation_badge_class(result) }}">{% if result == true %}Valid{% else %}Invalid{% endif %}</span>
 {% endmacro %}
 
-{% macro validation_badge_class(result) %}
-  badge badge-{% if result == true %}success{% else %}danger{% endif %}
+{% macro validation_badge_class(exists) %}
+  badge badge-{% if exists %}success{% else %}danger{% endif %}
+{% endmacro %}
+
+{% macro button_class(exists) %}
+  btn btn-{% if exists %}primary{% else %}secondary{% endif %} btn-lg
+{% endmacro %}
+
+{% macro download_enabled(exists) %}
+  {% if exists %}{% else %} disabled{% endif %}
+{% endmacro %}
+
+{% macro button_text(exists) %}
+  {% if exists == true %}Download{% else %}No Package{% endif %}
 {% endmacro %}

@@ -30,7 +30,10 @@ import argparse
 from datetime import datetime
 import os.path
 from pathlib import Path
+import re
 import sys
+import zipfile
+import io
 
 from git import Repo
 from jinja2 import Environment, PackageLoader
@@ -50,6 +53,16 @@ Author: Carl Wilson (OPF), 2020
 Maintainer: Carl Wilson (OPF), 2020"""
 }
 
+SKIPPED_KEYWORDS = [
+    'rel',
+    'integration',
+    'master',
+    'example',
+    'doc',
+    'feat',
+    'gh-pages',
+    'template'
+]
 class Corpus():
     """
     Encapsulates a test corpus of E-ARK information packages.
@@ -131,15 +144,20 @@ class Corpus():
 class Corpora():
     """Encapsulates the full set of E-ARK corpora derived from the contents of
     the git repository."""
-    def __init__(self, git_path, corpora, skipped=None):
-        self._git_path = git_path
+    def __init__(self, repo, corpora, skipped=None):
+        self._repo = repo
         self._corpora = corpora
         self._skipped = skipped if skipped else []
 
     @property
     def git_path(self):
         """Return the git repository path."""
-        return self._git_path
+        return self._repo.common_dir
+
+    @property
+    def repo(self):
+        """Return the git repo."""
+        return self._repo
 
     @property
     def corpora(self):
@@ -149,6 +167,26 @@ class Corpora():
     def corpus_by_key(self, name):
         """Return a corpus by name."""
         return self._corpora[name]
+
+    @classmethod
+    def get_packages(cls, test_case):
+        packages = {}
+        for rule in test_case.rules:
+            for package in rule.packages:
+                imz = InMemoryZip()
+                for path in _list_tree_paths(test_case.ref.commit.tree):
+                    path_parts = str(path).lower().split('/')
+                    if test_case.case_id.requirement_id.lower() in path_parts:
+                        if package.name.lower() in path_parts:
+                            blob = test_case.ref.commit.tree / str(path)
+                            parts = str(path).split('/')
+                            rel_parts = parts[parts.index(package.name):]
+                            imz.append('/'.join(rel_parts),
+                                       blob.data_stream.read())
+                if imz.size() > 0:
+                    packages[package.name] = imz
+        return packages
+
 
     @property
     def skipped(self):
@@ -170,17 +208,27 @@ class Corpora():
             # Empty list for each specification key
             case_lookup[key] = []
         # Loop through the remote branches
-        for ref in repo.remote().refs:
+        for ref in repo.refs:
+            skip = False
+            for skip_word in SKIPPED_KEYWORDS:
+                if skip:
+                    break
+                print('Checking {} in {}'.format(skip_word, str(ref.name)))
+                skip = (skip_word.lower() in str(ref.name).lower()) | (skip_word == str(ref.name))
+            if skip:
+                continue
             # Get the test case for this ref
             test_case, message = cls.test_case_from_ref(ref)
             if test_case is None:
-                skipped.append('{}:{}'.format(ref.name, message))
+                skipped.append(_skipped_item(ref.name, message))
                 continue
             try:
                 case_lookup[test_case.case_id.specification].append(test_case)
             except AttributeError:
-                print('Exception: {}'.format(test_case))
-        return cls.build_corpora(git_path, case_lookup)
+                skipped.append(_skipped_item(ref.name, message))
+                continue
+        corpora = cls.build_corpora(git_path, case_lookup)
+        return cls(repo, corpora, skipped=skipped)
 
     @classmethod
     def build_corpora(cls, git_path, cases):
@@ -193,13 +241,17 @@ class Corpora():
     @classmethod
     def test_case_from_ref(cls, ref):
         """Return the test case for a particular git reference."""
-        name_parts = ref.name.split('/')
+        name_parts = cls._get_ref_parts(ref.name)
         # The branch name should be 4 parts origin/<corpus>/<section>/<reqID>
         # If the path isn't 4 parts or the second element is not an recognised
         # corpus id then return nothing.
-        if (len(name_parts) != 4) | (name_parts[1].upper() not in SPECIFICATIONS):
-            return None, 'Invalid branch name.'
-
+        if len(name_parts) < 3:
+            return None, 'Invalid branch name {} should have at least 3 parts.'.format(ref)
+        # Check for a valid ID
+        if not re.search(r'^{}[0-9]{{1,3}}$'.format('|'.join(SPECIFICATIONS)),
+                         name_parts[-1].upper()):
+            return None, 'Invalid branch name {}, '.format(ref) + \
+                         'last element {} should be an id.'.format(name_parts[-1])
         # Iterate the paths of the blobs found for this commit tree
         for path in _list_tree_paths(ref.commit.tree):
 
@@ -208,7 +260,7 @@ class Corpora():
 
             # if the branch name requirement id is found in the path
             # AND the element name (without path, basename) is testCase.xml
-            if (name_parts[3].lower() in path_parts) & (path.name == DEFAULT_NAME):
+            if (name_parts[-1].lower() in path_parts) & (path.name == DEFAULT_NAME):
                 # test case match, return the results of parsing
                 case, message = cls.test_case_from_tree_path(ref.commit.tree, path)
                 return GitTestCase(ref, path, case), message
@@ -217,7 +269,31 @@ class Corpora():
         return None, 'No test case found for {}.'.format(ref.name)
 
     @classmethod
+    def _get_ref_parts(cls, name):
+        name_parts = name.split('/')
+        if len(name_parts) > 3:
+            # If we have more than 3 parts just return the last 3 parts
+            return name_parts[-3:]
+        # If less than 3 parts just return the list
+        return name_parts
+
+    @classmethod
     def test_case_from_tree_path(cls, tree, path):
+        """Return the test case parsed from the blob defined by tree and path params."""
+        # get the blob from commit tree and path
+        test_case_blob = tree / str(path)
+        try:
+            # Return the test case and it's path
+            _tc = TestCase.from_xml_string(test_case_blob.data_stream.read())
+            if not _tc.valid:
+                return None, 'Test case XML failed schema validation for {}. \nSchema validation error: {}'.format(str(path), _tc.description)
+            return _tc, str(path)
+        except ValueError:
+            # Bad test case XML.
+            return None, 'Badly formed test case XML in file {}.'.format(str(path))
+
+    @classmethod
+    def package_from_tree_path(cls, tree, path):
         """Return the test case parsed from the blob defined by tree and path params."""
         # get the blob from commit tree and path
         test_case_blob = tree / str(path)
@@ -231,6 +307,12 @@ class Corpora():
             # Bad test case XML.
             return None, 'Badly formed test case XML in file {}.'.format(str(path))
 
+def _skipped_item(ref, message):
+    return {
+        'ref': ref,
+        'message': message
+    }
+
 def _list_tree_paths(root, path=Path('.')):
     for blob in root.blobs:
         yield path / blob.name
@@ -243,7 +325,7 @@ env = Environment( loader = PackageLoader('ip_validation.cli') )
 
 def app_html(root, specifications, corpora):
     """Write an HTML file home page."""
-    template = env.get_template('home.html')
+    template = _init_template('home.html')
     _mkdirs(root)
     with open(os.path.join(root, 'index.html'), 'w') as filehand:
         filehand.write(template.render(
@@ -251,12 +333,20 @@ def app_html(root, specifications, corpora):
             corpora=corpora
         ))
 
+def skipped_html(root, skipped):
+    """Write an HTML file for skipped branches."""
+    template = _init_template('skipped.html')
+    _mkdirs(root)
+    with open(os.path.join(root, 'index.html'), 'w') as filehand:
+        filehand.write(template.render(
+            skipped=skipped
+        ))
+
 def corpus_html(root, corpus, specification):
     """Write an HTML file summarising a corpus."""
     if (root is None) | (corpus is None) | (specification is None):
         return
-    template = env.get_template('corpus.html')
-    template.globals['now'] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    template = _init_template('corpus.html')
     _mkdirs(root)
     with open(os.path.join(root, 'index.html'), 'w') as filehand:
         filehand.write(template.render(
@@ -268,27 +358,34 @@ def case_html(root, case):
     """Write an HTML file summarising a test case."""
     if case is None or case.case_id is None or case.case_id.requirement_id is None:
         return
-    template = env.get_template('case.html')
+    packages = Corpora.get_packages(case)
+    template = _init_template('case.html')
     out_dir = os.path.join(root, case.case_id.requirement_id)
     _mkdirs(out_dir)
+    for rule in case.rules:
+        for package in rule.packages:
+            if package.name in packages.keys():
+                package.exists = True
+            package_html(out_dir, case, rule, package, packages.get(package.name, None))
     with open(os.path.join(out_dir, 'index.html'), 'w') as filehand:
         filehand.write(template.render(
             case = case,
+            packages = len(packages),
         ))
-    for rule in case.rules:
-        for package in rule.packages:
-            package_html(out_dir, case, rule, package)
 
-def package_html(root, case, rule, package):
+def package_html(root, case, rule, package, zip):
     """Write an HTML file summarising a package."""
-    template = env.get_template('package.html')
+    template = _init_template('package.html')
     out_dir = os.path.join(root, package.name)
     _mkdirs(out_dir)
+    if (zip):
+        zip.writetofile(os.path.join(out_dir, '{}.zip'.format(package.name)))
     with open(os.path.join(out_dir, 'index.html'), 'w') as filehand:
         filehand.write(template.render(
             case = case,
             rule = rule,
             package = package,
+            exists = (zip is not None)
         ))
 
 def _mkdirs(_dir):
@@ -298,6 +395,11 @@ def _mkdirs(_dir):
         # directory already exists
         pass
 
+def _init_template(name):
+    template = env.get_template(name)
+    template.globals['now'] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    template.globals['url_root'] = 'https://carlwilson.github.io/eark-ip-test-corpus/'
+    return template
 
 def _get_test_cases(root):
     cases = []
@@ -311,6 +413,44 @@ def _get_test_cases(root):
 
 # Create PARSER
 PARSER = argparse.ArgumentParser(description=defaults['description'], epilog=defaults['epilog'])
+
+class InMemoryZip(object):
+    def __init__(self):
+        # Create the in-memory file-like object
+        self.in_memory_zip = io.BytesIO()
+
+    def size(self):
+        try:
+            zf = zipfile.ZipFile(self.in_memory_zip, "r", zipfile.ZIP_DEFLATED, False)
+        except zipfile.BadZipFile:
+            return 0
+        return len(zf.namelist())
+
+    def append(self, filename_in_zip, file_contents):
+        '''Appends a file with name filename_in_zip and contents of
+        file_contents to the in-memory zip.'''
+        # Get a handle to the in-memory zip in append mode
+        zf = zipfile.ZipFile(self.in_memory_zip, "a", zipfile.ZIP_DEFLATED, False)
+
+        # Write the file to the in-memory zip
+        zf.writestr(filename_in_zip, file_contents)
+
+        # Mark the files as having been created on Windows so that
+        # Unix permissions are not inferred as 0000
+        for zfile in zf.filelist:
+            zfile.create_system = 0
+
+        return self
+
+    def read(self):
+        '''Returns a string with the contents of the in-memory zip.'''
+        self.in_memory_zip.seek(0)
+        return self.in_memory_zip.read()
+
+    def writetofile(self, filename):
+        '''Writes the in-memory zip to a file.'''
+        with open(filename, 'wb') as filehand:
+            filehand.write(self.read())
 
 def parse_command_line():
     """Parse command line arguments."""
@@ -343,20 +483,17 @@ def main():
     if not args.files:
         PARSER.print_help()
 
-    corpora = {}
     for file_arg in args.files:
-        corpora = Corpora.from_git_repo(file_arg)
+        git_corpus = Corpora.from_git_repo(file_arg)
         for key in SPECIFICATIONS:
-            print('spec key: {}'.format(key))
-            corpus = corpora[key]
-            print(str(corpus))
+            corpus = git_corpus.corpora[key]
             if corpus:
-                corpus_html(os.path.join('results', key), corpus, SPECIFICATIONS[key])
                 for case in corpus.cases:
                     case_html(os.path.join('results', key), case)
-                corpora[key] = corpus
+                corpus_html(os.path.join('results', key), corpus, SPECIFICATIONS[key])
 
-    app_html('results', SPECIFICATIONS, corpora)
+    app_html('results', SPECIFICATIONS, git_corpus.corpora)
+    skipped_html(os.path.join('results', 'skipped'), git_corpus.skipped)
     sys.exit(_exit)
 
 if __name__ == "__main__":

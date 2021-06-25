@@ -13,7 +13,8 @@
     <div class="card-body">
       <h5 class="card-title">{{ case.case_id.specification }}:{{ case.case_id.requirement_id }}</h5>
       <h5 class="card-subtitle text-muted">Testable: {{ case.status }} Schema: {{ case.valid }}</h5>
-      <p class="card-text">{{ case.description }}</p>
+      <p class="card-text">Branch: {{ case.ref }}</p>
+      <p class="card-text">Path: {{ case.path }}</p>
     </div>
   </div>
 {% endmacro %}
@@ -30,7 +31,7 @@
     <li class="list-group-item">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Rule:{{ rule.rule_id }} Packages:{{ rule.existing_packages | length }}/{{ rule.packages | length }}</h5>
+          <h5 class="card-title">Rule:{{ rule.rule_id }} Packages:{{ packages }}/{{ rule.packages | length }}</h5>
           <h6 class="card-subtitle text-muted">{{ rule.description }}</h6>
           <p class="card-text">{{ rule.error.level }}: {{ rule.error.message }}</p>
           <p class="card-text">Packages: {{ package_table(rule.packages) }}</p>
@@ -61,7 +62,7 @@
         <tr>
           <td class="table-{{ badge_class(package) }}"><a href="./{{ package.name }}/index.html">{{ package.name }}</a></td>
           <td>{{ 'Valid' if package.is_valid  == 'TRUE' else 'Invalid' }}</td>
-          <td>{{ 'Valid' if package.validation_result == 'TRUE' else 'Invalid' }}</td>
+          <td>{{ result_text(package) }}</td>
         </tr>
       {%- endfor %}
     </tbody>
@@ -70,4 +71,8 @@
 
 {% macro badge_class(package) -%}
       {{ 'secondary' if not package.exists else 'primary' }}
+{%- endmacro %}
+
+{% macro result_text(package) -%}
+      {{ 'Not found' if not package.exists else 'Valid' if package.validation_result == 'TRUE' else 'Invalid' }}
 {%- endmacro %}

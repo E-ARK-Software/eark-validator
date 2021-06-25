@@ -311,6 +311,9 @@ class TestCase():
                 """Return the message."""
                 return self._message
 
+            def __str__(self):
+                return 'level: {}, message {}'.format(self.level, self.message)
+
             @classmethod
             def from_element(cls, error_ele):
                 """Return a Errpr instance from an XML element."""
@@ -332,6 +335,7 @@ class TestCase():
                 self.schema_result = False
                 self.schematron_result = False
                 self.profile_results = {}
+                self.exists = False
 
             @property
             def name(self):
@@ -345,6 +349,7 @@ class TestCase():
 
             def resolve_path(self, case_root):
                 """Resolve the path to the corpus package given the test case root."""
+                print('Resolving: {}'.format(self.path))
                 if self.path:
                     self._path = os.path.join(case_root, self.name)
                     if not self.exists:
@@ -353,10 +358,13 @@ class TestCase():
 
             @property
             def exists(self):
+                """Return True if the package can be found in the git repo."""
+                return self.__exists
+
+            @exists.setter
+            def exists(self, exists):
                 """Check if the corpus package exists given the test case root."""
-                if not self.path:
-                    return False
-                return os.path.exists(self.path)
+                self.__exists = exists
 
             @property
             def is_valid(self):
@@ -378,6 +386,9 @@ class TestCase():
                 """Return the validation report for the package."""
                 return self._validation_report.status == STRUCT.StructureStatus.WellFormed and \
                     self.schema_result and self.schematron_result
+
+            def __str__(self):
+                return 'name: {}, path: {}'.format(self.name, self.path)
 
             def validate(self):
                 """Validate the package."""
@@ -424,21 +435,19 @@ class TestCase():
     def from_xml_file(cls, xml_file, schema=TC_SCHEMA):
         """Create a test case from an XML file."""
         tree = ET.parse(xml_file)
-        return  cls._from_xml(tree, schema, xml_file=xml_file)
+        return  cls._from_xml(tree, schema)
 
     @classmethod
-    def _from_xml(cls, tree, schema, xml_file=None):
-        case = cls.from_element(tree.getroot(), schema)
-        if xml_file:
-            case.resolve_package_paths(os.path.abspath(os.path.join(xml_file, os.pardir)))
-        case.validate_packages()
-        return case
+    def _from_xml(cls, tree, schema):
+        return cls.from_element(tree.getroot(), schema)
 
     @classmethod
     def from_element(cls, case_ele, schema):
         """Create a TestCase from an XML element."""
         # Grab the testable att
-        is_valid = schema.validate(case_ele)
+        if not schema.validate(case_ele):
+            details = TestCase.CaseDetails(None, str(schema.error_log.last_error))
+            return cls(None, details, False)
         testable = case_ele.get('testable')
         req_id = None
         req = None
@@ -462,7 +471,7 @@ class TestCase():
 
         # Return the TestCase instance
         details = TestCase.CaseDetails(req, description)
-        return cls(req_id, details, is_valid, testable=testable, rules=rules)
+        return cls(req_id, details, True, testable=testable, rules=rules)
 
 class GitTestCase():
     """A wrapper around test cases held in a git repository."""
@@ -475,6 +484,11 @@ class GitTestCase():
     def ref(self):
         """Return the git reference for this test case."""
         return self._ref
+
+    @property
+    def root(self):
+        """Return the root path for this test case."""
+        return self._path.parent
 
     @property
     def path(self):
@@ -530,6 +544,16 @@ class GitTestCase():
     def rules(self):
         """Return the rules associated with the test case."""
         return self._tc.rules
+
+    @property
+    def package_count(self):
+        """Return the number of packages in the test case."""
+        return self._tc.package_count
+
+    @property
+    def missing_package_count(self):
+        """Return the number of packages in the test case."""
+        return self._tc.missing_package_count
 
     def __str__(self):
         return 'ref:' + str(self.ref) + ', path:' + str(self.path) \

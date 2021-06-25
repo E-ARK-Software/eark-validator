@@ -8,11 +8,11 @@
       <assert id="CSIP32" role="WARN" test="mets:digiprovMD">Sould be used to record information about preservation the standard PREMIS is used.</assert>
       <report id="CSIP45" role="INFO" test="mets:rightsMD">A simple rights statement may be used to describe general permissions for the package. Individual representations should state their specific rights in their representation METS file.</report>
     </rule>
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD">
+    <rules context="/mets:mets/mets:amdSec/mets:digiprovMD">
       <assert id="CSIP33" role="ERROR" test="@ID">Mandatory, unique id for the digital provenance.</assert>
       <assert id="CSIP34" role="WARN" test="@STATUS">Should be used to indicate the status of the package.</assert>
       <assert id="CSIP35" role="WARN" test="mets:mdRef">Should provide a reference to the digital provenance metadata file stored in the “metadata” section of the IP.</assert>
-    </rule>
+    </rules>
     <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef">
       <assert id="CSIP36" role="ERROR" test="@LOCTYPE = 'URL'">Mandatory, locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
       <assert id="CSIP37" role="ERROR" test="@xlink:type = 'simple'">Attribute MUST be used with the value “simple”. Value list is maintained by the xlink standard.</assert>

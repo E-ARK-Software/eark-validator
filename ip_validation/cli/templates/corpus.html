@@ -26,11 +26,12 @@
   <table  class="table table-striped" data-toggle="table" data-search="true">
     <thead class="thead-dark">
       <tr>
+        <th data-field="branch" data-sortable="true">Branch</th>
         <th data-field="sect" data-sortable="true">Section</th>
         <th data-field="id" data-sortable="true">Test Case</th>
         <th data-field="testable" data-sortable="true">Testable</th>
         <th data-field="rules" data-sortable="true">Rules</th>
-        <th data-field="packages-def" data-sortable="true">Packages Defined/Created</th>
+        <th data-field="packages-def" data-sortable="true">Packages</th>
       </tr>
     </thead>
     <tbody>
@@ -54,6 +55,7 @@
 
 {% macro case_row(section, requirement, case) %}
     <tr>
+      <td>{{ case.ref }}</td>
       <td>{{ section }}</td>
       <td><a href="./{{ requirement.id }}/index.html">{{ requirement.id }}</a></td>
       <td{{ ' class="table-danger"' if not case.valid }}>{{ case.status if case.valid else 'INVALID'}}</td>
@@ -64,6 +66,7 @@
 
 {% macro req_row(section, requirement) %}
     <tr>
+      <td></td>
       <td>{{ section }}</td>
       <td class="table-danger"><a href="./{{ requirement.id }}/index.html">{{ requirement.id }}</a></td>
       <td></td>
