@@ -326,12 +326,13 @@ class TestCase():
 
         class Package():
             """docstring for Package."""
-            def __init__(self, name, path, is_valid, description, validation_report=None):
+            def __init__(self, name, path, is_valid, is_implemented, description, validation_report=None):
                 self._name = name
                 self._path = path
                 self._is_valid = is_valid
                 self._description = description
                 self._validation_report = validation_report
+                self._is_implemented = is_implemented
 
             @property
             def name(self):
@@ -364,6 +365,11 @@ class TestCase():
                 return self._is_valid
 
             @property
+            def implemented(self):
+                """Return True if the test case is valid XML against the schema supplied."""
+                return self._is_implemented
+
+            @property
             def description(self):
                 """Return the description."""
                 return self._description
@@ -377,6 +383,7 @@ class TestCase():
             def from_element(cls, package_ele):
                 """Return a Package instance from an XML element."""
                 is_valid = package_ele.get('isValid')
+                is_implemented = package_ele.get('isImplemented')
                 name = package_ele.get('name')
                 path = ""
                 description = ""
@@ -385,7 +392,7 @@ class TestCase():
                         path = child.text
                     elif child.tag == 'description':
                         description = child.text
-                return cls(name, path, is_valid, description)
+                return cls(name, path, is_valid, is_implemented, description)
 
     @classmethod
     def from_xml_string(cls, xml, schema=TC_SCHEMA):

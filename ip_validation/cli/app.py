@@ -112,7 +112,7 @@ def _validate_ip(info_pack):
     ret_stat, to_validate = _get_ip_root(info_pack)
     struct_details = IP.validate_package_structure(to_validate)
     pprint('Path {} is dir, struct result is: {}'.format(to_validate,
-                                                         struct_details.package_status))
+                                                         struct_details.structure_status))
     for error in struct_details.errors:
         pprint(error.to_json())
 
@@ -128,8 +128,13 @@ def _validate_test_case(test_case):
         return 0
     for rule in case.rules:
         for package in rule.packages:
-            package_path = os.path.join(os.path.dirname(test_case), package.name)
-            _validate_ip(package_path)
+            if package.implemented:
+                package_path = os.path.join(os.path.dirname(test_case), package.name)
+                _validate_ip(package_path)
+            else:
+                pprint('{}:{}, package:{} is not implemented.'.format(case.case_id.specification,
+                                                      case.case_id.requirement_id, package.name))
+
     return 1
 
 def _get_ip_root(info_pack):

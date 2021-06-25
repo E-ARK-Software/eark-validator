@@ -194,6 +194,21 @@
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
+      <xs:attribute name="isImplemented" use="optional" default="FALSE">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">
+          The isImplemented attribute should be set FALSE for corpus packages that
+          are defined in the test case but not implemented as a package. The attribute
+          is optional and defaults to TRUE.
+          </xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="TRUE"/>
+            <xs:enumeration value="FALSE"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
       <xs:attribute name="name" use="required" type="xs:NCName"/>
     </xs:complexType>
   </xs:element>
