@@ -1,0 +1,81 @@
+<testCase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="testCase.xsd" testable="TRUE">
+  <id specification="SIP" version="2.0.4" requirementId="SIP33"/>
+  <references>
+    <reference requirementId="SIP33" URL="https://earksip.dilcis.eu/#SIP33"/>
+  </references>
+  <requirementText>
+    <name>File format version</name>
+    <location>mets/fileSec/fileGrp/file/@sip:FILEFORMATVERSION</location>
+    <description>
+      The version of the file format when the use of PREMIS has not been agreed upon in the submission agreement.
+      Example: "1.0"
+    </description>
+    <cardinality>0..1</cardinality>
+    <level>MAY</level>
+  </requirementText>
+  <description>
+    mets/fileSec/fileGrp/file/@sip:FILEFORMATVERSION MAY exist.
+    If mets/fileSec/fileGrp/file/@sip:FILEFORMATVERSION exists then it MUST have a value.
+    The value MUST record the version of the file format.<!-- Untestable -->
+    If mets/fileSec/fileGrp/file/@sip:FILEFORMATVERSION exists then the use of PREMIS
+      MUST not have been agreed upon in the submission agreement.<!-- Untestable
+      under the current wording as it would require parsing and interpreting the
+      submission agreement, which is not a machine-readable document. If the
+      requirement was about the presence of PREMIS metadata, some automated
+      tests could be performed for the presence of PREMIS XML files or their
+      references in amdSec/digiprovMD elements. However, such tests would likely
+      remain inconclusive as "the presence of PREMIS" can be interpreted in
+      multiple ways. -->
+  </description>
+  <dependencies>
+    <dependency requirementId="Chapter_5.4" URL="https://earkcsip.dilcis.eu/#useofpremis">
+      @sip:FILEFORMATVERSION should be used only if the use of PREMIS has not been agreed upon in the submission agreement.
+    </dependency>
+  </dependencies>
+  <rules>
+    <rule id="1">
+      <description>mets/fileSec/fileGrp/file/@sip:FILEFORMATVERSION MAY exist.</description>
+      <error level="INFO">
+        <message>
+          mets/fileSec/fileGrp/file/@sip:FILEFORMATVERSION does not exist. MAY be: the attribute exists and its value records the version of the file format.
+        </message>
+      </error>
+      <corpusPackages>
+        <package name="fileSec_fileGrp_file_sipFILEFORMATVERSION_not_exist" isValid="FALSE">
+          <path>invalid/fileSec_fileGrp_file_sipFILEFORMATVERSION_not_exist</path>
+          <description>
+            SIP where the METS.xml file has a mets/fileSec/fileGrp/file element with no @sip:FILEFORMATVERSION attribute.
+          </description>
+        </package>
+        <package name="minimal_SIP_plus_mets_SHOULD_MAY_items" isValid="TRUE">
+          <path>valid/minimal_SIP_plus_mets_SHOULD_MAY_items</path>
+          <description>
+            Minimal SIP that matches all MUST requirements, plus all SHOULD and MAY requirements (both for elements and attributes).
+          </description>
+        </package>
+      </corpusPackages>
+    </rule>
+    <rule id="2">
+      <description>If mets/fileSec/fileGrp/file/@sip:FILEFORMATVERSION exists then it MUST have a value.</description>
+      <error level="WARNING"><!-- Empty values are not explicitly prohibited but go against the logic of the specification. -->
+        <message>
+          mets/fileSec/fileGrp/file/@sip:FILEFORMATVERSION value is empty. MUST be: if the attribute exists then it MUST have a value that records the version of the file format.
+        </message>
+      </error>
+      <corpusPackages>
+        <package name="fileSec_fileGrp_file_sipFILEFORMATVERSION_value_empty" isValid="FALSE">
+          <path>invalid/fileSec_fileGrp_file_sipFILEFORMATVERSION_value_empty</path>
+          <description>
+            A SIP with METS.xml file that has a mets/fileSec/fileGrp/file/@sip:FILEFORMATVERSION = "".
+          </description>
+        </package>
+        <package name="minimal_SIP_plus_mets_SHOULD_MAY_items" isValid="TRUE">
+          <path>valid/minimal_SIP_plus_mets_SHOULD_MAY_items</path>
+          <description>
+            Minimal SIP that matches all MUST requirements, plus all SHOULD and MAY requirements (both for elements and attributes).
+          </description>
+        </package>
+      </corpusPackages>
+    </rule>
+  </rules>
+</testCase>

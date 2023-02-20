@@ -31,7 +31,6 @@ from pprint import pprint
 import os.path
 import sys
 
-import ip_validation.cli.testcases as TC
 import ip_validation.infopacks.structure as STRUCT
 
 __version__ = "0.1.0"
@@ -55,22 +54,17 @@ PARSER = argparse.ArgumentParser(description=defaults['description'], epilog=def
 def parse_command_line():
     """Parse command line arguments."""
     # Add arguments
-    PARSER.add_argument('--testcase', '-t',
-                        action="store_true",
-                        dest="testCase",
-                        default=False,
-                        help="Treat [FILE]s as XML test cases and drive validation from those.")
-    PARSER.add_argument('--recurse', '-r',
+    PARSER.add_argument('-r', '--recurse',
                         action="store_true",
                         dest="inputRecursiveFlag",
                         default=True,
                         help="When analysing an information package recurse into representations.")
-    PARSER.add_argument('--checksum', '-c',
+    PARSER.add_argument('-c', '--checksum',
                         action="store_true",
                         dest="inputChecksumFlag",
                         default=False,
                         help="Calculate and verify file checksums in packages.")
-    PARSER.add_argument('--verbose', '-v',
+    PARSER.add_argument('-v', '--verbose',
                         action="store_true",
                         dest="outputVerboseFlag",
                         default=False,
@@ -100,11 +94,7 @@ def main():
 
     # Iterate the file arguments
     for file_arg in args.files:
-        _loop_exit = 0
-        if args.testCase:
-            _loop_exit = _validate_test_case(file_arg)
-        else:
-            _loop_exit = _validate_ip(file_arg)
+        _loop_exit, results = _validate_ip(file_arg)
         _exit = _loop_exit if (_loop_exit > 0) else _exit
     sys.exit(_exit)
 
@@ -117,26 +107,6 @@ def _validate_ip(info_pack):
         pprint(error.to_json())
 
     return ret_stat, struct_details
-
-def _validate_test_case(test_case):
-    case = TC.TestCase.from_xml_file(test_case)
-    ret_val = 0
-    if not case.testable:
-        if not case.unknown:
-            # don't ouput UNKNOWN testablitiy test cases, do output FALSE cases
-            pprint('{}:{} not testable.'.format(case.case_id.specification,
-                                                  case.case_id.requirement_id))
-        return 0
-    for rule in case.rules:
-        for package in rule.packages:
-            if package.implemented:
-                package_path = os.path.join(os.path.dirname(test_case), package.name)
-                ret_val, struct_details = _validate_ip(package_path)
-            else:
-                pprint('{}:{}, package:{} is not implemented.'.format(case.case_id.specification,
-                                                      case.case_id.requirement_id, package.name))
-
-    return ret_val
 
 def _get_ip_root(info_pack):
     arch_processor = STRUCT.ArchivePackageHandler()

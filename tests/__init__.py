@@ -25,5 +25,5 @@
 """
 E-ARK : Python information package validation
 
+Initialisation module for tests.
 """
-__version__ = '2.0.3'

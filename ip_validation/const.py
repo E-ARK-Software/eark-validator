@@ -24,8 +24,6 @@
 #
 """Constants used across validation modules"""
 
-ENV_CONF_PROFILE = 'EARK_IPV_CONF_PROFILE'
-ENV_CONF_FILE = 'EARK_IPV_CONF_FILE'
 EPILOG = """
 E-ARK (https://e-ark4all.eu/)
 Open Preservation Foundation (http://www.openpreservation.org)

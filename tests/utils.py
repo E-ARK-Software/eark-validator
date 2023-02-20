@@ -22,27 +22,15 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-"""
-E-ARK : Information Package REST Validation.
-
-Initialisation module for package, kicks of the flask app.
-"""
-import logging
-__version__ = '2.0.3'
-# Load the application
-from flask import Flask
-APP = Flask(__name__)
-
-from .config import configure_app # pylint: disable-msg=C0413
-# Get the appropriate config
-configure_app(APP)
-
-# Configure logging across all modules
-logging.basicConfig(filename=APP.config['LOG_FILE'], level=logging.DEBUG,
-                    format=APP.config['LOG_FORMAT'])
-logging.info("Started E-ARK Python IP Validator.")
-logging.debug("Configured logging.")
-
-# Import the application routes
-logging.info("Setting up application routes")
-from .controller import ROUTES # pylint: disable-msg=W0611, C0413
+"""Module that holds common utilities for unit testing."""
+from ip_validation.infopacks.rules import Severity
+import pprint
+def contains_rule_id(error_list, rule_id, severity=Severity.Error):
+    """Check that a particular error with specified severity is present in a list
+    of errors."""
+    for val_error in error_list:
+        pprint.pprint(str(val_error))
+        if val_error.id == rule_id:
+            if val_error.severity == severity:
+                return True
+    return False
