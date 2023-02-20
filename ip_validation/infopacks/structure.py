@@ -149,12 +149,9 @@ class StructureReport:
     def __str__(self):
         return "status:" + str(self.status)
 
-import pprint
 class StructError():
     """Encapsulates an individual validation test result."""
     def __init__(self, requirement, sub_message):
-        pprint.pprint("REQ")
-        pprint.pprint(str(requirement))
         self._requirement = requirement
         self.severity = LEVEL_SEVERITY.get(requirement.level, Severity.Unknown)
         self._sub_message = sub_message
@@ -171,7 +168,7 @@ class StructError():
 
     @severity.setter
     def severity(self, value):
-        if not value in list(Severity):
+        if value not in list(Severity):
             raise ValueError("Illegal severity value")
         self._severity = value
 
@@ -214,15 +211,11 @@ class StructError():
     def from_rule_no(cls, rule_no, sub_message=None):
         """Create an StructError from values supplied."""
         requirement = SPECS.Specification.StructuralRequirement.from_rule_no(rule_no)
-        pprint.pprint("NOREQ")
-        pprint.pprint(str(requirement))
         return StructError(requirement, sub_message)
 
     @classmethod
     def from_values(cls, requirement, sub_message=None):
         """Create an StructError from values supplied."""
-        pprint.pprint("VALREQ")
-        pprint.pprint(str(requirement))
         return StructError(requirement, sub_message)
 
 class ArchivePackageHandler():
