@@ -33,6 +33,7 @@ import ip_validation.utils as UTILS
 MIN_TAR_SHA1 = '47ca3a9d7f5f23bf35b852a99785878c5e543076'
 
 class TestStatus(Enum):
+    __test__ = False
     Illegal = 5
 
 class StatusValuesTest(unittest.TestCase):

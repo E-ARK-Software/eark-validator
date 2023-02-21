@@ -50,11 +50,11 @@ LEVEL_SEVERITY = {
 @unique
 class StructureStatus(Enum):
     """Enum covering information package validation statuses."""
-    Unknown = 1
+    Unknown = 'Unknown'
     # Package has basic parse / structure problems and can't be validated
-    NotWellFormed = 2
+    NotWellFormed = 'Not Well Formed'
     # Package structure is OK
-    WellFormed = 3
+    WellFormed = 'Well Formed'
 
 class StructureReport:
     """Stores the vital facts and figures about a package."""

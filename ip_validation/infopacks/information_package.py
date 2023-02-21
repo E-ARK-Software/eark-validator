@@ -29,24 +29,24 @@ import os
 @unique
 class MetadataStatus(Enum):
     """Enum covering information package validation statuses."""
-    Unknown = 1
+    UNK = 'Unknown'
     # Package Metatdata is valid
-    Invalid = 2
+    INVLD = 'Invalid'
     # Package structure and metadata are both OK
-    Valid = 3
+    VLD = 'Valid'
 
 @unique
 class ManifestStatus(Enum):
     """Enum covering information package manifest statuses."""
-    Unknown = 1
+    UNK = 'Unknown'
     # Files are missing from the manifest/metadata reference, or there are files
     # on the file system not mentioned in any manifest or metadata record.
-    Incomplete = 2
+    INCMPLT = 'Incomplete'
     # Files are all present but there is a problem verifying size or checksum Information
     # in package
-    Inconsistent = 3
+    INCNSTNT = 'Inconsistent'
     # All files are present, with matching size and checksum data.
-    Consistent = 4
+    CNSTNT = 'Consistent'
 
 class InformationPackage:
     """Stores the vital facts and figures about a package."""
