@@ -128,13 +128,13 @@ class ValidationProfile():
 @unique
 class Severity(Enum):
     """Enum covering information package validation statuses."""
-    Unknown = 1
+    UNK = "Unknown"
     # Information level, possibly not best practise
-    Info = 2
+    INF = "Information"
     # Non-fatal issue that should be corrected
-    Warn = 3
+    WRN = "Warning"
     # Error level message means invalid package
-    Error = 4
+    ERR = "Error"
 
 class TestResult():
     """Encapsulates an individual validation test result."""
@@ -156,7 +156,7 @@ class TestResult():
 
     @severity.setter
     def severity(self, value):
-        if not value in list(Severity):
+        if value not in list(Severity):
             raise ValueError("Illegal severity value")
         self._severity = value
 
@@ -180,12 +180,12 @@ class TestResult():
                 "message" : self.message}
 
     @classmethod
-    def from_element(cls, rule, failed_assert, severity=Severity.Error):
+    def from_element(cls, rule, failed_assert):
         """Create a Test result from an element."""
         context = rule.get('context')
         rule_id = failed_assert.get('id')
         test = failed_assert.get('test')
-        severity = Severity.Warn if failed_assert.get('role', "ERROR") == 'WARN' else Severity.Error
+        severity = Severity.WRN if failed_assert.get('role', "ERROR") == 'WARN' else Severity.ERR
         location = failed_assert.get('location')
         message = failed_assert.find(SVRL_NS + 'text').text
         schmtrn_loc = SchematronLocation(context, test, location)
@@ -194,7 +194,7 @@ class TestResult():
     @classmethod
     def from_element_warn(cls, rule, failed_assert):
         """Create a warning from an element."""
-        return cls.from_element(rule, failed_assert, Severity.Warn)
+        return cls.from_element(rule, failed_assert, Severity.WRN)
 
 class TestReport():
     """A report made up of validation results."""

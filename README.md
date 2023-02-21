@@ -62,7 +62,7 @@ user@machine:~$ tree input
   └── schemas
 ```
 
-If the output paramter (`-o`) is specified, the validation result report (JSON format) is written to a file. 
+If the output paramter (`-o`) is specified, the validation result report (JSON format) is written to a file.
 
 ## For Developers
 

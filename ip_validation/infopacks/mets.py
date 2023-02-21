@@ -60,41 +60,40 @@ class MetsValidator():
         try:
             parsed_mets = etree.iterparse(mets, events=('start', 'end'), schema=self.schema_mets)
             for event, element in parsed_mets:
-                # Define what to do with specific tags.
-                if event == 'end' and element.tag == _q(METS_NS, 'file'):
-                    # files
-                    # self.total_files += 1
-                    element.clear()
-                    while element.getprevious() is not None:
-                        del element.getparent()[0]
-                elif event == 'end' and \
-                    element.tag == _q(METS_NS, 'div') and \
-                    element.attrib['LABEL'].startswith('representations/'):
-                    if fnmatch.fnmatch(element.attrib['LABEL'].rsplit('/', 1)[1], '*_mig-*'):
-                        # representation mets files
-                        rep = element.attrib['LABEL'].rsplit('/', 1)[1]
-                        for child in element.getchildren():
-                            if child.tag == _q(METS_NS, 'mptr'):
-                                metspath = child.attrib[_q(XLINK_NS, 'href')]
-                                sub_mets = rep, metspath
-                                self.subsequent_mets.append(sub_mets)
-                        element.clear()
-                        while element.getprevious() is not None:
-                            del element.getparent()[0]
-                elif event == 'end' and element.tag == _q(METS_NS, 'dmdSec'):
-                    # dmdSec
-                    pass
-                elif event == 'end' and element.tag == _q(METS_NS, 'amdSec'):
-                    pass
+                self._process_element(event, element)
         except etree.XMLSyntaxError as synt_err:
             self.validation_errors.append(synt_err)
-        except BaseException as base_err:
-            self.validation_errors.append(base_err)
 
         if self.total_files != 0:
             self.validation_errors.append('File count yielded %d instead of 0.' % self.total_files)
 
         return len(self.validation_errors) == 0
+
+    def _process_element(self, event, element):
+        # Define what to do with specific tags.
+        if event != 'end':
+            return
+        if element.tag == _q(METS_NS, 'file'):
+            element.clear()
+            while element.getprevious() is not None:
+                del element.getparent()[0]
+        elif element.tag == _q(METS_NS, 'div') and \
+            element.attrib['LABEL'].startswith('representations/'):
+            self._process_rep_div(element)
+
+
+    def _process_rep_div(self, element):
+        if fnmatch.fnmatch(element.attrib['LABEL'].rsplit('/', 1)[1], '*_mig-*'):
+            # representation mets files
+            rep = element.attrib['LABEL'].rsplit('/', 1)[1]
+            for child in element.getchildren():
+                if child.tag == _q(METS_NS, 'mptr'):
+                    metspath = child.attrib[_q(XLINK_NS, 'href')]
+                    sub_mets = rep, metspath
+                    self.subsequent_mets.append(sub_mets)
+            element.clear()
+            while element.getprevious() is not None:
+                del element.getparent()[0]
 
 def _handle_rel_paths(rootpath, metspath):
     if metspath.startswith('file://./'):

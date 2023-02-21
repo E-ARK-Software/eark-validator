@@ -133,35 +133,38 @@ class Specification:
     @classmethod
     def from_element(cls, spec_ele, schema=METS_PROF_SCHEMA, add_struct=False):
         """Create a Specification from an XML element."""
-        # is_valid = schema.assertValid(spec_ele)
-        # if not is_valid:
-        #     raise ValueError('Specification invalid')
         version = spec_ele.get('ID')
         name = date = ''
         requirements = {}
         # Loop through the child eles
         for child in spec_ele:
-            if child.tag == '{}title'.format(METS_NS):
+            if child.tag == _mets_ns('title'):
                 # Process the title element
                 name = child.text
-            elif child.tag == '{}date'.format(METS_NS):
+            elif child.tag == _mets_ns('date'):
                 # Grab the requirement text value
                 date = child.text
-            elif child.tag == '{}structural_requirements'.format(METS_NS):
-                for sect_ele in child:
-                    section = sect_ele.get('ID')
-                    reqs = []
-                    for req_ele in sect_ele:
-                        requirement = cls.Requirement.from_element(req_ele)
-                        if not requirement.id.startswith('REF_'):
-                            reqs.append(cls.Requirement.from_element(req_ele))
-                    requirements[section] = reqs
+            elif child.tag == _mets_ns('structural_requirements'):
+                requirements = cls._processs_requirements(child)
         if add_struct:
             # Add the structural requirements
             struct_reqs = Specification.StructuralRequirement._get_struct_reqs()
             requirements['structure'] = struct_reqs
-        # Return the TestCase instance
+        # Return the Specification
         return cls(name, version, date, requirements=requirements)
+
+    @classmethod
+    def _processs_requirements(cls, req_root):
+        requirements = {}
+        for sect_ele in req_root:
+            section = sect_ele.get('ID')
+            reqs = []
+            for req_ele in sect_ele:
+                requirement = cls.Requirement.from_element(req_ele)
+                if not requirement.id.startswith('REF_'):
+                    reqs.append(cls.Requirement.from_element(req_ele))
+            requirements[section] = reqs
+        return requirements
 
     class Requirement():
         """Encapsulates a requirement."""
@@ -207,9 +210,9 @@ class Specification:
             level = req_ele.get('LEVEL')
             name = ''
             for child in req_ele:
-                if child.tag == '{http://www.loc.gov/METS_Profile/v2}description':
+                if child.tag == _mets_ns('description'):
                     for req_child in child:
-                        if req_child.tag == '{http://www.loc.gov/METS_Profile/v2}head':
+                        if req_child.tag == _mets_ns('head'):
                             name = req_child.text
             return cls(req_id, name, level)
 
@@ -264,6 +267,9 @@ class Specification:
                                                                 level=req.get('level'),
                                                                 message=req.get('message')))
             return reqs
+
+def _mets_ns(name):
+    return '{}{}'.format(METS_NS, name)
 
 SPECIFICATIONS = {
     'CSIP': Specification.csip(),

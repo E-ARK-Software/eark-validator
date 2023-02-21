@@ -44,9 +44,9 @@ class ManifestClassTests(unittest.TestCase):
         val_errors = man_no_mets.validate_manifest(is_root=False)
         self.assertTrue(len(val_errors) == 2)
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR12",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_manifest_nomd(self):
         # test as root
@@ -54,13 +54,13 @@ class ManifestClassTests(unittest.TestCase):
         val_errors = man_no_md.validate_manifest()
         self.assertTrue(len(val_errors) == 1)
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR5",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         val_errors = man_no_md.validate_manifest(is_root=False)
         self.assertTrue(len(val_errors) == 2)
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR13",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_manifest_noschema(self):
         # test as root
@@ -68,13 +68,13 @@ class ManifestClassTests(unittest.TestCase):
         val_errors = man_no_schema.validate_manifest()
         self.assertTrue(len(val_errors) == 1)
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         val_errors = man_no_schema.validate_manifest(is_root=False)
         self.assertTrue(len(val_errors) == 2)
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_manifest_data(self):
         # test as root
@@ -89,8 +89,8 @@ class ManifestClassTests(unittest.TestCase):
         val_errors = man_no_reps.validate_manifest()
         self.assertTrue(len(val_errors) == 1)
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR9",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         val_errors = man_no_reps.validate_manifest(is_root=False)
         self.assertTrue(len(val_errors) == 1)
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))

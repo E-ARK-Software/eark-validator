@@ -46,7 +46,7 @@ class StructValidationTests(unittest.TestCase):
         self.assertTrue(len(val_errors) == 1,
                         'Expecting 1 errors but found {}'.format(len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
-                                         severity=Severity.Error))
+                                         severity=Severity.ERR))
 
     def test_check_package_root_multi_dir(self):
         """Dedicated test for package root detection errors."""
@@ -59,7 +59,7 @@ class StructValidationTests(unittest.TestCase):
         self.assertTrue(len(val_errors) == 1,
                         'Expecting 1 errors but found {}'.format(len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
-                                         severity=Severity.Error))
+                                         severity=Severity.ERR))
 
     def test_check_package_root_multi_file(self):
         """Dedicated test for package root detection errors."""
@@ -72,7 +72,7 @@ class StructValidationTests(unittest.TestCase):
         self.assertTrue(len(val_errors) == 1,
                         'Expecting 1 errors but found {}'.format(len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
-                                         severity=Severity.Error))
+                                         severity=Severity.ERR))
 
     def test_check_package_root_multi_var(self):
         """Dedicated test for package root detection errors."""
@@ -85,7 +85,7 @@ class StructValidationTests(unittest.TestCase):
         self.assertTrue(len(val_errors) == 1,
                         'Expecting 1 errors but found {}'.format(len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
-                                         severity=Severity.Error))
+                                         severity=Severity.ERR))
 
     def test_single_file_archive(self):
         """Test a package that's just a compressed single file."""
@@ -104,11 +104,11 @@ class StructValidationTests(unittest.TestCase):
         self.assertTrue(len(val_errors) == 3,
                         'Expecting 3 errors but found {}'.format(len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR12",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR13",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_nomets(self):
         """Test package with no METS.xml file"""
@@ -126,11 +126,11 @@ class StructValidationTests(unittest.TestCase):
         self.assertTrue(len(val_warnings) == 3,
                         'Expecting 3 errors but found {}'.format(len(val_warnings)))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR12",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR13",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR15",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_nomd(self):
         # test as root
@@ -143,13 +143,13 @@ class StructValidationTests(unittest.TestCase):
         self.assertTrue(len(val_errors) == 4,
                         'Expecting 4 errors but found {}'.format(len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR5",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR12",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR13",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_noschema(self):
         # test as root
@@ -165,11 +165,11 @@ class StructValidationTests(unittest.TestCase):
         self.assertTrue(len(val_warnings) == 4,
                         'Expecting 4 errors but found {}'.format(len(val_warnings)))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR12",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR13",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR15",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_nodata(self):
         # test as root
@@ -182,13 +182,13 @@ class StructValidationTests(unittest.TestCase):
         self.assertTrue(len(val_errors) == 4,
                         'Expecting 4 errors but found {}'.format(len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR12",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR13",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_noreps(self):
         ip_path = os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'struct',
@@ -203,4 +203,4 @@ class StructValidationTests(unittest.TestCase):
         self.assertTrue(len(val_warnings) == 1,
                         'Expecting 1 errors but found {}'.format(len(val_warnings)))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR9",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
