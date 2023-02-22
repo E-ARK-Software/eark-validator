@@ -23,7 +23,8 @@
 # under the License.
 #
 """Module covering information package structure validation and navigation."""
-import lxml.etree as ET
+from lxml import etree as ET
+
 
 from importlib_resources import files
 

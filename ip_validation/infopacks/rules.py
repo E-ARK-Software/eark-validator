@@ -26,7 +26,7 @@
 from enum import Enum, unique
 import logging
 
-import lxml.etree
+from lxml import etree as ET
 from lxml.isoschematron import Schematron
 
 from importlib_resources import files
@@ -48,7 +48,7 @@ class ValidationRules():
 
     def get_assertions(self):
         """Generator that returns the rules one at a time."""
-        xml_rules = lxml.etree.XML(bytes(self.ruleset.schematron))
+        xml_rules = ET.XML(bytes(self.ruleset.schematron))
 
         for ele in xml_rules.iter():
             if ele.tag == SCHEMATRON_NS + 'assert':
@@ -56,26 +56,29 @@ class ValidationRules():
 
     def validate(self, to_validate):
         """Validate a file against the loaded Schematron ruleset."""
-        xml_file = lxml.etree.parse(to_validate)
+        xml_file = ET.parse(to_validate)
         self.ruleset.validate(xml_file)
 
     def get_report(self):
         """Get the report from the last validation."""
-        xml_report = lxml.etree.XML(bytes(self.ruleset.validation_report))
+        xml_report = ET.XML(bytes(self.ruleset.validation_report))
         failures = []
         warnings = []
+        infos = []
         is_valid = True
         rule = None
         for ele in xml_report.iter():
             if ele.tag == SVRL_NS + 'fired-rule':
                 rule = ele
             elif ele.tag == SVRL_NS + 'failed-assert':
-                if ele.get('role') == 'WARN':
+                if ele.get('role') == 'INFO':
+                    infos.append(TestResult.from_element(rule, ele))
+                elif ele.get('role') == 'WARN':
                     warnings.append(TestResult.from_element(rule, ele))
                 else:
                     is_valid = False
                     failures.append(TestResult.from_element(rule, ele))
-        return TestReport(is_valid, failures, warnings)
+        return TestReport(is_valid, failures, warnings, infos)
 
 class ValidationProfile():
     """ A complete set of Schematron rule sets that comprise a complete validation profile."""
@@ -107,7 +110,7 @@ class ValidationProfile():
         for section in self.SECTIONS:
             try:
                 self.rulesets[section].validate(to_validate)
-            except lxml.etree.XMLSyntaxError as parse_err:
+            except ET.XMLSyntaxError as parse_err:
                 self.is_wellformed = False
                 self.is_valid = False
                 self.messages.append(parse_err.msg)
@@ -198,10 +201,11 @@ class TestResult():
 
 class TestReport():
     """A report made up of validation results."""
-    def __init__(self, is_valid, failures, warnings):
+    def __init__(self, is_valid, failures, warnings, infos):
         self._is_valid = is_valid
         self._failures = failures
         self._warnings = warnings
+        self._infos = infos
 
     @property
     def is_valid(self):
@@ -217,6 +221,12 @@ class TestReport():
     def warnings(self):
         """Get the warnings."""
         return self._warnings
+
+    @property
+    def infos(self):
+        """Get the warnings."""
+        return self._infos
+
 
 class SchematronLocation():
     """All details of the location of a Schematron error."""

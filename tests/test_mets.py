@@ -22,10 +22,30 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-"""
-E-ARK : Python information package validation
 
-"""
-from .infopacks import MetsValidator
+import unittest
 
-__version__ = '2.0.3'
+from importlib_resources import files
+
+import tests.resources.xml as XML
+
+from ip_validation import MetsValidator
+
+class MetsTest(unittest.TestCase):
+    """Tests for Schematron validation rules."""
+    def test_valid_mets(self):
+        valid_mets = str(files(XML).joinpath('METS-valid.xml'))
+        validator = MetsValidator(str(files(XML)))
+        is_valid = validator.validate_mets(valid_mets)
+        self.assertTrue(is_valid)
+        self.assertTrue(len(validator.validation_errors) == 0)
+
+    def test_invalid_mets(self):
+        valid_mets = str(files(XML).joinpath('METS-no-root.xml'))
+        validator = MetsValidator(str(files(XML)))
+        is_valid = validator.validate_mets(valid_mets)
+        self.assertFalse(is_valid)
+        self.assertTrue(len(validator.validation_errors) > 0)
+
+if __name__ == '__main__':
+    unittest.main()

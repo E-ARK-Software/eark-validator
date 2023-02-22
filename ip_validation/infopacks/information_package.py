@@ -50,25 +50,19 @@ class ManifestStatus(Enum):
 
 class InformationPackage:
     """Stores the vital facts and figures about a package."""
-    def __init__(self, details, specification, validation_report):
+    def __init__(self, path, details):
+        self._path = path
         self._details = details
-        self._specification = specification
-        self._validation_report = validation_report
+
+    @property
+    def path(self):
+        """Get the specification of the package."""
+        return self._path
 
     @property
     def details(self):
         """Get the package details."""
         return self._details
-
-    @property
-    def specification(self):
-        """Get the specification of the package."""
-        return self._specification
-
-    @property
-    def validation_report(self):
-        """Return the package validation_report."""
-        return self._validation_report
 
     def __str__(self):
         return "name:" + self.details.name + ", details:" + \
@@ -76,15 +70,14 @@ class InformationPackage:
 
 class PackageDetails:
     """Stores the vital facts and figures about a package."""
-    def __init__(self, path, size, specification):
-        self._path = path
-        self._size = size
+    def __init__(self, specification, size):
         self._specification = specification
+        self._size = size
 
     @property
-    def path(self):
-        """Get the package root directory path."""
-        return self._path
+    def specification(self):
+        """Get the specification."""
+        return self._specification
 
     @property
     def name(self):
@@ -96,11 +89,10 @@ class PackageDetails:
         """Return the package size in bytes."""
         return self._size
 
-    @property
-    def specification(self):
-        """Get the specification of the package."""
-        return self._specification
-
+    @classmethod
+    def from_mets(cls, mets_path):
+        pass
+        
     def __str__(self):
-        return "name:" + self.name + " path:" + self.path + ", size:" + \
-            str(self.size) + ", specification:" + str(self.specification)
+        return "name: " + self.name + ", specification: " + self._specification + ", size: " + \
+            str(self.size)
