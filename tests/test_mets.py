@@ -28,24 +28,31 @@ import unittest
 from importlib_resources import files
 
 import tests.resources.xml as XML
+import tests.resources.ips.unpacked as UNPACKED
 
 from ip_validation import MetsValidator
 
 class MetsTest(unittest.TestCase):
     """Tests for Schematron validation rules."""
     def test_valid_mets(self):
-        valid_mets = str(files(XML).joinpath('METS-valid.xml'))
         validator = MetsValidator(str(files(XML)))
-        is_valid = validator.validate_mets(valid_mets)
+        is_valid = validator.validate_mets('METS-valid.xml')
         self.assertTrue(is_valid)
         self.assertTrue(len(validator.validation_errors) == 0)
 
     def test_invalid_mets(self):
-        valid_mets = str(files(XML).joinpath('METS-no-root.xml'))
         validator = MetsValidator(str(files(XML)))
-        is_valid = validator.validate_mets(valid_mets)
+        is_valid = validator.validate_mets('METS-no-root.xml')
         self.assertFalse(is_valid)
         self.assertTrue(len(validator.validation_errors) > 0)
+
+    def test_multi_mets(self):
+        validator = MetsValidator(str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')))
+        is_valid = validator.validate_mets('METS.xml')
+        self.assertTrue(is_valid)
+        self.assertTrue(len(validator.validation_errors) == 0)
+        self.assertTrue(len(validator.subsequent_mets) == 1)
+        self.assertTrue(len(validator.file_refs) > 0)
 
 if __name__ == '__main__':
     unittest.main()

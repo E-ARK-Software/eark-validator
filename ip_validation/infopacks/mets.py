@@ -44,6 +44,7 @@ class MetsValidator():
         self.schema_mets = etree.XMLSchema(file=str(files(SCHEMA).joinpath('mets.xsd')))
         self.rootpath = root
         self.subsequent_mets = []
+        self.file_refs = []
 
     def validate_mets(self, mets):
         '''
@@ -74,35 +75,82 @@ class MetsValidator():
         if event != 'end':
             return
         if element.tag == _q(METS_NS, 'file'):
+            self.file_refs.append(MetsFile.from_element)
             element.clear()
             while element.getprevious() is not None:
                 del element.getparent()[0]
         elif element.tag == _q(METS_NS, 'div') and \
-            element.attrib['LABEL'].startswith('representations/'):
+            element.attrib['LABEL'].startswith('Representations/'):
             self._process_rep_div(element)
 
 
     def _process_rep_div(self, element):
-        if fnmatch.fnmatch(element.attrib['LABEL'].rsplit('/', 1)[1], '*_mig-*'):
-            # representation mets files
-            rep = element.attrib['LABEL'].rsplit('/', 1)[1]
-            for child in element.getchildren():
-                if child.tag == _q(METS_NS, 'mptr'):
-                    metspath = child.attrib[_q(XLINK_NS, 'href')]
-                    sub_mets = rep, metspath
-                    self.subsequent_mets.append(sub_mets)
-            element.clear()
-            while element.getprevious() is not None:
-                del element.getparent()[0]
+        rep = element.attrib['LABEL'].rsplit('/', 1)[1]
+        for child in element.getchildren():
+            if child.tag == _q(METS_NS, 'mptr'):
+                metspath = child.attrib[_q(XLINK_NS, 'href')]
+                sub_mets = rep, metspath
+                self.subsequent_mets.append(sub_mets)
+        element.clear()
+        while element.getprevious() is not None:
+            del element.getparent()[0]
 
 def _handle_rel_paths(rootpath, metspath):
-    if metspath.startswith('file://./'):
-        relpath = os.path.join(rootpath, metspath[9:])
-        # change self.rootpath to match any relative path found in the
-        # current (subsequent) mets
-        return relpath.rsplit('/', 1)[0], relpath
-    return metspath.rsplit('/', 1)[0], metspath
+    if metspath.startswith('file:///') or os.path.isabs(metspath):
+        return metspath.rsplit('/', 1)[0], metspath
+    relpath = os.path.join(rootpath, metspath[9:]) if metspath.startswith('file://./') else os.path.join(rootpath, metspath)
+    return relpath.rsplit('/', 1)[0], relpath
 
+class MetsFile:
+    def __init__(self, name, size, checksum, mime):
+        self._name = name
+        self._size = size
+        self._checksum = checksum
+        self._mime = mime
+
+    @property
+    def name(self):
+        """Get the name."""
+        return self._name
+
+    @property
+    def size(self):
+        """Get the size."""
+        return self._size
+
+    @property
+    def checksum(self):
+        """Get the checksum value."""
+        return self._checksum
+
+    @property
+    def mime(self):
+        """Get the mime type."""
+        return self._mime
+    
+    @classmethod
+    def from_element(cls, element):
+        """Create a MetsFile from an etree element."""
+        name = element.attrib['ID']
+        size = element.attrib['SIZE']
+        checksum = Checksum(element.attrib['CHECKSUMTYPE'], element.attrib['CHECKSUM'])
+        mime = element.attrib['MIMETYPE']
+        return cls(name, size, checksum, mime)
+
+class Checksum:
+    def __init__(self, algorithm, value):
+        self._algorithm = algorithm
+        self._value = value
+
+    @property
+    def algorithm(self):
+        """Get the algorithm."""
+        return self._algorithm
+    
+    @property
+    def value(self):
+        """Get the value."""
+        return self._value
 
 def _q(_ns, _v):
     return '{{{}}}{}'.format(_ns, _v)
