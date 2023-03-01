@@ -28,7 +28,8 @@ from lxml import etree as ET
 
 from importlib_resources import files
 
-import ip_validation.infopacks.resources.profiles as RES
+import ip_validation.infopacks.resources.profiles as PROFILES
+import ip_validation.infopacks.resources.schemas as SCHEMA
 from ip_validation.infopacks.struct_reqs import STRUCT_REQS
 
 @unique
@@ -41,14 +42,14 @@ class EarkSpecifications(Enum):
     @property
     def path(self):
         """Get the path to the specification file."""
-        return str(files(RES).joinpath(self.value + '.xml'))
+        return str(files(PROFILES).joinpath(self.value + '.xml'))
 
     @property
     def specification(self):
         """Get the specification."""
         return Specification.from_xml_file(self.path)
 
-METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(RES).joinpath('mets.profile.v2-0.xsd')))
+METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(SCHEMA).joinpath('mets.profile.v2-0.xsd')))
 METS_PROFILE_NS = '{http://www.loc.gov/METS_Profile/v2}'
 
 class Specification:
