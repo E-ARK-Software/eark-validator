@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<v3:object xsi:type="v3:file" xmlns:v3="http://www.loc.gov/premis/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <v3:objectIdentifier>
+    <v3:objectIdentifierType>URN</v3:objectIdentifierType>
+    <v3:objectIdentifierValue>urn:roda:premis:file:RODA-in.png</v3:objectIdentifierValue>
+  </v3:objectIdentifier>
+  <v3:preservationLevel>
+    <v3:preservationLevelValue>full</v3:preservationLevelValue>
+  </v3:preservationLevel>
+  <v3:objectCharacteristics>
+    <v3:fixity>
+      <v3:messageDigestAlgorithm>SHA-1</v3:messageDigestAlgorithm>
+      <v3:messageDigest>6FD211F3F50D75165B23E801E6BC91C9C3C1B938</v3:messageDigest>
+      <v3:messageDigestOriginator>RODA</v3:messageDigestOriginator>
+    </v3:fixity>
+    <v3:fixity>
+      <v3:messageDigestAlgorithm>SHA-256</v3:messageDigestAlgorithm>
+      <v3:messageDigest>552F7310A3C65ED2E4853E0B191025800B3C01E19976160EE7A2755120B7244B</v3:messageDigest>
+      <v3:messageDigestOriginator>RODA</v3:messageDigestOriginator>
+    </v3:fixity>
+    <v3:fixity>
+      <v3:messageDigestAlgorithm>MD5</v3:messageDigestAlgorithm>
+      <v3:messageDigest>705C5C812EA58A015BA101EB2F59EE05</v3:messageDigest>
+      <v3:messageDigestOriginator>RODA</v3:messageDigestOriginator>
+    </v3:fixity>
+    <v3:size>2002</v3:size>
+    <v3:format>
+      <v3:formatDesignation>
+        <v3:formatName>Portable Network Graphics</v3:formatName>
+        <v3:formatVersion>1.0</v3:formatVersion>
+      </v3:formatDesignation>
+    </v3:format>
+    <v3:format>
+      <v3:formatRegistry>
+        <v3:formatRegistryName>pronom</v3:formatRegistryName>
+        <v3:formatRegistryKey>fmt/11</v3:formatRegistryKey>
+      </v3:formatRegistry>
+    </v3:format>
+    <v3:format>
+      <v3:formatRegistry>
+        <v3:formatRegistryName>mime</v3:formatRegistryName>
+        <v3:formatRegistryKey>image/png</v3:formatRegistryKey>
+      </v3:formatRegistry>
+    </v3:format>
+  </v3:objectCharacteristics>
+  <v3:originalName>RODA-in.png</v3:originalName>
+  <v3:storage>
+    <v3:contentLocation>
+      <v3:contentLocationType/>
+      <v3:contentLocationValue/>
+    </v3:contentLocation>
+  </v3:storage>
+</v3:object>

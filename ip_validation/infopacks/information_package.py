@@ -23,36 +23,14 @@
 # under the License.
 #
 """Module covering information package structure validation and navigation."""
-from enum import Enum, unique
 import os
-
-@unique
-class MetadataStatus(Enum):
-    """Enum covering information package validation statuses."""
-    UNK = 'Unknown'
-    # Package Metatdata is valid
-    INVLD = 'Invalid'
-    # Package structure and metadata are both OK
-    VLD = 'Valid'
-
-@unique
-class ManifestStatus(Enum):
-    """Enum covering information package manifest statuses."""
-    UNK = 'Unknown'
-    # Files are missing from the manifest/metadata reference, or there are files
-    # on the file system not mentioned in any manifest or metadata record.
-    INCMPLT = 'Incomplete'
-    # Files are all present but there is a problem verifying size or checksum Information
-    # in package
-    INCNSTNT = 'Inconsistent'
-    # All files are present, with matching size and checksum data.
-    CNSTNT = 'Consistent'
 
 class InformationPackage:
     """Stores the vital facts and figures about a package."""
-    def __init__(self, path, details):
+    def __init__(self, path, details, files=None):
         self._path = path
         self._details = details
+        self._files = files if files else []
 
     @property
     def path(self):
@@ -64,9 +42,14 @@ class InformationPackage:
         """Get the package details."""
         return self._details
 
+    @property
+    def files(self):
+        """Get a list of details for all files found in the package."""
+        return self._details
+
     def __str__(self):
-        return "name:" + self.details.name + ", details:" + \
-            str(self.details) + ", specification:" + str(self.specification)
+        return 'name: ' + self.details.name + ', details: ' + \
+            str(self.details) + ', specification: ' + str(self.specification) + ', files: ' + len(self._files)
 
 class PackageDetails:
     """Stores the vital facts and figures about a package."""
@@ -88,11 +71,7 @@ class PackageDetails:
     def size(self):
         """Return the package size in bytes."""
         return self._size
-
-    @classmethod
-    def from_mets(cls, mets_path):
-        pass
         
     def __str__(self):
-        return "name: " + self.name + ", specification: " + self._specification + ", size: " + \
+        return 'name: ' + self.name + ', specification: ' + self._specification + ', size: ' + \
             str(self.size)

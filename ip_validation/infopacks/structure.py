@@ -32,7 +32,7 @@ import zipfile
 from ip_validation.infopacks.rules import Severity
 import ip_validation.infopacks.specification as SPECS
 
-import ip_validation.utils as UTILS
+from ip_validation.infopacks.manifest import Checksum
 
 MD_DIR = "metadata"
 REPS_DIR = "representations"
@@ -239,9 +239,9 @@ class ArchivePackageHandler():
         returns the destination folder."""
         if not os.path.isfile(to_unpack) or not self.is_archive(to_unpack):
             raise PackageStructError("File is not an archive file.")
-        sha1 = UTILS.sha1(to_unpack)
+        sha1 = Checksum.from_file(to_unpack, 'sha1')
         dest_root = dest if dest else self.unpack_root
-        destination = os.path.join(dest_root, sha1)
+        destination = os.path.join(dest_root, sha1.value)
         if zipfile.is_zipfile(to_unpack):
             zip_ip = zipfile.ZipFile(to_unpack)
             zip_ip.extractall(path=destination)

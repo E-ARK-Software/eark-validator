@@ -23,32 +23,46 @@
 # under the License.
 #
 """Module covering information package structure validation and navigation."""
+from enum import Enum, unique
 from lxml import etree as ET
-
 
 from importlib_resources import files
 
-import ip_validation.cli.resources as RES
+import ip_validation.infopacks.resources.profiles as RES
 from ip_validation.infopacks.struct_reqs import STRUCT_REQS
 
+@unique
+class EarkSpecifications(Enum):
+    """Enumeration of E-ARK specifications."""
+    CSIP = 'E-ARK-CSIP'
+    SIP = 'E-ARK-SIP'
+    DIP = 'E-ARK-DIP'
+
+    @property
+    def path(self):
+        """Get the path to the specification file."""
+        return str(files(RES).joinpath(self.value + '.xml'))
+
+    @property
+    def specification(self):
+        """Get the specification."""
+        return Specification.from_xml_file(self.path)
+
 METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(RES).joinpath('mets.profile.v2-0.xsd')))
-CSIP_XML = str(files(RES).joinpath('E-ARK-CSIP.xml'))
-SIP_XML = str(files(RES).joinpath('E-ARK-SIP.xml'))
-DIP_XML = str(files(RES).joinpath('E-ARK-DIP.xml'))
-METS_NS = '{http://www.loc.gov/METS_Profile/v2}'
+METS_PROFILE_NS = '{http://www.loc.gov/METS_Profile/v2}'
 
 class Specification:
     """Stores the vital facts and figures an IP specification."""
-    def __init__(self, name, version, date, requirements=None):
-        self._name = name
+    def __init__(self, title, version, date, requirements=None):
+        self._title = title
         self._version = version
         self._date = date
         self._requirements = requirements if requirements else {}
 
     @property
-    def name(self):
+    def title(self):
         """Get the name of the specification."""
-        return self._name
+        return self._title
 
     @property
     def version(self):
@@ -96,7 +110,7 @@ class Specification:
         return self._requirements.keys()
 
     def __str__(self):
-        return "name:" + self.name + ", version:" + \
+        return "name:" + self.title + ", version:" + \
             str(self.version) + ", date:" + str(self.date)
 
     @classmethod
@@ -106,22 +120,7 @@ class Specification:
         return cls._from_xml(tree, schema)
 
     @classmethod
-    def csip(cls):
-        """Create a Specification from an XML file with CSIP."""
-        return  cls.from_xml_file(xml_file=CSIP_XML, schema=METS_PROF_SCHEMA, add_struct=True)
-
-    @classmethod
-    def sip(cls):
-        """Create a Specification from an XML file with SIP."""
-        return  cls.from_xml_file(xml_file=SIP_XML, schema=METS_PROF_SCHEMA)
-
-    @classmethod
-    def dip(cls):
-        """Create a Specification from an XML file with DIP."""
-        return  cls.from_xml_file(xml_file=DIP_XML, schema=METS_PROF_SCHEMA)
-
-    @classmethod
-    def from_xml_file(cls, xml_file=CSIP_XML, schema=METS_PROF_SCHEMA, add_struct=False):
+    def from_xml_file(cls, xml_file=EarkSpecifications.CSIP.path, schema=METS_PROF_SCHEMA, add_struct=False):
         """Create a Specification from an XML file."""
         tree = ET.parse(xml_file)
         return  cls._from_xml(tree, schema, add_struct=add_struct)
@@ -135,13 +134,13 @@ class Specification:
     def from_element(cls, spec_ele, schema=METS_PROF_SCHEMA, add_struct=False):
         """Create a Specification from an XML element."""
         version = spec_ele.get('ID')
-        name = date = ''
+        title = date = ''
         requirements = {}
         # Loop through the child eles
         for child in spec_ele:
             if child.tag == _mets_ns('title'):
                 # Process the title element
-                name = child.text
+                title = child.text
             elif child.tag == _mets_ns('date'):
                 # Grab the requirement text value
                 date = child.text
@@ -152,7 +151,7 @@ class Specification:
             struct_reqs = Specification.StructuralRequirement._get_struct_reqs()
             requirements['structure'] = struct_reqs
         # Return the Specification
-        return cls(name, version, date, requirements=requirements)
+        return cls(title, version, date, requirements=requirements)
 
     @classmethod
     def _processs_requirements(cls, req_root):
@@ -270,10 +269,4 @@ class Specification:
             return reqs
 
 def _mets_ns(name):
-    return '{}{}'.format(METS_NS, name)
-
-SPECIFICATIONS = {
-    'CSIP': Specification.csip(),
-    'SIP': Specification.sip(),
-    'DIP': Specification.dip()
-}
+    return '{}{}'.format(METS_PROFILE_NS, name)
