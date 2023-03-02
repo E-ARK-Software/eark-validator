@@ -84,7 +84,7 @@ class ValidationRules():
         for ele in xml_report.iter():
             if ele.tag == SVRL_NS + 'fired-rule':
                 rule = ele
-            elif ele.tag == SVRL_NS + 'failed-assert':
+            elif (ele.tag == SVRL_NS + 'failed-assert') or (ele.tag == SVRL_NS + 'successful-report'):
                 if ele.get('role') == 'INFO':
                     infos.append(TestResult.from_element(rule, ele))
                 elif ele.get('role') == 'WARN':

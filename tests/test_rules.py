@@ -85,52 +85,57 @@ class ValidationRulesTest(unittest.TestCase):
         self.assertFalse(self._mets_one_def_rules.get_report().is_valid)
 
     def test_mets_root(self):
-        result, failures, _ = _test_validation('root', METS_VALID)
+        result, failures, _, _ = _test_validation('root', METS_VALID)
         self.assertTrue(failures == 0)
         self.assertTrue(result)
 
     def test_mets_root_no_objid(self):
-        result, failures, _ = _test_validation('root', 'METS-no-objid.xml')
+        result, failures, _, _ = _test_validation('root', 'METS-no-objid.xml')
         self.assertTrue(failures == 1)
         self.assertFalse(result)
 
     def test_mets_root_no_type(self):
-        result, failures, _ = _test_validation('root', 'METS-no-type.xml')
+        result, failures, _, _ = _test_validation('root', 'METS-no-type.xml')
         self.assertTrue(failures == 1)
         self.assertFalse(result)
 
     def test_mets_root_other_type(self):
-        result, failures, _ = _test_validation('root', 'METS-other-type.xml')
+        result, failures, _, _ = _test_validation('root', 'METS-other-type.xml')
         self.assertTrue(failures == 0)
         self.assertTrue(result)
 
     def test_mets_root_no_profile(self):
-        result, failures, _ = _test_validation('root', 'METS-no-profile.xml')
+        result, failures, _, _ = _test_validation('root', 'METS-no-profile.xml')
         self.assertTrue(failures == 1)
         self.assertFalse(result)
 
     def test_mets_root_no_hdr(self):
-        result, failures, _ = _test_validation('root', 'METS-no-hdr.xml')
+        result, failures, _, _ = _test_validation('root', 'METS-no-hdr.xml')
         self.assertTrue(failures == 1)
         self.assertFalse(result)
 
     def test_mets_hdr_valid(self):
-        result, failures, _ = _test_validation('hdr', METS_VALID)
+        result, failures, _, _ = _test_validation('hdr', METS_VALID)
         self.assertTrue(failures == 0)
         self.assertTrue(result)
 
     def test_mets_hdr_no_createdate(self):
-        result, failures, _ = _test_validation('hdr', 'METS-no-createdate.xml')
+        result, failures, _, _ = _test_validation('hdr', 'METS-no-createdate.xml')
         self.assertTrue(failures == 1)
         self.assertFalse(result)
 
+    def test_mets_file_ownerid(self):
+        result, errors, _, infos = _test_validation('file', 'METS-ownerid.xml')
+        self.assertTrue(infos == 1)
+        self.assertTrue(result)
+
     def test_mets_hdr_no_type(self):
-        result, failures, _ = _test_validation('hdr', 'METS-hdr-no-type.xml')
+        result, failures, _, _ = _test_validation('hdr', 'METS-hdr-no-type.xml')
         self.assertTrue(failures == 1)
         self.assertFalse(result)
 
     def test_mets_hdr_no_version(self):
-        result, failures, _ = _test_validation('hdr', 'METS-hdr-no-version.xml')
+        result, failures, _, _ = _test_validation('hdr', 'METS-hdr-no-version.xml')
         self.assertTrue(failures == 1)
         self.assertFalse(result)
 
@@ -144,25 +149,25 @@ class ValidationRulesTest(unittest.TestCase):
         self.assertTrue(result)
 
     def test_mets_dmd(self):
-        result, failures, warnings = _test_validation('dmd', METS_VALID)
+        result, failures, warnings, _ = _test_validation('dmd', METS_VALID)
         self.assertTrue(failures == 0)
         self.assertTrue(warnings == 0)
         self.assertTrue(result)
 
     def test_mets_amd(self):
-        result, failures, warnings = _test_validation('amd', METS_VALID)
+        result, failures, warnings, _ = _test_validation('amd', METS_VALID)
         self.assertTrue(failures == 0)
         self.assertTrue(warnings == 0)
         self.assertTrue(result)
 
     def test_mets_file(self):
-        result, failures, warnings = _test_validation('file', METS_VALID)
+        result, failures, warnings, _ = _test_validation('file', METS_VALID)
         self.assertTrue(failures == 0)
         self.assertTrue(warnings == 0)
         self.assertTrue(result)
 
     def test_mets_structmap(self):
-        result, failures, warnings = _test_validation('structmap', METS_VALID)
+        result, failures, warnings, _ = _test_validation('structmap', METS_VALID)
         self.assertTrue(failures == 0)
         self.assertTrue(warnings == 1)
         self.assertTrue(result)
@@ -175,7 +180,7 @@ def _test_validation(name, to_validate):
     for warning in rules.get_report().warnings:
         print(warning)
     report = rules.get_report()
-    return report.is_valid, len(rules.get_report().failures), len(rules.get_report().warnings)
+    return report.is_valid, len(rules.get_report().failures), len(rules.get_report().warnings), len(rules.get_report().infos)
 
 def _full_validation(name, to_validate):
     rules = SC.ValidationRules('CSIP', name)
