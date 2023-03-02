@@ -158,7 +158,7 @@ class Specification:
     def _processs_requirements(cls, req_root):
         requirements = {}
         for sect_ele in req_root:
-            section = sect_ele.get('ID')
+            section = sect_ele.tag.replace(METS_PROFILE_NS, '')
             reqs = []
             for req_ele in sect_ele:
                 requirement = cls.Requirement.from_element(req_ele)

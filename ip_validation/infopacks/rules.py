@@ -24,7 +24,7 @@
 #
 """Module to capture everything schematron validation related."""
 from enum import Enum, unique
-import logging
+import os
 
 from lxml import etree as ET
 from lxml.isoschematron import Schematron
@@ -38,13 +38,27 @@ SVRL_NS = "{http://purl.oclc.org/dsdl/svrl}"
 
 class ValidationRules():
     """Encapsulates a set of Schematron rules loaded from a file."""
-    def __init__(self, name, rules_path=None):
-        self.name = name
+    def __init__(self, specification, section, rules_path=None):
+        self._specification = specification
+        self._section = section
         if not rules_path:
-            rules_path = str(files(SCHEMATRON).joinpath('mets_{}_rules.xml'.format(name)))
+            rules_path = str(files(SCHEMATRON).joinpath(specification).joinpath('mets_{}_rules.xml'.format(section)))
+        if not os.path.exists(rules_path):
+            raise FileNotFoundError('Rules file not found: {}'.format(rules_path))
+        if not os.path.isfile(rules_path):
+            raise ValueError('Rules path is not a file: {}'.format(rules_path))
         self.rules_path = rules_path
-        logging.debug("path: %s", self.rules_path)
         self.ruleset = Schematron(file=self.rules_path, store_schematron=True, store_report=True)
+
+    @property
+    def specification(self):
+        """Get the specification ID."""
+        return self._specification
+
+    @property
+    def section(self):
+        """Get the specification section name."""
+        return self._section
 
     def get_assertions(self):
         """Generator that returns the rules one at a time."""
