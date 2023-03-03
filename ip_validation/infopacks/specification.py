@@ -32,23 +32,6 @@ import ip_validation.infopacks.resources.profiles as PROFILES
 import ip_validation.infopacks.resources.schemas as SCHEMA
 from ip_validation.infopacks.struct_reqs import STRUCT_REQS
 
-@unique
-class EarkSpecifications(Enum):
-    """Enumeration of E-ARK specifications."""
-    CSIP = 'E-ARK-CSIP'
-    SIP = 'E-ARK-SIP'
-    DIP = 'E-ARK-DIP'
-
-    @property
-    def path(self):
-        """Get the path to the specification file."""
-        return str(files(PROFILES).joinpath(self.value + '.xml'))
-
-    @property
-    def specification(self):
-        """Get the specification."""
-        return Specification.from_xml_file(self.path)
-
 METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(SCHEMA).joinpath('mets.profile.v2-0.xsd')))
 METS_PROFILE_NS = '{http://www.loc.gov/METS_Profile/v2}'
 
@@ -79,7 +62,7 @@ class Specification:
     def requirements(self):
         """Get the specification rules."""
         for section in self.sections:
-            for requirement in self._requirements[section]:
+            for requirement in self._requirements[section].values():
                 yield requirement
 
     @property
@@ -90,6 +73,21 @@ class Specification:
             req_count += len(self._requirements[sect])
         return req_count
 
+    def get_requirement_by_id(self, id):
+        """Retrieve a requirement by id."""
+        for sect in self.sections:
+            req = self.get_requirement_by_sect(id, sect)
+            if req:
+                return req
+        return None
+
+    def get_requirement_by_sect(self, id, section):
+        """Retrieve a requirement by id."""
+        sect = self._requirements[section]
+        if sect:
+            return sect.get(id)
+        return None
+
     def section_requirements(self, section=None):
         """Get the specification requirements, by section if offered."""
         requirements = []
@@ -97,7 +95,7 @@ class Specification:
             requirements = self._requirements[section]
         else:
             for sect in self.sections:
-                requirements += self._requirements[sect]
+                requirements += self._requirements[sect].values()
         return requirements
 
     @property
@@ -121,7 +119,7 @@ class Specification:
         return cls._from_xml(tree, schema)
 
     @classmethod
-    def from_xml_file(cls, xml_file=EarkSpecifications.CSIP.path, schema=METS_PROF_SCHEMA, add_struct=False):
+    def from_xml_file(cls, xml_file, schema=METS_PROF_SCHEMA, add_struct=False):
         """Create a Specification from an XML file."""
         tree = ET.parse(xml_file)
         return  cls._from_xml(tree, schema, add_struct=add_struct)
@@ -159,11 +157,11 @@ class Specification:
         requirements = {}
         for sect_ele in req_root:
             section = sect_ele.tag.replace(METS_PROFILE_NS, '')
-            reqs = []
+            reqs = {}
             for req_ele in sect_ele:
                 requirement = cls.Requirement.from_element(req_ele)
                 if not requirement.id.startswith('REF_'):
-                    reqs.append(cls.Requirement.from_element(req_ele))
+                    reqs.update({requirement.id: requirement})
             requirements[section] = reqs
         return requirements
 
@@ -271,3 +269,24 @@ class Specification:
 
 def _mets_ns(name):
     return '{}{}'.format(METS_PROFILE_NS, name)
+
+@unique
+class EarkSpecifications(Enum):
+    """Enumeration of E-ARK specifications."""
+    CSIP = 'E-ARK-CSIP'
+    SIP = 'E-ARK-SIP'
+    DIP = 'E-ARK-DIP'
+
+    def __init__(self, value):
+        self._path = str(files(PROFILES).joinpath(value + '.xml'))
+        self._specfication = Specification.from_xml_file(self._path)
+
+    @property
+    def path(self):
+        """Get the path to the specification file."""
+        self._path
+
+    @property
+    def specification(self):
+        """Get the specification."""
+        return self._specfication

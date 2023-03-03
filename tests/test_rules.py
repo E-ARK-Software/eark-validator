@@ -39,16 +39,16 @@ class ValidationRulesTest(unittest.TestCase):
     """Tests for Schematron validation rules."""
     @classmethod
     def setUpClass(cls):
-        cls._person_rules = SC.ValidationRules('test_spec', 'test_section', PERSON_PATH)
-        cls._mets_one_def_rules = SC.ValidationRules('test_spec', 'test_section', METS_ONE_DEF)
+        cls._person_rules = SC.SchematronRuleset('test_spec', 'test_section', PERSON_PATH)
+        cls._mets_one_def_rules = SC.SchematronRuleset('test_spec', 'test_section', METS_ONE_DEF)
 
     def test_file_not_found(self):
         with self.assertRaises(FileNotFoundError):
-            SC.ValidationRules('test', 'test', str(files(SCHEMATRON).joinpath('not-found.xml')))
+            SC.SchematronRuleset('test', 'test', str(files(SCHEMATRON).joinpath('not-found.xml')))
 
     def test_dir_value_err(self):
         with self.assertRaises(ValueError):
-            SC.ValidationRules('test', 'test', str(files(SCHEMATRON)))
+            SC.SchematronRuleset('test', 'test', str(files(SCHEMATRON)))
 
     def test_specification(self):
         self.assertEqual(self._person_rules.specification, 'test_spec')
@@ -173,7 +173,7 @@ class ValidationRulesTest(unittest.TestCase):
         self.assertTrue(result)
 
 def _test_validation(name, to_validate):
-    rules = SC.ValidationRules('CSIP', name)
+    rules = SC.SchematronRuleset('CSIP', name)
     rules.validate(str(files(XML).joinpath(to_validate)))
     for failure in rules.get_report().failures:
         print(failure)
@@ -183,7 +183,7 @@ def _test_validation(name, to_validate):
     return report.is_valid, len(rules.get_report().failures), len(rules.get_report().warnings), len(rules.get_report().infos)
 
 def _full_validation(name, to_validate):
-    rules = SC.ValidationRules('CSIP', name)
+    rules = SC.SchematronRuleset('CSIP', name)
     rules.validate(str(files(XML).joinpath(to_validate)))
     for failure in rules.get_report().failures:
         print(failure)

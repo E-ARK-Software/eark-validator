@@ -64,6 +64,13 @@ class SpecificationTest(unittest.TestCase):
         spec = SPEC.DIP.specification
         self.assertEqual(self._count_reqs(spec), spec.requirement_count)
 
+    def test_get_requirement(self):
+        spec = SPEC.CSIP.specification
+        rule_1 = spec.get_requirement_by_id('CSIP1')
+        rule_1_by_sect = spec.get_requirement_by_sect('CSIP1', 'metsRootElement')
+        self.assertEqual(rule_1, rule_1_by_sect)
+        self.assertIsNone(spec.get_requirement_by_id('CSIP999'))
+
     def test_sections(self):
         spec = SPEC.CSIP.specification
         self.assertTrue(spec.section_count > 0)

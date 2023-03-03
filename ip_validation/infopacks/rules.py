@@ -36,7 +36,7 @@ import ip_validation.infopacks.resources.schematron as SCHEMATRON
 SCHEMATRON_NS = "{http://purl.oclc.org/dsdl/schematron}"
 SVRL_NS = "{http://purl.oclc.org/dsdl/svrl}"
 
-class ValidationRules():
+class SchematronRuleset():
     """Encapsulates a set of Schematron rules loaded from a file."""
     def __init__(self, specification, section, rules_path=None):
         self._specification = specification
@@ -96,24 +96,26 @@ class ValidationRules():
 
 class ValidationProfile():
     """ A complete set of Schematron rule sets that comprise a complete validation profile."""
-    NAMES = {
-        'root': 'METS Root',
-        'hdr': 'METS Header',
-        'amd': 'Adminstrative Metadata',
-        'dmd': 'Descriptive Metadata',
-        'file': 'File Section',
-        'structmap': 'Structural Map'
-    }
-    SECTIONS = NAMES.keys()
 
-    def __init__(self):
-        self.rulesets = {}
+    def __init__(self, specification):
+        self._rulesets = {}
+        self._specification = specification
         self.is_valid = False
         self.is_wellformed = False
         self.results = {}
         self.messages = []
-        for section in self.SECTIONS:
-            self.rulesets[section] = ValidationRules(section)
+        for section in specification.sections:
+            self.rulesets[section] = SchematronRuleset(section)
+
+    @property
+    def specification(self):
+        """Get the specification."""
+        return self._specification
+
+    @property
+    def rulesets(self):
+        """ Get the Schematron rulesets."""
+        return self._rulesets
 
     def validate(self, to_validate):
         """Validates a file against each loaded ruleset."""
@@ -121,7 +123,7 @@ class ValidationProfile():
         self.is_wellformed = True
         self.results = {}
         self.messages = []
-        for section in self.SECTIONS:
+        for section in self.rulesets.keys():
             try:
                 self.rulesets[section].validate(to_validate)
             except ET.XMLSyntaxError as parse_err:

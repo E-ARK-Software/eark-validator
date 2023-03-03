@@ -86,17 +86,15 @@ class MetsValidator():
         # Handle relative package paths for representation METS files.
         self._package_root, mets = _handle_rel_paths(self._package_root, mets)
         try:
-            parsed_mets = etree.iterparse(mets, events=('start', 'end'), schema=MetsValidator.schema_mets)
+            parsed_mets = etree.iterparse(mets, schema=MetsValidator.schema_mets)
             for event, element in parsed_mets:
-                self._process_element(event, element)
+                self._process_element(element)
         except etree.XMLSyntaxError as synt_err:
             self._validation_errors.append(synt_err)
         return len(self._validation_errors) == 0
 
-    def _process_element(self, event, element):
+    def _process_element(self, element):
         # Define what to do with specific tags.
-        if event != 'end':
-            return
         if element.tag == _q(METS_NS, 'div') and \
             element.attrib['LABEL'].startswith('Representations/'):
             self._process_rep_div(element)
