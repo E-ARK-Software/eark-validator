@@ -28,3 +28,8 @@ E-ARK : Information package validation
 """
 
 from .mets import MetsValidator
+
+from .resources.xml import profiles as PROFILES
+from .resources.xml import schema as SCHEMA
+from .resources.xml import schematron as SCHEMATRON
+

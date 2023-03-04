@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema targetNamespace="http://DILCIS.eu/XML/METS/PROFILE" xmlns:xsd="http://www.w3.org/2001/XMLSchema" >
+<xsd:schema targetNamespace="http://DILCIS.eu/XML/METS/CSIP" xmlns:xsd="http://www.w3.org/2001/XMLSchema" >
 	<xsd:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="./xml.xsd"/>	
 	<xsd:import namespace="http://www.w3.org/1999/xhtml" schemaLocation="./xhtml1-strict.xsd"/>
 	<xsd:import namespace="http://www.w3.org/1999/xlink" schemaLocation="./xlink.xsd"/>
     <xsd:import namespace="http://www.loc.gov/METS/" schemaLocation="./mets.xsd"/>
-    <xsd:import namespace="http://www.loc.gov/METS_Profile/v2" schemaLocation="./mets.profile.v2-0.xsd"/>
+    <xsd:import namespace="https://DILCIS.eu/XML/METS/CSIPExtensionMETS" schemaLocation="./DILCISExtensionMETS.xsd"/>
+    <xsd:import namespace="https://DILCIS.eu/XML/METS/SIPExtensionMETS" schemaLocation="./DILCISExtensionSIPMETS.xsd"/>
 </xsd:schema>

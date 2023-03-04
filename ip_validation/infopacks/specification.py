@@ -28,8 +28,7 @@ from lxml import etree as ET
 
 from importlib_resources import files
 
-from ip_validation.infopacks.resources import PROFILES
-from ip_validation.infopacks.resources import SCHEMA
+from ip_validation.infopacks.resources import (PROFILES, SCHEMA)
 from ip_validation.infopacks.struct_reqs import STRUCT_REQS
 
 METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(SCHEMA).joinpath('mets.profile.local.v2-0.xsd')))
