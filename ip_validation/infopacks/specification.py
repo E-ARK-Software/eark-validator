@@ -28,11 +28,11 @@ from lxml import etree as ET
 
 from importlib_resources import files
 
-import ip_validation.infopacks.resources.profiles as PROFILES
-import ip_validation.infopacks.resources.schemas as SCHEMA
+from ip_validation.infopacks.resources import PROFILES
+from ip_validation.infopacks.resources import SCHEMA
 from ip_validation.infopacks.struct_reqs import STRUCT_REQS
 
-METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(SCHEMA).joinpath('mets.profile.v2-0.xsd')))
+METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(SCHEMA).joinpath('mets.profile.local.v2-0.xsd')))
 METS_PROFILE_NS = '{http://www.loc.gov/METS_Profile/v2}'
 
 class Specification:
@@ -113,24 +113,34 @@ class Specification:
             str(self.version) + ", date:" + str(self.date)
 
     @classmethod
-    def from_xml_string(cls, xml, schema=METS_PROF_SCHEMA):
+    def from_xml_string(cls, xml, add_struct=False):
         """Create a Specification from an XML string."""
-        tree = ET.fromstring(xml)
-        return cls._from_xml(tree, schema)
+        tree = ET.fromstring(xml, parser=cls._parser())
+        return cls._from_xml(tree, add_struct)
 
     @classmethod
-    def from_xml_file(cls, xml_file, schema=METS_PROF_SCHEMA, add_struct=False):
+    def from_xml_file(cls, xml_file, add_struct=False):
         """Create a Specification from an XML file."""
-        tree = ET.parse(xml_file)
-        return  cls._from_xml(tree, schema, add_struct=add_struct)
+        errors = []
+        try:
+            tree = ET.parse(xml_file, parser=cls._parser())
+            return  cls._from_xml(tree, add_struct=add_struct)
+        except ET.XMLSyntaxError as synt_err:
+            errors.append(synt_err)
 
     @classmethod
-    def _from_xml(cls, tree, schema, add_struct=False):
-        spec = cls.from_element(tree.getroot(), schema=schema, add_struct=add_struct)
+    def _parser(cls):
+        """Create a parser for the specification."""
+        parser = ET.XMLParser(schema=METS_PROF_SCHEMA, resolve_entities=False, no_network=True)
+        return parser
+
+    @classmethod
+    def _from_xml(cls, tree, add_struct=False):
+        spec = cls.from_element(tree.getroot(), add_struct=add_struct)
         return spec
 
     @classmethod
-    def from_element(cls, spec_ele, schema=METS_PROF_SCHEMA, add_struct=False):
+    def from_element(cls, spec_ele, add_struct=False):
         """Create a Specification from an XML element."""
         version = spec_ele.get('ID')
         title = date = ''

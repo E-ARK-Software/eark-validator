@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.loc.gov/METS_Profile/complete" xmlns:xsd="http://www.w3.org/2001/XMLSchema" >
+	<xsd:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>	
+	<xsd:import namespace="http://www.w3.org/1999/xhtml" schemaLocation="http://www.w3.org/2002/08/xhtml/xhtml1-strict.xsd"/>
+	<xsd:import namespace="http://www.w3.org/1999/xlink" schemaLocation="http://www.loc.gov/standards/xlink/xlink.xsd"/>
+    <xsd:import namespace="http://www.loc.gov/METS_Profile/v2" schemaLocation="./mets.profile.v2-0.xsd"/>
+    <xsd:import namespace="http://www.loc.gov/METS/" schemaLocation="http://www.loc.gov/standards/mets/mets.xsd"/>
+</xsd:schema>

@@ -31,7 +31,7 @@ from lxml.isoschematron import Schematron
 
 from importlib_resources import files
 
-import ip_validation.infopacks.resources.schematron as SCHEMATRON
+from ip_validation.infopacks.resources import SCHEMATRON
 
 SCHEMATRON_NS = "{http://purl.oclc.org/dsdl/schematron}"
 SVRL_NS = "{http://purl.oclc.org/dsdl/svrl}"

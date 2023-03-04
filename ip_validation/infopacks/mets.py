@@ -30,16 +30,16 @@ from lxml import etree
 
 from importlib_resources import files
 
-import ip_validation.infopacks.resources.schemas as SCHEMA
+from ip_validation.infopacks.resources import SCHEMA
 from ip_validation.infopacks.manifest import FileItem, Manifest
 
 XLINK_NS = 'http://www.w3.org/1999/xlink'
 METS_NS = 'http://www.loc.gov/METS/'
 DILCIS_EXT_NS = 'https://DILCIS.eu/XML/METS/CSIPExtensionMETS'
+METS_SCHEMA_LOC=str(files(SCHEMA).joinpath('mets.xsd'))
+METS_SCHEMA = etree.XMLSchema(file=METS_SCHEMA_LOC)
 
 class MetsValidator():
-    schema_mets = etree.XMLSchema(file=str(files(SCHEMA).joinpath('mets.xsd')))
-
     """Encapsulates METS schema validation."""
     def __init__(self, root):
         self._validation_errors = []
@@ -86,7 +86,7 @@ class MetsValidator():
         # Handle relative package paths for representation METS files.
         self._package_root, mets = _handle_rel_paths(self._package_root, mets)
         try:
-            parsed_mets = etree.iterparse(mets, schema=MetsValidator.schema_mets)
+            parsed_mets = etree.iterparse(mets, schema=METS_SCHEMA)
             for event, element in parsed_mets:
                 self._process_element(element)
         except etree.XMLSyntaxError as synt_err:
