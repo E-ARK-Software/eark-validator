@@ -25,10 +25,12 @@
 """Module to capture everything schematron validation related."""
 from enum import Enum, unique
 import os
+from importlib_resources import files
 
 from lxml import etree as ET
 
-from ip_validation.xml.schematron import SchematronRuleset, SVRL_NS
+from ip_validation.xml.resources import schematron as SCHEMATRON
+from ip_validation.xml.schematron import SchematronRuleset, SVRL_NS, get_schematron_path
 from ip_validation.infopacks.specification import EarkSpecifications, Specification
 from ip_validation.const import NO_PATH, NOT_FILE
 
@@ -42,7 +44,7 @@ class ValidationProfile():
         self.results = {}
         self.messages = []
         for section in specification.sections:
-            self.rulesets[section] = SchematronRuleset(specification.id, section)
+            self.rulesets[section] = SchematronRuleset(get_schematron_path(specification.id, section))
 
     @property
     def specification(self):

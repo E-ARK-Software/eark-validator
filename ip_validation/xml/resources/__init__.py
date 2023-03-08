@@ -26,7 +26,6 @@
 E-ARK : Information package validation
         Information Package modules
 """
-from .resources import profiles as PROFILES
-from .resources import schema as SCHEMA
-from .resources import schematron as SCHEMATRON
-from .resources.schematron import CSIP as CSIP
+from . import profiles as PROFILES
+from . import schema as SCHEMA
+from . import schematron as SCHEMATRON

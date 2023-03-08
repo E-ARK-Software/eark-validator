@@ -30,11 +30,12 @@ from importlib_resources import files
 
 from ip_validation.infopacks import rules as SC
 from ip_validation.infopacks.specification import EarkSpecifications
-
 import tests.resources.schematron as SCHEMATRON
 import tests.resources.xml as XML
 
 PERSON_PATH = str(files(SCHEMATRON).joinpath('person.xml'))
+NOT_FOUND_PATH = str(files(SCHEMATRON).joinpath('not-found.xml'))
+EMPTY_FILE_PATH = str(files('tests.resources').joinpath('empty.file'))
 METS_VALID = 'METS-valid.xml'
 METS_VALID_PATH = str(files(XML).joinpath(METS_VALID))
 METS_ONE_DEF = str(files(SCHEMATRON).joinpath('METS-one-default-ns.xml'))
@@ -48,32 +49,24 @@ class ValidationRulesTest(unittest.TestCase):
     """Tests for Schematron validation rules."""
     @classmethod
     def setUpClass(cls):
-        cls._person_rules = SC.SchematronRuleset('test_spec', 'test_section', PERSON_PATH)
-        cls._mets_one_def_rules = SC.SchematronRuleset('test_spec', 'test_section', METS_ONE_DEF)
+        cls._person_rules = SC.SchematronRuleset(PERSON_PATH)
+        cls._mets_one_def_rules = SC.SchematronRuleset(METS_ONE_DEF)
 
     def test_file_not_found(self):
         with self.assertRaises(FileNotFoundError):
-            SC.SchematronRuleset('test', 'test', str(files(SCHEMATRON).joinpath('not-found.xml')))
+            SC.SchematronRuleset(NOT_FOUND_PATH)
 
     def test_dir_value_err(self):
         with self.assertRaises(ValueError):
-            SC.SchematronRuleset('test', 'test', str(files(SCHEMATRON)))
+            SC.SchematronRuleset(str(files(SCHEMATRON)))
 
     def test_empty_file(self):
         with self.assertRaises(ValueError):
-            SC.SchematronRuleset('test', 'test', str(files('tests.resources').joinpath('empty.file')))
+            SC.SchematronRuleset(EMPTY_FILE_PATH)
 
     def test_notschematron_file(self):
         with self.assertRaises(ValueError):
-            SC.SchematronRuleset('test', 'test', str(files('tests.resources.xml').joinpath('person.xml')))
-
-    def test_specification(self):
-        self.assertEqual(self._person_rules.specification, 'test_spec')
-        self.assertEqual(self._mets_one_def_rules.specification, 'test_spec')
-
-    def test_section(self):
-        self.assertEqual(self._person_rules.section, 'test_section')
-        self.assertEqual(self._mets_one_def_rules.section, 'test_section')
+            SC.SchematronRuleset(str(files(XML).joinpath('person.xml')))
 
     def test_load_schematron(self):
         assert_count = 0
@@ -306,7 +299,7 @@ class ResultTest(unittest.TestCase):
             self._result.severity = SeverityTest.NOT_SEV
 
 def _test_validation(name, to_validate):
-    rules = SC.SchematronRuleset('CSIP', name)
+    rules = SC.SchematronRuleset(SC.get_schematron_path('CSIP', name))
     rules.validate(str(files(XML).joinpath(to_validate)))
     for failure in SC.TestReport.from_ruleset(rules.ruleset.validation_report).failures:
         print(failure)
@@ -316,7 +309,7 @@ def _test_validation(name, to_validate):
     return report.is_valid, len(report.failures), len(report.warnings), len(report.infos)
 
 def _full_validation(name, to_validate):
-    rules = SC.SchematronRuleset('CSIP', name)
+    rules = SC.SchematronRuleset(SC.get_schematron_path('CSIP', name))
     rules.validate(str(files(XML).joinpath(to_validate)))
     for failure in SC.TestReport.from_ruleset(rules.ruleset.validation_report).failures:
         print(failure)

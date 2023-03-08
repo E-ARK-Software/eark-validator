@@ -30,7 +30,7 @@ from lxml import etree
 from importlib_resources import files
 
 
-from .resources.xml import schema as SCHEMA
+from .resources import schema as SCHEMA
 
 METS_NS = 'http://www.loc.gov/METS/'
 CSIP_NS = 'https://DILCIS.eu/XML/METS/CSIPExtensionMETS'

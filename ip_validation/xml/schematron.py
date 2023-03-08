@@ -24,13 +24,12 @@
 #
 """Module to capture everything schematron validation related."""
 import os
+from importlib_resources import files
 
 from lxml import etree as ET
 from lxml.isoschematron import Schematron
 
-from importlib_resources import files
-
-from ip_validation.xml import SCHEMATRON
+from .resources import schematron as SCHEMATRON
 from ip_validation.const import NO_PATH, NOT_FILE
 
 SCHEMATRON_NS = "{http://purl.oclc.org/dsdl/schematron}"
@@ -38,11 +37,7 @@ SVRL_NS = "{http://purl.oclc.org/dsdl/svrl}"
 
 class SchematronRuleset():
     """Encapsulates a set of Schematron rules loaded from a file."""
-    def __init__(self, specification, section, rules_path=None):
-        self._specification = specification
-        self._section = section
-        if not rules_path:
-            rules_path = str(files(SCHEMATRON).joinpath(specification).joinpath('mets_{}_rules.xml'.format(section)))
+    def __init__(self, rules_path=None):
         if not os.path.exists(rules_path):
             raise FileNotFoundError(NO_PATH.format(rules_path))
         if not os.path.isfile(rules_path):
@@ -77,3 +72,6 @@ class SchematronRuleset():
         """Validate a file against the loaded Schematron ruleset."""
         xml_file = ET.parse(to_validate)
         self.ruleset.validate(xml_file)
+    
+def get_schematron_path(id, section):
+    return str(files(SCHEMATRON).joinpath(id).joinpath('mets_{}_rules.xml'.format(section)))
