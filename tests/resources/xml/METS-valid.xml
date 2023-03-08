@@ -87,7 +87,7 @@
           <FLocat LOCTYPE="URL" xlink:href="schemas/XMLSchema.xsd" xlink:type="simple"/>
         </file>
       </fileGrp>
-      <fileGrp USE="Representations" ID="ID-minimal_with_schemas_fileGrp_representations" csip:CONTENTINFORMATIONTYPE="NOT-OTHER">
+      <fileGrp USE="Representations" ID="ID-minimal_with_schemas_fileGrp_representations" csip:CONTENTINFORMATIONTYPE="ERMS">
         <!-- CSIP60 there MUST be a fileGrp-element -->
         <!-- CSIP64 there MUST be an USE-attribute -->
         <!-- CSIP65 there MUST be an ID-attribute -->

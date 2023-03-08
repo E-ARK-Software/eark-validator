@@ -32,6 +32,8 @@ from lxml.isoschematron import Schematron
 from importlib_resources import files
 
 from ip_validation.infopacks.resources import SCHEMATRON
+from ip_validation.infopacks.specification import EarkSpecifications, Specification
+from ip_validation.infopacks.const import NO_PATH, NOT_FILE
 
 SCHEMATRON_NS = "{http://purl.oclc.org/dsdl/schematron}"
 SVRL_NS = "{http://purl.oclc.org/dsdl/svrl}"
@@ -44,11 +46,16 @@ class SchematronRuleset():
         if not rules_path:
             rules_path = str(files(SCHEMATRON).joinpath(specification).joinpath('mets_{}_rules.xml'.format(section)))
         if not os.path.exists(rules_path):
-            raise FileNotFoundError('Rules file not found: {}'.format(rules_path))
+            raise FileNotFoundError(NO_PATH.format(rules_path))
         if not os.path.isfile(rules_path):
-            raise ValueError('Rules path is not a file: {}'.format(rules_path))
+            raise ValueError(NOT_FILE.format(rules_path))
         self.rules_path = rules_path
-        self.ruleset = Schematron(file=self.rules_path, store_schematron=True, store_report=True)
+        try:
+            self.ruleset = Schematron(file=self.rules_path, store_schematron=True, store_report=True)
+        except ET.SchematronParseError as ex:
+            raise ValueError('Rules file is not valid XML: {}. {}'.format(rules_path, ex.error_log.last_error.message ))
+        except KeyError as ex:
+            raise ValueError('Rules file is not valid Schematron: {}. {}'.format(rules_path, ex.__doc__))
 
     @property
     def specification(self):
@@ -96,7 +103,6 @@ class SchematronRuleset():
 
 class ValidationProfile():
     """ A complete set of Schematron rule sets that comprise a complete validation profile."""
-
     def __init__(self, specification):
         self._rulesets = {}
         self._specification = specification
@@ -105,7 +111,7 @@ class ValidationProfile():
         self.results = {}
         self.messages = []
         for section in specification.sections:
-            self.rulesets[section] = SchematronRuleset(section)
+            self.rulesets[section] = SchematronRuleset(specification.id, section)
 
     @property
     def specification(self):
@@ -119,6 +125,10 @@ class ValidationProfile():
 
     def validate(self, to_validate):
         """Validates a file against each loaded ruleset."""
+        if not os.path.exists(to_validate):
+            raise FileNotFoundError(NO_PATH.format(to_validate))
+        if not os.path.isfile(to_validate):
+            raise ValueError(NOT_FILE.format(to_validate))
         is_valid = True
         self.is_wellformed = True
         self.results = {}
@@ -129,7 +139,7 @@ class ValidationProfile():
             except ET.XMLSyntaxError as parse_err:
                 self.is_wellformed = False
                 self.is_valid = False
-                self.messages.append(parse_err.msg)
+                self.messages.append('File {} is not valid XML. {}'.format(to_validate, parse_err.msg))
                 return
             self.results[section] = self.rulesets[section].get_report()
             if not self.results[section].is_valid:
@@ -144,16 +154,35 @@ class ValidationProfile():
         """Return only the results for element name."""
         return self.results.get(name)
 
+    @classmethod
+    def from_specification(cls, specification):
+        """Create a validation profile from a specification."""
+        if isinstance(specification, str):
+            specification = EarkSpecifications.from_id(specification)
+        if isinstance(specification, EarkSpecifications):
+            specification = specification.specification
+        if not isinstance(specification, Specification):
+            raise ValueError('Specification must be a Specification instance or valid specification ID.')
+        return cls(specification)
+
 @unique
 class Severity(Enum):
     """Enum covering information package validation statuses."""
-    UNK = "Unknown"
+    UNKNOWN = "Unknown"
     # Information level, possibly not best practise
-    INF = "Information"
+    INFO = "Information"
     # Non-fatal issue that should be corrected
-    WRN = "Warning"
+    WARN = "Warning"
     # Error level message means invalid package
-    ERR = "Error"
+    ERROR = "Error"
+
+    @classmethod
+    def from_id(cls, id):
+        """Get the enum from the value."""
+        for severity in cls:
+            if severity.name == id or severity.value == id:
+                return severity
+        return None
 
 class TestResult():
     """Encapsulates an individual validation test result."""
@@ -175,6 +204,8 @@ class TestResult():
 
     @severity.setter
     def severity(self, value):
+        if not isinstance(value, Severity):
+            value = Severity.from_id(value)
         if value not in list(Severity):
             raise ValueError("Illegal severity value")
         self._severity = value
@@ -204,16 +235,12 @@ class TestResult():
         context = rule.get('context')
         rule_id = failed_assert.get('id')
         test = failed_assert.get('test')
-        severity = Severity.WRN if failed_assert.get('role', "ERROR") == 'WARN' else Severity.ERR
+        severity = Severity.from_id(failed_assert.get('role', Severity.UNKNOWN.name))
         location = failed_assert.get('location')
         message = failed_assert.find(SVRL_NS + 'text').text
         schmtrn_loc = SchematronLocation(context, test, location)
         return cls(rule_id, schmtrn_loc, message, severity)
 
-    @classmethod
-    def from_element_warn(cls, rule, failed_assert):
-        """Create a warning from an element."""
-        return cls.from_element(rule, failed_assert, Severity.WRN)
 
 class TestReport():
     """A report made up of validation results."""

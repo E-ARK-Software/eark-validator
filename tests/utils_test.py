@@ -24,7 +24,7 @@
 #
 """Module that holds common utilities for unit testing."""
 from ip_validation.infopacks.rules import Severity
-def contains_rule_id(error_list, rule_id, severity=Severity.ERR):
+def contains_rule_id(error_list, rule_id, severity=Severity.ERROR):
     """Check that a particular error with specified severity is present in a list
     of errors."""
     for val_error in error_list:

@@ -27,8 +27,7 @@ from enum import Enum, unique
 import hashlib
 import os
 
-NO_PATH='Path {} does not exist.'
-NOT_DIR='Path {} is not a directory.'
+from .const import NO_PATH, NOT_DIR
 @unique
 class HashAlgorithms(Enum):
     """Enum covering information package validation statuses."""

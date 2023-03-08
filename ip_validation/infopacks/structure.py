@@ -43,9 +43,9 @@ SUB_MESS_NOT_EXIST = 'Path {} does not exist'
 SUB_MESS_NOT_ARCH = 'Path {} is not a directory or archive format file.'
 # Map requirement levels to severity
 LEVEL_SEVERITY = {
-    'MUST': Severity.ERR,
-    'SHOULD': Severity.WRN,
-    'MAY': Severity.INF
+    'MUST': Severity.ERROR,
+    'SHOULD': Severity.WARN,
+    'MAY': Severity.INFO
 }
 @unique
 class StructureStatus(Enum):
@@ -103,11 +103,11 @@ class StructureReport:
 
     def add_error(self, error):
         """Add a validation error to package lists."""
-        if error.severity == Severity.INF:
+        if error.severity == Severity.INFO:
             self._infos.append(error)
-        elif error.severity == Severity.WRN:
+        elif error.severity == Severity.WARN:
             self._warnings.append(error)
-        elif error.severity == Severity.ERR:
+        elif error.severity == Severity.ERROR:
             self._errors.append(error)
             self.status = StructureStatus.NotWellFormed
 
@@ -159,7 +159,7 @@ class StructError():
     """Encapsulates an individual validation test result."""
     def __init__(self, requirement, sub_message):
         self._requirement = requirement
-        self.severity = LEVEL_SEVERITY.get(requirement.level, Severity.UNK)
+        self.severity = LEVEL_SEVERITY.get(requirement.level, Severity.UNKNOWN)
         self._sub_message = sub_message
 
     @property
@@ -181,17 +181,17 @@ class StructError():
     @property
     def is_error(self):
         """Returns True if this is an error message, false otherwise."""
-        return self.severity == Severity.ERR
+        return self.severity == Severity.ERROR
 
     @property
     def is_info(self):
         """Returns True if this is an info message, false otherwise."""
-        return self.severity == Severity.INF
+        return self.severity == Severity.INFO
 
     @property
     def is_warning(self):
         """Returns True if this is an warning message, false otherwise."""
-        return self.severity == Severity.WRN
+        return self.severity == Severity.WARN
 
     @property
     def message(self):

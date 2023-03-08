@@ -37,6 +37,7 @@ TEST_DEPS = [
     'pytest',
     'pylint',
     'pytest-cov',
+    'pre-commit',
 ]
 
 EXTRAS = {

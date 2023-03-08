@@ -25,27 +25,40 @@
 """Module covering information package structure validation and navigation."""
 from enum import Enum, unique
 from lxml import etree as ET
+import os
 
 from importlib_resources import files
 
 from ip_validation.infopacks.resources import (PROFILES, SCHEMA)
 from ip_validation.infopacks.struct_reqs import STRUCT_REQS
+from ip_validation.infopacks.const import NOT_FILE, NO_PATH
 
 METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(SCHEMA).joinpath('mets.profile.local.v2-0.xsd')))
 METS_PROFILE_NS = '{http://www.loc.gov/METS_Profile/v2}'
 
 class Specification:
     """Stores the vital facts and figures an IP specification."""
-    def __init__(self, title, version, date, requirements=None):
+    def __init__(self, title, url, version, date, requirements=None):
         self._title = title
+        self._url = url
         self._version = version
         self._date = date
         self._requirements = requirements if requirements else {}
 
     @property
+    def id(self):
+        """Get the id of the specification."""
+        return EarkSpecifications.from_id(self.url).name
+
+    @property
     def title(self):
         """Get the name of the specification."""
         return self._title
+
+    @property
+    def url(self):
+        """Get the name of the specification."""
+        return self._url
 
     @property
     def version(self):
@@ -112,20 +125,14 @@ class Specification:
             str(self.version) + ", date:" + str(self.date)
 
     @classmethod
-    def from_xml_string(cls, xml, add_struct=False):
-        """Create a Specification from an XML string."""
-        tree = ET.fromstring(xml, parser=cls._parser())
-        return cls._from_xml(tree, add_struct)
-
-    @classmethod
-    def from_xml_file(cls, xml_file, add_struct=False):
+    def _from_xml_file(cls, xml_file, add_struct=False):
+        if not os.path.exists(xml_file):
+            raise FileNotFoundError(NO_PATH.format(xml_file))
+        if not os.path.isfile(xml_file):
+            raise ValueError(NOT_FILE.format(xml_file))
         """Create a Specification from an XML file."""
-        errors = []
-        try:
-            tree = ET.parse(xml_file, parser=cls._parser())
-            return  cls._from_xml(tree, add_struct=add_struct)
-        except ET.XMLSyntaxError as synt_err:
-            errors.append(synt_err)
+        tree = ET.parse(xml_file, parser=cls._parser())
+        return  cls._from_xml(tree, add_struct=add_struct)
 
     @classmethod
     def _parser(cls):
@@ -144,6 +151,7 @@ class Specification:
         version = spec_ele.get('ID')
         title = date = ''
         requirements = {}
+        profile = ''
         # Loop through the child eles
         for child in spec_ele:
             if child.tag == _mets_ns('title'):
@@ -154,12 +162,14 @@ class Specification:
                 date = child.text
             elif child.tag == _mets_ns('structural_requirements'):
                 requirements = cls._processs_requirements(child)
+            elif child.tag == _mets_ns('URI'):
+                profile = child.text
         if add_struct:
             # Add the structural requirements
             struct_reqs = Specification.StructuralRequirement._get_struct_reqs()
             requirements['structure'] = struct_reqs
         # Return the Specification
-        return cls(title, version, date, requirements=requirements)
+        return cls(title, profile, version, date, requirements=requirements)
 
     @classmethod
     def _processs_requirements(cls, req_root):
@@ -288,7 +298,12 @@ class EarkSpecifications(Enum):
 
     def __init__(self, value):
         self._path = str(files(PROFILES).joinpath(value + '.xml'))
-        self._specfication = Specification.from_xml_file(self._path)
+        self._specfication = Specification._from_xml_file(self._path)
+
+    @property
+    def id(self):
+        """Get the specification id."""
+        return self.name
 
     @property
     def path(self):
@@ -296,6 +311,24 @@ class EarkSpecifications(Enum):
         self._path
 
     @property
+    def title(self):
+        """Get the specification title."""
+        self.value
+
+    @property
     def specification(self):
         """Get the specification."""
         return self._specfication
+
+    @property
+    def profile(self):
+        """Get the specification profile url."""
+        return 'https://eark{}.dilcis.eu/profile/{}.xml'.format(self.name.lower(), self.value)
+
+    @classmethod
+    def from_id(cls, id):
+        """Get the enum from the value."""
+        for spec in cls:
+            if spec.id == id or spec.value == id or spec.profile == id:
+                return spec
+        return None

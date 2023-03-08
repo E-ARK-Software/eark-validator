@@ -30,9 +30,11 @@ from importlib_resources import files
 import tests.resources.xml as XML
 import tests.resources.ips.unpacked as UNPACKED
 
-from ip_validation import MetsValidator
+from ip_validation.infopacks.mets import MetsValidator
+from ip_validation.infopacks import LOCAL_SCHEMA, get_local_schema
 
-class MetsTest(unittest.TestCase):
+METS_XML = 'METS.xml'
+class MetsValidatorTest(unittest.TestCase):
     """Tests for Schematron validation rules."""
     def test_mets_root(self):
         validator = MetsValidator(str(files(XML)))
@@ -52,7 +54,7 @@ class MetsTest(unittest.TestCase):
 
     def test_multi_mets(self):
         validator = MetsValidator(str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')))
-        is_valid = validator.validate_mets('METS.xml')
+        is_valid = validator.validate_mets(METS_XML)
         self.assertTrue(is_valid)
         self.assertTrue(len(validator.validation_errors) == 0)
         self.assertTrue(len(validator.representations) == 1)
@@ -65,14 +67,20 @@ class MetsTest(unittest.TestCase):
 
     def test_bad_manifest(self):
         validator = MetsValidator(str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031-bad')))
-        is_valid = validator.validate_mets('METS.xml')
+        is_valid = validator.validate_mets(METS_XML)
         self.assertTrue(is_valid)
         self.assertTrue(len(validator.validation_errors) == 0)
         self.assertTrue(len(validator.representations) == 1)
         self.assertTrue(len(validator.file_references) > 0)
         is_complete, issues = validator.get_manifest().check_integrity()
         self.assertFalse(is_complete)
-        self.assertEqual(len(issues), 4)
+        self.assertEqual(len(issues), 24)
+
+class SchemaTest(unittest.TestCase):
+    def test_schema(self):
+        for namespace in LOCAL_SCHEMA:
+            schema = get_local_schema(namespace)
+            self.assertIsNotNone(schema)
 
 if __name__ == '__main__':
     unittest.main()

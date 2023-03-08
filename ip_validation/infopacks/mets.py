@@ -23,7 +23,6 @@
 # under the License.
 #
 """METS Schema validation."""
-import fnmatch
 import os
 
 from lxml import etree
@@ -32,12 +31,14 @@ from importlib_resources import files
 
 from ip_validation.infopacks.resources import SCHEMA
 from ip_validation.infopacks.manifest import FileItem, Manifest
+from ip_validation.infopacks import METS_NS, XLINK_NS
 
-XLINK_NS = 'http://www.w3.org/1999/xlink'
-METS_NS = 'http://www.loc.gov/METS/'
-DILCIS_EXT_NS = 'https://DILCIS.eu/XML/METS/CSIPExtensionMETS'
 METS_SCHEMA_LOC=str(files(SCHEMA).joinpath('mets.xsd'))
+CSIP_SCHEMA_LOC=str(files(SCHEMA).joinpath('mets.csip.local.v2-0.xsd'))
+SIP_SCHEMA_LOC=str(files(SCHEMA).joinpath('mets.sip.local.v2-0.xsd'))
 METS_SCHEMA = etree.XMLSchema(file=METS_SCHEMA_LOC)
+CSIP_SCHEMA = etree.XMLSchema(file=CSIP_SCHEMA_LOC)
+
 
 class MetsValidator():
     """Encapsulates METS schema validation."""
@@ -86,7 +87,7 @@ class MetsValidator():
         # Handle relative package paths for representation METS files.
         self._package_root, mets = _handle_rel_paths(self._package_root, mets)
         try:
-            parsed_mets = etree.iterparse(mets, schema=METS_SCHEMA)
+            parsed_mets = etree.iterparse(mets, schema=CSIP_SCHEMA)
             for event, element in parsed_mets:
                 self._process_element(element)
         except etree.XMLSyntaxError as synt_err:

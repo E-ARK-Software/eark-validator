@@ -1,0 +1,7 @@
+<schema xmlns="http://purl.oclc.org/dsdl/schematron">
+  <ns prefix="mets" uri="http://www.loc.gov/METS/" />
+  <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
+  <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
+  <pattern id="METS_behaviorSec_element">
+  </pattern>
+</schema>

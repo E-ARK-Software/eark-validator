@@ -1,0 +1,7 @@
+<schema xmlns="http://purl.oclc.org/dsdl/schematron">
+  <ns prefix="mets" uri="http://www.loc.gov/METS/" />
+  <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
+  <pattern id="METS_header_element">
+    <title>Use of the METS header</title>
+  </pattern>
+</schema>
