@@ -83,23 +83,23 @@ class ValidationRulesTest(unittest.TestCase):
 
     def test_validate_person(self):
         self._person_rules.validate(str(files(XML).joinpath('person.xml')))
-        self.assertTrue(self._person_rules.get_report().is_valid)
+        self.assertTrue(SC.TestReport.from_ruleset(self._person_rules.ruleset.validation_report).is_valid)
 
     def test_validate_invalid_person(self):
         self._person_rules.validate(str(files(XML).joinpath('invalid-person.xml')))
-        self.assertFalse(self._person_rules.get_report().is_valid)
+        self.assertFalse(SC.TestReport.from_ruleset(self._person_rules.ruleset.validation_report).is_valid)
 
     def test_validate_mets(self):
         self._mets_one_def_rules.validate(METS_VALID_PATH)
-        self.assertTrue(self._mets_one_def_rules.get_report().is_valid)
+        self.assertTrue(SC.TestReport.from_ruleset(self._mets_one_def_rules.ruleset.validation_report).is_valid)
 
     def test_validate_mets_no_root(self):
         self._mets_one_def_rules.validate(str(files(XML).joinpath('METS-no-root.xml')))
-        self.assertFalse(self._mets_one_def_rules.get_report().is_valid)
+        self.assertFalse(SC.TestReport.from_ruleset(self._mets_one_def_rules.ruleset.validation_report).is_valid)
 
     def test_validate_mets_no_objid(self):
         self._mets_one_def_rules.validate(str(files(XML).joinpath('METS-no-objid.xml')))
-        self.assertFalse(self._mets_one_def_rules.get_report().is_valid)
+        self.assertFalse(SC.TestReport.from_ruleset(self._mets_one_def_rules.ruleset.validation_report).is_valid)
 
     def test_mets_root(self):
         result, failures, _, _ = _test_validation(METS_ROOT_RULES, METS_VALID)
@@ -308,19 +308,19 @@ class ResultTest(unittest.TestCase):
 def _test_validation(name, to_validate):
     rules = SC.SchematronRuleset('CSIP', name)
     rules.validate(str(files(XML).joinpath(to_validate)))
-    for failure in rules.get_report().failures:
+    for failure in SC.TestReport.from_ruleset(rules.ruleset.validation_report).failures:
         print(failure)
-    for warning in rules.get_report().warnings:
+    for warning in SC.TestReport.from_ruleset(rules.ruleset.validation_report).warnings:
         print(warning)
-    report = rules.get_report()
-    return report.is_valid, len(rules.get_report().failures), len(rules.get_report().warnings), len(rules.get_report().infos)
+    report = SC.TestReport.from_ruleset(rules.ruleset.validation_report)
+    return report.is_valid, len(report.failures), len(report.warnings), len(report.infos)
 
 def _full_validation(name, to_validate):
     rules = SC.SchematronRuleset('CSIP', name)
     rules.validate(str(files(XML).joinpath(to_validate)))
-    for failure in rules.get_report().failures:
+    for failure in SC.TestReport.from_ruleset(rules.ruleset.validation_report).failures:
         print(failure)
-    for warning in rules.get_report().warnings:
+    for warning in SC.TestReport.from_ruleset(rules.ruleset.validation_report).warnings:
         print(warning)
-    report = rules.get_report()
-    return report.is_valid, rules.get_report().failures, rules.get_report().warnings
+    report = SC.TestReport.from_ruleset(rules.ruleset.validation_report)
+    return report.is_valid, report.failures, report.warnings

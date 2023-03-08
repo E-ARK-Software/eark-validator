@@ -26,8 +26,8 @@
 import os
 from lxml import etree
 
-from .const import NO_PATH, NOT_FILE, NOT_VALID_FILE
-from ip_validation.infopacks import METS_NS, CSIP_NS
+from ip_validation.const import NO_PATH, NOT_FILE, NOT_VALID_FILE
+from ip_validation.xml.schema import METS_NS, CSIP_NS
 from ip_validation.infopacks.manifest import Manifest
 
 class InformationPackage:

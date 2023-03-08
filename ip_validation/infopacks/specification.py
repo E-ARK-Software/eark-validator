@@ -29,9 +29,9 @@ import os
 
 from importlib_resources import files
 
-from ip_validation.infopacks.resources import (PROFILES, SCHEMA)
+from ip_validation.xml import (PROFILES, SCHEMA)
 from ip_validation.infopacks.struct_reqs import STRUCT_REQS
-from ip_validation.infopacks.const import NOT_FILE, NO_PATH
+from ip_validation.const import NOT_FILE, NO_PATH
 
 METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(SCHEMA).joinpath('mets.profile.local.v2-0.xsd')))
 METS_PROFILE_NS = '{http://www.loc.gov/METS_Profile/v2}'

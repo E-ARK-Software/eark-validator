@@ -26,7 +26,6 @@
 E-ARK : Information package validation
         Information Package modules
 """
-
-from .xml import profiles as PROFILES
-from .xml import schema as SCHEMA
-from .xml import schematron as SCHEMATRON
+from .resources.xml import profiles as PROFILES
+from .resources.xml import schema as SCHEMA
+from .resources.xml import schematron as SCHEMATRON

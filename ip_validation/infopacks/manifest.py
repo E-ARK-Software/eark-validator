@@ -27,7 +27,7 @@ from enum import Enum, unique
 import hashlib
 import os
 
-from .const import NO_PATH, NOT_DIR
+from ip_validation.const import NO_PATH, NOT_DIR
 @unique
 class HashAlgorithms(Enum):
     """Enum covering information package validation statuses."""

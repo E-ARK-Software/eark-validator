@@ -31,7 +31,7 @@ import tests.resources.xml as XML
 import tests.resources.ips.unpacked as UNPACKED
 
 from ip_validation.infopacks.mets import MetsValidator
-from ip_validation.infopacks import LOCAL_SCHEMA, get_local_schema
+from ip_validation.xml.schema import LOCAL_SCHEMA, get_local_schema
 
 METS_XML = 'METS.xml'
 class MetsValidatorTest(unittest.TestCase):
@@ -49,6 +49,12 @@ class MetsValidatorTest(unittest.TestCase):
     def test_invalid_mets(self):
         validator = MetsValidator(str(files(XML)))
         is_valid = validator.validate_mets('METS-no-root.xml')
+        self.assertFalse(is_valid)
+        self.assertTrue(len(validator.validation_errors) > 0)
+
+    def test_mets_no_structmap(self):
+        validator = MetsValidator(str(files(XML)))
+        is_valid = validator.validate_mets('METS-no-structmap.xml')
         self.assertFalse(is_valid)
         self.assertTrue(len(validator.validation_errors) > 0)
 

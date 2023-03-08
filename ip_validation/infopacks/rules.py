@@ -27,79 +27,10 @@ from enum import Enum, unique
 import os
 
 from lxml import etree as ET
-from lxml.isoschematron import Schematron
 
-from importlib_resources import files
-
-from ip_validation.infopacks.resources import SCHEMATRON
+from ip_validation.xml.schematron import SchematronRuleset, SVRL_NS
 from ip_validation.infopacks.specification import EarkSpecifications, Specification
-from ip_validation.infopacks.const import NO_PATH, NOT_FILE
-
-SCHEMATRON_NS = "{http://purl.oclc.org/dsdl/schematron}"
-SVRL_NS = "{http://purl.oclc.org/dsdl/svrl}"
-
-class SchematronRuleset():
-    """Encapsulates a set of Schematron rules loaded from a file."""
-    def __init__(self, specification, section, rules_path=None):
-        self._specification = specification
-        self._section = section
-        if not rules_path:
-            rules_path = str(files(SCHEMATRON).joinpath(specification).joinpath('mets_{}_rules.xml'.format(section)))
-        if not os.path.exists(rules_path):
-            raise FileNotFoundError(NO_PATH.format(rules_path))
-        if not os.path.isfile(rules_path):
-            raise ValueError(NOT_FILE.format(rules_path))
-        self.rules_path = rules_path
-        try:
-            self.ruleset = Schematron(file=self.rules_path, store_schematron=True, store_report=True)
-        except ET.SchematronParseError as ex:
-            raise ValueError('Rules file is not valid XML: {}. {}'.format(rules_path, ex.error_log.last_error.message ))
-        except KeyError as ex:
-            raise ValueError('Rules file is not valid Schematron: {}. {}'.format(rules_path, ex.__doc__))
-
-    @property
-    def specification(self):
-        """Get the specification ID."""
-        return self._specification
-
-    @property
-    def section(self):
-        """Get the specification section name."""
-        return self._section
-
-    def get_assertions(self):
-        """Generator that returns the rules one at a time."""
-        xml_rules = ET.XML(bytes(self.ruleset.schematron))
-
-        for ele in xml_rules.iter():
-            if ele.tag == SCHEMATRON_NS + 'assert':
-                yield ele
-
-    def validate(self, to_validate):
-        """Validate a file against the loaded Schematron ruleset."""
-        xml_file = ET.parse(to_validate)
-        self.ruleset.validate(xml_file)
-
-    def get_report(self):
-        """Get the report from the last validation."""
-        xml_report = ET.XML(bytes(self.ruleset.validation_report))
-        failures = []
-        warnings = []
-        infos = []
-        is_valid = True
-        rule = None
-        for ele in xml_report.iter():
-            if ele.tag == SVRL_NS + 'fired-rule':
-                rule = ele
-            elif (ele.tag == SVRL_NS + 'failed-assert') or (ele.tag == SVRL_NS + 'successful-report'):
-                if ele.get('role') == 'INFO':
-                    infos.append(TestResult.from_element(rule, ele))
-                elif ele.get('role') == 'WARN':
-                    warnings.append(TestResult.from_element(rule, ele))
-                else:
-                    is_valid = False
-                    failures.append(TestResult.from_element(rule, ele))
-        return TestReport(is_valid, failures, warnings, infos)
+from ip_validation.const import NO_PATH, NOT_FILE
 
 class ValidationProfile():
     """ A complete set of Schematron rule sets that comprise a complete validation profile."""
@@ -141,7 +72,7 @@ class ValidationProfile():
                 self.is_valid = False
                 self.messages.append('File {} is not valid XML. {}'.format(to_validate, parse_err.msg))
                 return
-            self.results[section] = self.rulesets[section].get_report()
+            self.results[section] = TestReport.from_ruleset(self.rulesets[section].ruleset.validation_report)
             if not self.results[section].is_valid:
                 is_valid = False
         self.is_valid = is_valid
@@ -269,6 +200,28 @@ class TestReport():
     def infos(self):
         """Get the warnings."""
         return self._infos
+
+    @classmethod
+    def from_ruleset(cls, ruleset):
+        """Get the report from the last validation."""
+        xml_report = ET.XML(bytes(ruleset))
+        failures = []
+        warnings = []
+        infos = []
+        is_valid = True
+        rule = None
+        for ele in xml_report.iter():
+            if ele.tag == SVRL_NS + 'fired-rule':
+                rule = ele
+            elif (ele.tag == SVRL_NS + 'failed-assert') or (ele.tag == SVRL_NS + 'successful-report'):
+                if ele.get('role') == 'INFO':
+                    infos.append(TestResult.from_element(rule, ele))
+                elif ele.get('role') == 'WARN':
+                    warnings.append(TestResult.from_element(rule, ele))
+                else:
+                    is_valid = False
+                    failures.append(TestResult.from_element(rule, ele))
+        return TestReport(is_valid, failures, warnings, infos)
 
 
 class SchematronLocation():
