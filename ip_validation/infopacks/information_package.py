@@ -30,31 +30,18 @@ from ip_validation.const import NO_PATH, NOT_FILE, NOT_VALID_FILE
 from ip_validation.xml.schema import METS_NS, CSIP_NS
 from ip_validation.infopacks.manifest import Manifest
 
-class InformationPackage:
-    """Stores the vital facts and figures about a package."""
-    def __init__(self, path, details, manifest=None):
-        self._path = path
-        self._details = details
-        self._manifest = manifest if manifest else Manifest.from_directory(path)
-
-    @property
-    def path(self):
-        """Get the specification of the package."""
-        return self._path
-
-    @property
-    def details(self):
-        """Get the package details."""
-        return self._details
-
-    @property
-    def manifest(self):
-        """Return the package manifest."""
-        return self._manifest
-
 class PackageDetails:
 
-    def __init__(self, objid, label, type, othertype, contentinformationtype, profile, oaispackagetype, ns):
+    def __init__(
+            self: str,
+            objid: str,
+            label: str,
+            type: str,
+            othertype: str,
+            contentinformationtype: str,
+            profile: str,
+            oaispackagetype: str,
+            ns: str):
         self._objid = objid
         self._label = label
         self._type = type
@@ -65,39 +52,39 @@ class PackageDetails:
         self._ns = ns
 
     @property
-    def objid(self):
+    def objid(self) -> str:
         return self._objid
 
     @property
-    def label(self):
+    def label(self) -> str:
         return self._label
 
     @property
-    def type(self):
+    def type(self) -> str:
         return self._type
 
     @property
-    def othertype(self):
+    def othertype(self) -> str:
         return self._othertype
 
     @property
-    def contentinformationtype(self):
+    def contentinformationtype(self) -> str:
         return self._contentinformationtype
 
     @property
-    def profile(self):
+    def profile(self) -> str:
         return self._profile
 
     @property
-    def oaispackagetype(self):
+    def oaispackagetype(self) -> str:
         return self._oaispackagetype
 
     @property
-    def namespaces(self):
+    def namespaces(self) -> str:
         return self._ns
 
     @classmethod
-    def from_mets_file(cls, mets_file):
+    def from_mets_file(cls, mets_file: str) -> 'PackageDetails':
         if (not os.path.exists(mets_file)):
             raise FileNotFoundError(NO_PATH.format(mets_file))
         if (not os.path.isfile(mets_file)):
@@ -122,9 +109,31 @@ class PackageDetails:
                         oaispackagetype = element.find(_q(METS_NS, 'metsHdr')).get(_q(CSIP_NS, 'OAISPACKAGETYPE'), '')
                     elif element.tag == _q(METS_NS, 'metsHdr'):
                         break
-        except etree.XMLSyntaxError as synt_err:
+        except etree.XMLSyntaxError:
             raise ValueError(NOT_VALID_FILE.format(mets_file, 'XML'))
         return cls(objid, label, ptype, othertype, contentinformationtype, profile, oaispackagetype, ns)
 
-def _q(_ns, _v):
+def _q(_ns: str, _v: str) -> str:
     return '{{{}}}{}'.format(_ns, _v)
+
+class InformationPackage:
+    """Stores the vital facts and figures about a package."""
+    def __init__(self, path: str, details: PackageDetails, manifest: Manifest=None):
+        self._path = path
+        self._details = details
+        self._manifest = manifest if manifest else Manifest.from_directory(path)
+
+    @property
+    def path(self) -> str:
+        """Get the specification of the package."""
+        return self._path
+
+    @property
+    def details(self) -> PackageDetails:
+        """Get the package details."""
+        return self._details
+
+    @property
+    def manifest(self) -> Manifest:
+        """Return the package manifest."""
+        return self._manifest

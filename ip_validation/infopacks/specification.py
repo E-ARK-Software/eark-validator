@@ -38,7 +38,7 @@ METS_PROFILE_NS = '{http://www.loc.gov/METS_Profile/v2}'
 
 class Specification:
     """Stores the vital facts and figures an IP specification."""
-    def __init__(self, title, url, version, date, requirements=None):
+    def __init__(self, title: str, url: str, version: str, date: str, requirements:dict[str, 'Requirement']=None):
         self._title = title
         self._url = url
         self._version = version
@@ -46,27 +46,27 @@ class Specification:
         self._requirements = requirements if requirements else {}
 
     @property
-    def id(self):
+    def id(self) -> str:
         """Get the id of the specification."""
         return EarkSpecifications.from_id(self.url).name
 
     @property
-    def title(self):
+    def title(self) -> str:
         """Get the name of the specification."""
         return self._title
 
     @property
-    def url(self):
+    def url(self) -> str:
         """Get the name of the specification."""
         return self._url
 
     @property
-    def version(self):
+    def version(self) -> str:
         """Get the version."""
         return self._version
 
     @property
-    def date(self):
+    def date(self) -> str:
         """Return the specification date."""
         return self._date
 
@@ -78,14 +78,14 @@ class Specification:
                 yield requirement
 
     @property
-    def requirement_count(self):
+    def requirement_count(self) -> int:
         """Return the number of requirments in the specification."""
         req_count = 0
         for sect in self.sections:
             req_count += len(self._requirements[sect])
         return req_count
 
-    def get_requirement_by_id(self, id):
+    def get_requirement_by_id(self, id: str) -> 'Requirement':
         """Retrieve a requirement by id."""
         for sect in self.sections:
             req = self.get_requirement_by_sect(id, sect)
@@ -93,14 +93,14 @@ class Specification:
                 return req
         return None
 
-    def get_requirement_by_sect(self, id, section):
+    def get_requirement_by_sect(self, id: str, section: str) -> 'Requirement':
         """Retrieve a requirement by id."""
         sect = self._requirements[section]
         if sect:
             return sect.get(id)
         return None
 
-    def section_requirements(self, section=None):
+    def section_requirements(self, section: str=None) -> list['Requirement']:
         """Get the specification requirements, by section if offered."""
         requirements = []
         if section:
@@ -111,21 +111,21 @@ class Specification:
         return requirements
 
     @property
-    def section_count(self):
+    def section_count(self) -> int:
         """Get the specification sections."""
         return len(self._requirements)
 
     @property
-    def sections(self):
+    def sections(self) -> list[str]:
         """Get the specification sections."""
         return self._requirements.keys()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "name:" + self.title + ", version:" + \
             str(self.version) + ", date:" + str(self.date)
 
     @classmethod
-    def _from_xml_file(cls, xml_file, add_struct=False):
+    def _from_xml_file(cls, xml_file: str, add_struct: bool=False) -> 'Specification':
         if not os.path.exists(xml_file):
             raise FileNotFoundError(NO_PATH.format(xml_file))
         if not os.path.isfile(xml_file):
@@ -135,18 +135,18 @@ class Specification:
         return  cls._from_xml(tree, add_struct=add_struct)
 
     @classmethod
-    def _parser(cls):
+    def _parser(cls) -> ET.XMLParser:
         """Create a parser for the specification."""
         parser = ET.XMLParser(schema=METS_PROF_SCHEMA, resolve_entities=False, no_network=True)
         return parser
 
     @classmethod
-    def _from_xml(cls, tree, add_struct=False):
+    def _from_xml(cls, tree: ET.ElementTree, add_struct: bool=False) -> 'Specification':
         spec = cls.from_element(tree.getroot(), add_struct=add_struct)
         return spec
 
     @classmethod
-    def from_element(cls, spec_ele, add_struct=False):
+    def from_element(cls, spec_ele: ET.Element, add_struct: bool=False) -> 'Specification':
         """Create a Specification from an XML element."""
         version = spec_ele.get('ID')
         title = date = ''
@@ -172,7 +172,7 @@ class Specification:
         return cls(title, profile, version, date, requirements=requirements)
 
     @classmethod
-    def _processs_requirements(cls, req_root):
+    def _processs_requirements(cls, req_root: ET.Element) -> dict[str, 'Requirement']:
         requirements = {}
         for sect_ele in req_root:
             section = sect_ele.tag.replace(METS_PROFILE_NS, '')
@@ -186,7 +186,7 @@ class Specification:
 
     class Requirement():
         """Encapsulates a requirement."""
-        def __init__(self, req_id, name, level="MUST", xpath=None, cardinality=None):
+        def __init__(self, req_id: str, name: str, level: str="MUST", xpath: str=None, cardinality: str=None):
             self._id = req_id
             self._name = name
             self._level = level
@@ -194,35 +194,35 @@ class Specification:
             self._cardinality = cardinality
 
         @property
-        def id(self): # pylint: disable-msg=C0103
+        def id(self) -> str: # pylint: disable-msg=C0103
             """Return the id."""
             return self._id
 
         @property
-        def name(self):
+        def name(self) -> str:
             """Return the name."""
             return self._name
 
         @property
-        def level(self):
+        def level(self) -> str:
             """Return the level."""
             return self._level
 
         @property
-        def xpath(self):
+        def xpath(self) -> str:
             """Return the xpath."""
             return self._xpath
 
         @property
-        def cardinality(self):
+        def cardinality(self) -> str:
             """Return the cardinality."""
             return self._cardinality
 
-        def __str__(self):
+        def __str__(self) -> str:
             return "id:" + self.id + ", name:" + self.name
 
         @classmethod
-        def from_element(cls, req_ele):
+        def from_element(cls, req_ele: ET.Element) -> 'Specification.Requirement':
             """Return a Requirement instance from an XML element."""
             req_id = req_ele.get('ID')
             level = req_ele.get('LEVEL')
@@ -236,48 +236,48 @@ class Specification:
 
     class StructuralRequirement():
         """Encapsulates a structural requirement."""
-        def __init__(self, req_id, level="MUST", message=None):
+        def __init__(self, req_id: str, level: str="MUST", message: str=None):
             self._id = req_id
             self._level = level
             self._message = message
 
         @property
-        def id(self): # pylint: disable-msg=C0103
+        def id(self) -> str: # pylint: disable-msg=C0103
             """Return the id."""
             return self._id
 
         @property
-        def level(self):
+        def level(self) -> str:
             """Return the level."""
             return self._level
 
         @property
-        def message(self):
+        def message(self) -> str:
             """Return the message."""
             return self._message
 
-        def __str__(self):
+        def __str__(self) -> str:
             return "id:" + self.id + ", level:" + str(self.level)
 
         @classmethod
-        def from_rule_no(cls, rule_no):
+        def from_rule_no(cls, rule_no: int) -> 'Specification.StructuralRequirement':
             """Create an StructuralRequirement from a numerical rule id and a sub_message."""
             item = STRUCT_REQS.get(rule_no)
             return cls.from_dict_item(item)
 
         @classmethod
-        def from_dict_item(cls, item):
+        def from_dict_item(cls, item: ET.Element) -> 'Specification.StructuralRequirement':
             """Create an StructuralRequirement from dictionary item and a sub_message."""
             return cls.from_values(item.get('id'), item.get('level'),
                                    item.get('message'))
 
         @classmethod
-        def from_values(cls, req_id, level="MUST", message=None):
+        def from_values(cls, req_id: str, level: str="MUST", message:str=None) -> 'Specification.StructuralRequirement':
             """Create an StructuralRequirement from values supplied."""
             return cls(req_id, level, message)
 
         @staticmethod
-        def _get_struct_reqs():
+        def _get_struct_reqs() -> list['Specification.StructuralRequirement']:
             reqs = []
             for req_num in STRUCT_REQS:
                 req = STRUCT_REQS.get(req_num)
@@ -286,7 +286,7 @@ class Specification:
                                                                 message=req.get('message')))
             return reqs
 
-def _mets_ns(name):
+def _mets_ns(name: str) -> str:
     return '{}{}'.format(METS_PROFILE_NS, name)
 
 @unique
@@ -296,37 +296,37 @@ class EarkSpecifications(Enum):
     SIP = 'E-ARK-SIP'
     DIP = 'E-ARK-DIP'
 
-    def __init__(self, value):
+    def __init__(self, value: str):
         self._path = str(files(PROFILES).joinpath(value + '.xml'))
         self._specfication = Specification._from_xml_file(self._path)
 
     @property
-    def id(self):
+    def id(self) -> str:
         """Get the specification id."""
         return self.name
 
     @property
-    def path(self):
+    def path(self) -> str:
         """Get the path to the specification file."""
         self._path
 
     @property
-    def title(self):
+    def title(self) -> str:
         """Get the specification title."""
         self.value
 
     @property
-    def specification(self):
+    def specification(self) -> Specification:
         """Get the specification."""
         return self._specfication
 
     @property
-    def profile(self):
+    def profile(self) -> str:
         """Get the specification profile url."""
         return 'https://eark{}.dilcis.eu/profile/{}.xml'.format(self.name.lower(), self.value)
 
     @classmethod
-    def from_id(cls, id):
+    def from_id(cls, id: str) -> 'EarkSpecifications':
         """Get the enum from the value."""
         for spec in cls:
             if spec.id == id or spec.value == id or spec.profile == id:

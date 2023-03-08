@@ -29,14 +29,13 @@ from importlib_resources import files
 
 from lxml import etree as ET
 
-from ip_validation.xml.resources import schematron as SCHEMATRON
 from ip_validation.xml.schematron import SchematronRuleset, SVRL_NS, get_schematron_path
 from ip_validation.infopacks.specification import EarkSpecifications, Specification
 from ip_validation.const import NO_PATH, NOT_FILE
 
 class ValidationProfile():
     """ A complete set of Schematron rule sets that comprise a complete validation profile."""
-    def __init__(self, specification):
+    def __init__(self, specification: Specification):
         self._rulesets = {}
         self._specification = specification
         self.is_valid = False
@@ -47,16 +46,16 @@ class ValidationProfile():
             self.rulesets[section] = SchematronRuleset(get_schematron_path(specification.id, section))
 
     @property
-    def specification(self):
+    def specification(self) -> Specification:
         """Get the specification."""
         return self._specification
 
     @property
-    def rulesets(self):
+    def rulesets(self) -> dict[str, SchematronRuleset]:
         """ Get the Schematron rulesets."""
         return self._rulesets
 
-    def validate(self, to_validate):
+    def validate(self, to_validate: str) -> None:
         """Validates a file against each loaded ruleset."""
         if not os.path.exists(to_validate):
             raise FileNotFoundError(NO_PATH.format(to_validate))
@@ -79,16 +78,16 @@ class ValidationProfile():
                 is_valid = False
         self.is_valid = is_valid
 
-    def get_results(self):
+    def get_results(self) -> dict[str, 'TestReport']:
         """Return the full set of results."""
         return self.results
 
-    def get_result(self, name):
+    def get_result(self, name: str) -> 'TestReport':
         """Return only the results for element name."""
         return self.results.get(name)
 
     @classmethod
-    def from_specification(cls, specification):
+    def from_specification(cls, specification: Specification) -> 'ValidationProfile':
         """Create a validation profile from a specification."""
         if isinstance(specification, str):
             specification = EarkSpecifications.from_id(specification)
@@ -110,7 +109,7 @@ class Severity(Enum):
     ERROR = "Error"
 
     @classmethod
-    def from_id(cls, id):
+    def from_id(cls, id: str) -> 'Severity':
         """Get the enum from the value."""
         for severity in cls:
             if severity.name == id or severity.value == id:
@@ -119,24 +118,24 @@ class Severity(Enum):
 
 class TestResult():
     """Encapsulates an individual validation test result."""
-    def __init__(self, rule_id, location, message, severity):
+    def __init__(self, rule_id: str, location: 'SchematronLocation', message: str, severity: Severity = Severity.UNKNOWN):
         self._rule_id = rule_id
         self._severity = severity
         self._location = location
         self._message = message
 
     @property
-    def rule_id(self):
+    def rule_id(self) -> str:
         """Get the rule_id."""
         return self._rule_id
 
     @property
-    def severity(self):
+    def severity(self) -> Severity:
         """Get the severity."""
         return self._severity
 
     @severity.setter
-    def severity(self, value):
+    def severity(self, value: Severity) -> None:
         if not isinstance(value, Severity):
             value = Severity.from_id(value)
         if value not in list(Severity):
@@ -144,26 +143,26 @@ class TestResult():
         self._severity = value
 
     @property
-    def location(self):
+    def location(self) -> 'SchematronLocation':
         """Get the location location."""
         return self._location
 
     @property
-    def message(self):
+    def message(self) -> str:
         """Get the message."""
         return self._message
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.rule_id) + " " + str(self.severity) + " " + str(self.location)
 
-    def to_json(self):
+    def to_json(self) -> dict:
         """Output the error message in JSON form."""
         return {"rule_id" : self.rule_id, "severity" : str(self.severity.name),
                 "test" : self.location.test, "location" : self.location.location,
                 "message" : self.message}
 
     @classmethod
-    def from_element(cls, rule, failed_assert):
+    def from_element(cls, rule: ET.Element, failed_assert: ET.Element) -> 'TestResult':
         """Create a Test result from an element."""
         context = rule.get('context')
         rule_id = failed_assert.get('id')
@@ -177,34 +176,34 @@ class TestResult():
 
 class TestReport():
     """A report made up of validation results."""
-    def __init__(self, is_valid, failures, warnings, infos):
+    def __init__(self, is_valid: bool, errors: list[TestResult]=None, warnings: list[TestResult]=None, infos: list[TestResult]=None):
         self._is_valid = is_valid
-        self._failures = failures
-        self._warnings = warnings
-        self._infos = infos
+        self._errors = errors if errors else []
+        self._warnings = warnings if warnings else []
+        self._infos = infos if infos else []
 
     @property
-    def is_valid(self):
+    def is_valid(self) -> bool:
         """Get the is_valid result."""
         return self._is_valid
 
     @property
-    def failures(self):
+    def errors(self) -> list[TestResult]:
         """Get the failures."""
-        return self._failures
+        return self._errors
 
     @property
-    def warnings(self):
+    def warnings(self) -> list[TestResult]:
         """Get the warnings."""
         return self._warnings
 
     @property
-    def infos(self):
+    def infos(self) -> list[TestResult]:
         """Get the warnings."""
         return self._infos
 
     @classmethod
-    def from_ruleset(cls, ruleset):
+    def from_ruleset(cls, ruleset: ET.Element) -> 'TestReport':
         """Get the report from the last validation."""
         xml_report = ET.XML(bytes(ruleset))
         failures = []
@@ -228,25 +227,25 @@ class TestReport():
 
 class SchematronLocation():
     """All details of the location of a Schematron error."""
-    def __init__(self, context, test, location):
+    def __init__(self, context: str, test: str, location: str):
         self._context = context
         self._test = test
         self._location = location
 
     @property
-    def context(self):
+    def context(self) -> str:
         """Get the context of the location."""
         return self._context
 
     @property
-    def test(self):
+    def test(self) -> str:
         """Get the location test."""
         return self._test
 
     @property
-    def location(self):
+    def location(self) -> str:
         """Get the location location."""
         return self._location
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.context) + " " + str(self.test) + " " + str(self.location)

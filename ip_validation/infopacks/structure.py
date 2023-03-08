@@ -59,35 +59,35 @@ class StructureStatus(Enum):
 class StructureReport:
     """Stores the vital facts and figures about a package."""
     structure_values = list(StructureStatus)
-    def __init__(self, status=StructureStatus.Unknown, errors=None, warnings=None, infos=None):
+    def __init__(self, status: StructureStatus=StructureStatus.Unknown, errors: list[str]=None, warnings: list[str]=None, infos: list[str]=None):
         self.status = status
         self._errors = errors if errors else []
         self._warnings = warnings if warnings else []
         self._infos = infos if infos else []
 
     @property
-    def status(self):
+    def status(self) -> StructureStatus:
         """Get the structure status."""
         return self._status
 
     @status.setter
-    def status(self, value):
+    def status(self, value: StructureStatus) -> None:
         if value not in self.structure_values:
             raise ValueError("Illegal package status value")
         self._status = value
 
     @property
-    def errors(self):
+    def errors(self) -> list[str]:
         """Return the full list of error messages."""
         return self._errors
 
     @property
-    def warnings(self):
+    def warnings(self) -> list[str]:
         """Return the full list of warnings messages."""
         return self._warnings
 
     @property
-    def infos(self):
+    def infos(self) -> list[str]:
         """Return the full list of info messages."""
         return self._infos
 
@@ -101,7 +101,7 @@ class StructureReport:
         for entry in self.infos:
             yield entry
 
-    def add_error(self, error):
+    def add_error(self, error: str) -> None:
         """Add a validation error to package lists."""
         if error.severity == Severity.INFO:
             self._infos.append(error)
@@ -111,13 +111,13 @@ class StructureReport:
             self._errors.append(error)
             self.status = StructureStatus.NotWellFormed
 
-    def add_errors(self, errors):
+    def add_errors(self, errors: list[str]) -> None:
         """Add a validation error to package lists."""
         for error in errors:
             self.add_error(error)
 
     @classmethod
-    def from_path(cls, path):
+    def from_path(cls, path: str) -> 'StructureReport':
         """Create a structure report from a path, this can be a folder or an archive file."""
         rep = StructureReport(status=StructureStatus.WellFormed)
         root = path
@@ -141,7 +141,7 @@ class StructureReport:
         return rep
 
     @classmethod
-    def _handle_archive(cls, archive_path):
+    def _handle_archive(cls, archive_path: str) -> str:
         arch_handler = ArchivePackageHandler()
         root = arch_handler.unpack_package(archive_path)
         if len(os.listdir(root)) == 1:
@@ -157,84 +157,84 @@ class StructureReport:
 
 class StructError():
     """Encapsulates an individual validation test result."""
-    def __init__(self, requirement, sub_message):
+    def __init__(self, requirement: str, sub_message: str):
         self._requirement = requirement
         self.severity = LEVEL_SEVERITY.get(requirement.level, Severity.UNKNOWN)
         self._sub_message = sub_message
 
     @property
-    def id(self): # pylint: disable-msg=C0103
+    def id(self) -> str: # pylint: disable-msg=C0103
         """Get the rule_id."""
         return self._requirement.id
 
     @property
-    def severity(self):
+    def severity(self) -> Severity:
         """Get the severity."""
         return self._severity
 
     @severity.setter
-    def severity(self, value):
+    def severity(self, value: Severity) -> None:
         if value not in list(Severity):
             raise ValueError("Illegal severity value")
         self._severity = value
 
     @property
-    def is_error(self):
+    def is_error(self) -> bool:
         """Returns True if this is an error message, false otherwise."""
         return self.severity == Severity.ERROR
 
     @property
-    def is_info(self):
+    def is_info(self) -> bool:
         """Returns True if this is an info message, false otherwise."""
         return self.severity == Severity.INFO
 
     @property
-    def is_warning(self):
+    def is_warning(self) -> bool:
         """Returns True if this is an warning message, false otherwise."""
         return self.severity == Severity.WARN
 
     @property
-    def message(self):
+    def message(self) -> str:
         """Get the message."""
         return self._requirement.message
 
     @property
-    def sub_message(self):
+    def sub_message(self) -> str:
         """Get the sub-message."""
         return self._sub_message
 
-    def to_json(self):
+    def to_json(self) -> dict:
         """Output the message in JSON format."""
         return {"id" : self.id, "severity" : str(self.severity.name),
                 "message" : self.message, "sub_message" : self.sub_message}
 
-    def __str__(self):
+    def __str__(self) -> str:
         return 'id:{}, severity:{}, message:{}, sub_message:{}'.format(self.id,
                                                                        str(self.severity.name),
                                                                        self.message,
                                                                        self.sub_message)
     @classmethod
-    def from_rule_no(cls, rule_no, sub_message=None):
+    def from_rule_no(cls, rule_no: int, sub_message: str=None) -> 'StructError':
         """Create an StructError from values supplied."""
         requirement = SPECS.Specification.StructuralRequirement.from_rule_no(rule_no)
         return StructError(requirement, sub_message)
 
     @classmethod
-    def from_values(cls, requirement, sub_message=None):
+    def from_values(cls, requirement: str, sub_message: str=None) -> 'StructError':
         """Create an StructError from values supplied."""
         return StructError(requirement, sub_message)
 
 class ArchivePackageHandler():
     """Class to handle archive / compressed information packages."""
-    def __init__(self, unpack_root=tempfile.gettempdir()):
+    def __init__(self, unpack_root: str=tempfile.gettempdir()):
         self._unpack_root = unpack_root
 
     @property
-    def unpack_root(self):
+    def unpack_root(self) -> str:
         """Returns the root directory for archive unpacking."""
         return self._unpack_root
 
-    def unpack_package(self, to_unpack, dest=None):
+    def unpack_package(self, to_unpack: str, dest: str=None) -> str:
         """Unpack an archived package to a destination (defaults to tempdir).
         returns the destination folder."""
         if not os.path.isfile(to_unpack) or not self.is_archive(to_unpack):
@@ -251,13 +251,13 @@ class ArchivePackageHandler():
         return destination
 
     @staticmethod
-    def is_archive(to_test):
+    def is_archive(to_test: str) -> bool:
         """Return True if the file is a recognised archive type, False otherwise."""
         if zipfile.is_zipfile(to_test):
             return True
         return tarfile.is_tarfile(to_test)
 
-def validate_package_structure(package_path):
+def validate_package_structure(package_path: str) -> StructureReport:
     """Carry out all structural package tests."""
     # It's a file so we need to unpack it
     return StructureReport.from_path(package_path)
@@ -273,7 +273,7 @@ class StructureChecker():
         self.has_data = has_data
         self.has_reps = has_reps
 
-    def validate_manifest(self, is_root=True):
+    def validate_manifest(self, is_root: bool=True) -> list[StructError]:
         """Validate a manifest report and return the list of validation errors."""
         validation_errors = []
         # [CSIPSTR4] Is there a file called METS.xml (perform case checks)
@@ -302,7 +302,7 @@ class StructureChecker():
         return validation_errors
 
     @classmethod
-    def from_directory(cls, dir_to_scan):
+    def from_directory(cls, dir_to_scan: str) -> 'StructureChecker':
         """Create a manifest instance from a directory."""
         has_mets = False
         has_md = False

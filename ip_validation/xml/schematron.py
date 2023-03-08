@@ -25,6 +25,7 @@
 """Module to capture everything schematron validation related."""
 import os
 from importlib_resources import files
+from typing import Generator
 
 from lxml import etree as ET
 from lxml.isoschematron import Schematron
@@ -37,7 +38,7 @@ SVRL_NS = "{http://purl.oclc.org/dsdl/svrl}"
 
 class SchematronRuleset():
     """Encapsulates a set of Schematron rules loaded from a file."""
-    def __init__(self, rules_path=None):
+    def __init__(self, rules_path: str=None):
         if not os.path.exists(rules_path):
             raise FileNotFoundError(NO_PATH.format(rules_path))
         if not os.path.isfile(rules_path):
@@ -50,17 +51,7 @@ class SchematronRuleset():
         except KeyError as ex:
             raise ValueError('Rules file is not valid Schematron: {}. {}'.format(rules_path, ex.__doc__))
 
-    @property
-    def specification(self):
-        """Get the specification ID."""
-        return self._specification
-
-    @property
-    def section(self):
-        """Get the specification section name."""
-        return self._section
-
-    def get_assertions(self):
+    def get_assertions(self) -> Generator[ ET.Element, None, None]:
         """Generator that returns the rules one at a time."""
         xml_rules = ET.XML(bytes(self.ruleset.schematron))
 
@@ -68,10 +59,10 @@ class SchematronRuleset():
             if ele.tag == SCHEMATRON_NS + 'assert':
                 yield ele
 
-    def validate(self, to_validate):
+    def validate(self, to_validate: str) -> None:
         """Validate a file against the loaded Schematron ruleset."""
         xml_file = ET.parse(to_validate)
         self.ruleset.validate(xml_file)
     
-def get_schematron_path(id, section):
+def get_schematron_path(id: str, section: str) -> str:
     return str(files(SCHEMATRON).joinpath(id).joinpath('mets_{}_rules.xml'.format(section)))

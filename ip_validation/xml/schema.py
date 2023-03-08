@@ -73,14 +73,14 @@ IP_SCHEMA = {
     'sip': etree.XMLSchema(file=str(files(SCHEMA).joinpath('mets.sip.local.v2-0.xsd')))
 }
 
-def get_prefix(uri):
+def get_prefix(uri: str) -> str:
     """Return the prefix for a given namespace URI."""
     return PREFIX_BY_URI.get(uri, PREFIX_BY_URI[METS_NS])
 
-def  get_uri(prefix):
+def  get_uri(prefix: str) -> str:
     """Return the namespace URI for a given prefix."""
     return NS_BY_PREFIX.get(prefix, METS_NS)
 
-def get_local_schema(uri):
+def get_local_schema(uri: str) -> str:
     """Return the local schema file name for a given namespace URI."""
     return str(files(SCHEMA).joinpath(LOCAL_SCHEMA.get(uri, 'mets.xsd')))

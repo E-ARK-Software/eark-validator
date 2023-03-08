@@ -33,39 +33,39 @@ from ip_validation.xml.schema import METS_NS, XLINK_NS, IP_SCHEMA
 
 class MetsValidator():
     """Encapsulates METS schema validation."""
-    def __init__(self, root):
+    def __init__(self, root: str):
         self._validation_errors = []
         self._package_root = root
         self._reps_mets = {}
         self._file_refs = []
 
     @property
-    def root(self):
+    def root(self) -> str:
         return self._package_root
 
     @property
-    def validation_errors(self):
+    def validation_errors(self) -> list[str]:
         return self._validation_errors
 
     @property
-    def representations(self):
+    def representations(self) -> list[str]:
         return self._reps_mets.keys()
 
     @property
-    def representation_mets(self):
+    def representation_mets(self) -> list[str]:
         return self._reps_mets.values()
 
     @property
-    def file_references(self):
+    def file_references(self) -> list[FileItem]:
         return self._file_refs
 
-    def get_mets_path(self, rep_name):
+    def get_mets_path(self, rep_name: str) -> str:
         return self._reps_mets[rep_name]
 
-    def get_manifest(self):
+    def get_manifest(self) -> Manifest:
         return Manifest.from_file_items(self._package_root, self._file_refs)
 
-    def validate_mets(self, mets):
+    def validate_mets(self, mets: str) -> bool:
         '''
         Validates a Mets file. The Mets file is parsed with etree.iterparse(),
         which allows event-driven parsing of large files. On certain events/conditions
@@ -85,7 +85,7 @@ class MetsValidator():
             self._validation_errors.append(synt_err)
         return len(self._validation_errors) == 0
 
-    def _process_element(self, element):
+    def _process_element(self, element: etree.Element) -> None:
         # Define what to do with specific tags.
         if element.tag == _q(METS_NS, 'div') and \
             element.attrib['LABEL'].startswith('Representations/'):
@@ -96,18 +96,18 @@ class MetsValidator():
         elif element.tag == _q(METS_NS, 'mdRef'):
             self._file_refs.append(FileItem.from_mdref_element(element))
 
-    def _process_rep_div(self, element):
+    def _process_rep_div(self, element: etree.Element) -> None:
         rep = element.attrib['LABEL'].rsplit('/', 1)[1]
         for child in element.getchildren():
             if child.tag == _q(METS_NS, 'mptr'):
                 metspath = child.attrib[_q(XLINK_NS, 'href')]
                 self._reps_mets.update({rep: metspath})
 
-def _handle_rel_paths(rootpath, metspath):
+def _handle_rel_paths(rootpath: str, metspath: str) -> tuple[str, str]:
     if metspath.startswith('file:///') or os.path.isabs(metspath):
         return metspath.rsplit('/', 1)[0], metspath
     relpath = os.path.join(rootpath, metspath[9:]) if metspath.startswith('file://./') else os.path.join(rootpath, metspath)
     return relpath.rsplit('/', 1)[0], relpath
 
-def _q(_ns, _v):
+def _q(_ns: str, _v: str) -> str:
     return '{{{}}}{}'.format(_ns, _v)

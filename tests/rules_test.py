@@ -301,19 +301,19 @@ class ResultTest(unittest.TestCase):
 def _test_validation(name, to_validate):
     rules = SC.SchematronRuleset(SC.get_schematron_path('CSIP', name))
     rules.validate(str(files(XML).joinpath(to_validate)))
-    for failure in SC.TestReport.from_ruleset(rules.ruleset.validation_report).failures:
+    for failure in SC.TestReport.from_ruleset(rules.ruleset.validation_report).errors:
         print(failure)
     for warning in SC.TestReport.from_ruleset(rules.ruleset.validation_report).warnings:
         print(warning)
     report = SC.TestReport.from_ruleset(rules.ruleset.validation_report)
-    return report.is_valid, len(report.failures), len(report.warnings), len(report.infos)
+    return report.is_valid, len(report.errors), len(report.warnings), len(report.infos)
 
 def _full_validation(name, to_validate):
     rules = SC.SchematronRuleset(SC.get_schematron_path('CSIP', name))
     rules.validate(str(files(XML).joinpath(to_validate)))
-    for failure in SC.TestReport.from_ruleset(rules.ruleset.validation_report).failures:
+    for failure in SC.TestReport.from_ruleset(rules.ruleset.validation_report).errors:
         print(failure)
     for warning in SC.TestReport.from_ruleset(rules.ruleset.validation_report).warnings:
         print(warning)
     report = SC.TestReport.from_ruleset(rules.ruleset.validation_report)
-    return report.is_valid, report.failures, report.warnings
+    return report.is_valid, report.errors, report.warnings
