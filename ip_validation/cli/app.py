@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=UTF-8
+# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -33,7 +33,7 @@ import sys
 
 import ip_validation.infopacks.structure as STRUCT
 
-__version__ = "0.1.0"
+__version__ = '0.1.0'
 
 defaults = {
     'description': """E-ARK Information Package validation (ip-check).
@@ -55,20 +55,20 @@ def parse_command_line():
     """Parse command line arguments."""
     # Add arguments
     PARSER.add_argument('-r', '--recurse',
-                        action="store_true",
-                        dest="inputRecursiveFlag",
+                        action='store_true',
+                        dest='inputRecursiveFlag',
                         default=True,
-                        help="When analysing an information package recurse into representations.")
+                        help='When analysing an information package recurse into representations.')
     PARSER.add_argument('-c', '--checksum',
-                        action="store_true",
-                        dest="inputChecksumFlag",
+                        action='store_true',
+                        dest='inputChecksumFlag',
                         default=False,
-                        help="Calculate and verify file checksums in packages.")
+                        help='Calculate and verify file checksums in packages.')
     PARSER.add_argument('-v', '--verbose',
-                        action="store_true",
-                        dest="outputVerboseFlag",
+                        action='store_true',
+                        dest='outputVerboseFlag',
                         default=False,
-                        help="report results in verbose format")
+                        help='report results in verbose format')
     PARSER.add_argument('--version',
                         action='version',
                         version=__version__)
@@ -128,5 +128,5 @@ def _get_ip_root(info_pack):
     return 0, to_validate
 
 # def _test_case_schema_checks():
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

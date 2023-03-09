@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=UTF-8
+# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -49,7 +49,7 @@ class StructValidationTests(unittest.TestCase):
         err_count = 1
         self.assertTrue(len(val_errors) == err_count,
                         EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR4',
                                          severity=Severity.ERROR))
 
     def test_check_package_root_multi_dir(self):
@@ -63,7 +63,7 @@ class StructValidationTests(unittest.TestCase):
         err_count = 1
         self.assertTrue(len(val_errors) == err_count,
                         EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR4',
                                          severity=Severity.ERROR))
 
     def test_check_package_root_multi_file(self):
@@ -77,7 +77,7 @@ class StructValidationTests(unittest.TestCase):
         err_count = 1
         self.assertTrue(len(val_errors) == err_count,
                         EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR4',
                                          severity=Severity.ERROR))
 
     def test_check_package_root_multi_var(self):
@@ -91,7 +91,7 @@ class StructValidationTests(unittest.TestCase):
         err_count = 1
         self.assertTrue(len(val_errors) == err_count,
                         EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR4',
                                          severity=Severity.ERROR))
 
     def test_single_file_archive(self):
@@ -103,7 +103,7 @@ class StructValidationTests(unittest.TestCase):
         err_count = 1
         self.assertTrue(len(val_errors) == err_count,
                         EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR4',
                                          severity=Severity.ERROR))
 
     def test_minimal(self):
@@ -116,11 +116,11 @@ class StructValidationTests(unittest.TestCase):
         val_errors = details.warnings
         self.assertTrue(len(val_errors) == 3,
                         'Expecting 3 errors but found {}'.format(len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR12",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR12',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR13",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR13',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR15',
                                          severity=Severity.WARN))
 
     def test_nomets(self):
@@ -134,16 +134,16 @@ class StructValidationTests(unittest.TestCase):
         err_count = 1
         self.assertTrue(len(val_errors) == err_count,
                         EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4"))
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR4'))
 
         val_warnings = details.warnings
         self.assertTrue(len(val_warnings) == 3,
                         'Expecting 3 errors but found {}'.format(len(val_warnings)))
-        self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR12",
+        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR12',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR13",
+        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR13',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR15",
+        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR15',
                                          severity=Severity.WARN))
 
     def test_nomd(self):
@@ -157,13 +157,13 @@ class StructValidationTests(unittest.TestCase):
         err_count = 4
         self.assertTrue(len(val_errors) == err_count,
                         EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR5",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR5',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR12",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR12',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR13",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR13',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR15',
                                          severity=Severity.WARN))
 
     def test_noschema(self):
@@ -180,11 +180,11 @@ class StructValidationTests(unittest.TestCase):
         err_count = 4
         self.assertTrue(len(val_warnings) == err_count,
                         EXP_ERRORS.format(err_count, len(val_warnings)))
-        self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR12",
+        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR12',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR13",
+        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR13',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR15",
+        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR15',
                                          severity=Severity.WARN))
 
     def test_nodata(self):
@@ -198,13 +198,13 @@ class StructValidationTests(unittest.TestCase):
         err_count = 4
         self.assertTrue(len(val_errors) == err_count,
                         EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR11',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR12",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR12',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR13",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR13',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR15',
                                          severity=Severity.WARN))
 
     def test_noreps(self):
@@ -214,13 +214,13 @@ class StructValidationTests(unittest.TestCase):
         self.assertTrue(details.status == STRUCT.StructureStatus.WellFormed,
                         EXP_WELLFORMED.format(details.status))
         val_warnings = details.warnings
-        print("ERRORS")
+        print('ERRORS')
         for err in details.messages:
             print(err)
         err_count = 1
         self.assertTrue(len(val_warnings) == err_count,
                         EXP_ERRORS.format(err_count, len(val_warnings)))
-        self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR9",
+        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR9',
                                          severity=Severity.WARN))
     """Unit tests covering structural validation of information packages, spcifically
     unpacking archived packages and establishing that the files and folders specified
@@ -229,60 +229,60 @@ class StructValidationTests(unittest.TestCase):
     def test_manifest_nomets(self):
         """Ensure proper behaviour when no METS file is present."""
         # test as root
-        man_no_mets = STRUCT.StructureChecker("no_mets", has_mets=False)
+        man_no_mets = STRUCT.StructureChecker('no_mets', has_mets=False)
         val_errors = man_no_mets.validate_manifest()
         self.assertTrue(len(val_errors) == 1)
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4"))
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR4'))
         val_errors = man_no_mets.validate_manifest(is_root=False)
         self.assertTrue(len(val_errors) == 2)
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR12",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR12',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR11',
                                          severity=Severity.WARN))
 
     def test_manifest_nomd(self):
         # test as root
-        man_no_md = STRUCT.StructureChecker("no_md", has_md=False)
+        man_no_md = STRUCT.StructureChecker('no_md', has_md=False)
         val_errors = man_no_md.validate_manifest()
         self.assertTrue(len(val_errors) == 1)
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR5",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR5',
                                          severity=Severity.WARN))
         val_errors = man_no_md.validate_manifest(is_root=False)
         self.assertTrue(len(val_errors) == 2)
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR13",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR13',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR11',
                                          severity=Severity.WARN))
 
     def test_manifest_noschema(self):
         # test as root
-        man_no_schema = STRUCT.StructureChecker("no_schema", has_schema=False)
+        man_no_schema = STRUCT.StructureChecker('no_schema', has_schema=False)
         val_errors = man_no_schema.validate_manifest()
         self.assertTrue(len(val_errors) == 1)
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR15',
                                          severity=Severity.WARN))
         val_errors = man_no_schema.validate_manifest(is_root=False)
         self.assertTrue(len(val_errors) == 2)
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR15',
                                          severity=Severity.WARN))
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR11',
                                          severity=Severity.WARN))
 
     def test_manifest_data(self):
         # test as root
-        man_data = STRUCT.StructureChecker("data", has_data=True)
+        man_data = STRUCT.StructureChecker('data', has_data=True)
         val_errors = man_data.validate_manifest()
         self.assertTrue(len(val_errors) == 0)
         val_errors = man_data.validate_manifest(is_root=False)
         self.assertTrue(len(val_errors) == 0)
 
     def test_manifest_noreps(self):
-        man_no_reps = STRUCT.StructureChecker("no_reps", has_reps=False)
+        man_no_reps = STRUCT.StructureChecker('no_reps', has_reps=False)
         val_errors = man_no_reps.validate_manifest()
         self.assertTrue(len(val_errors) == 1)
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR9",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR9',
                                          severity=Severity.WARN))
         val_errors = man_no_reps.validate_manifest(is_root=False)
         self.assertTrue(len(val_errors) == 1)
-        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
+        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR11',
                                          severity=Severity.WARN))

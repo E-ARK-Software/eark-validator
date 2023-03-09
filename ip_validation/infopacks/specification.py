@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=UTF-8
+# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -120,8 +120,8 @@ class Specification:
         return self._requirements.keys()
 
     def __str__(self) -> str:
-        return "name:" + self.title + ", version:" + \
-            str(self.version) + ", date:" + str(self.date)
+        return 'name:' + self.title + ', version:' + \
+            str(self.version) + ', date:' + str(self.date)
 
     @classmethod
     def _from_xml_file(cls, xml_file: str, add_struct: bool=False) -> 'Specification':
@@ -185,7 +185,7 @@ class Specification:
 
     class Requirement():
         """Encapsulates a requirement."""
-        def __init__(self, req_id: str, name: str, level: str="MUST", xpath: str=None, cardinality: str=None):
+        def __init__(self, req_id: str, name: str, level: str='MUST', xpath: str=None, cardinality: str=None):
             self._id = req_id
             self._name = name
             self._level = level
@@ -218,7 +218,7 @@ class Specification:
             return self._cardinality
 
         def __str__(self) -> str:
-            return "id:" + self.id + ", name:" + self.name
+            return 'id:' + self.id + ', name:' + self.name
 
         @classmethod
         def from_element(cls, req_ele: ET.Element) -> 'Specification.Requirement':
@@ -235,7 +235,7 @@ class Specification:
 
     class StructuralRequirement():
         """Encapsulates a structural requirement."""
-        def __init__(self, req_id: str, level: str="MUST", message: str=None):
+        def __init__(self, req_id: str, level: str='MUST', message: str=None):
             self._id = req_id
             self._level = level
             self._message = message
@@ -256,7 +256,7 @@ class Specification:
             return self._message
 
         def __str__(self) -> str:
-            return "id:" + self.id + ", level:" + str(self.level)
+            return 'id:' + self.id + ', level:' + str(self.level)
 
         @classmethod
         def from_rule_no(cls, rule_no: int) -> 'Specification.StructuralRequirement':
@@ -271,7 +271,7 @@ class Specification:
                                    item.get('message'))
 
         @classmethod
-        def from_values(cls, req_id: str, level: str="MUST", message:str=None) -> 'Specification.StructuralRequirement':
+        def from_values(cls, req_id: str, level: str='MUST', message:str=None) -> 'Specification.StructuralRequirement':
             """Create an StructuralRequirement from values supplied."""
             return cls(req_id, level, message)
 

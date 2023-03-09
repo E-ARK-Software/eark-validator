@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=UTF-8
+# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -47,7 +47,7 @@ class HashAlgorithms(Enum):
             raise ValueError(NOT_FILE.format(path))
         implemenation = self.get_implementation(self)
         with open(path, 'rb') as file:
-            for chunk in iter(lambda: file.read(4096), b""):
+            for chunk in iter(lambda: file.read(4096), b''):
                 implemenation.update(chunk)
         return Checksum(self, implemenation.hexdigest())
 
@@ -157,7 +157,7 @@ class FileItem:
     @classmethod
     def from_element(cls, element: ET.Element) -> 'FileItem':
         """Create a FileItem from an etree element."""
-        path = ""
+        path = ''
         if element.tag in [Namespaces.METS.qualify('file'), 'file']:
             path = cls.path_from_file_element(element)
         elif element.tag in [Namespaces.METS.qualify('mdRef'), 'mdRef']:

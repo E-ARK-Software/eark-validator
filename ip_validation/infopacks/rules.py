@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=UTF-8
+# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -98,13 +98,13 @@ class ValidationProfile():
 @unique
 class Severity(Enum):
     """Enum covering information package validation statuses."""
-    UNKNOWN = "Unknown"
+    UNKNOWN = 'Unknown'
     # Information level, possibly not best practise
-    INFO = "Information"
+    INFO = 'Information'
     # Non-fatal issue that should be corrected
-    WARN = "Warning"
+    WARN = 'Warning'
     # Error level message means invalid package
-    ERROR = "Error"
+    ERROR = 'Error'
 
     @classmethod
     def from_id(cls, id: str) -> 'Severity':
@@ -137,7 +137,7 @@ class TestResult():
         if not isinstance(value, Severity):
             value = Severity.from_id(value)
         if value not in list(Severity):
-            raise ValueError("Illegal severity value")
+            raise ValueError('Illegal severity value')
         self._severity = value
 
     @property
@@ -151,13 +151,13 @@ class TestResult():
         return self._message
 
     def __str__(self) -> str:
-        return str(self.rule_id) + " " + str(self.severity) + " " + str(self.location)
+        return str(self.rule_id) + ' ' + str(self.severity) + ' ' + str(self.location)
 
     def to_json(self) -> dict:
         """Output the error message in JSON form."""
-        return {"rule_id" : self.rule_id, "severity" : str(self.severity.name),
-                "test" : self.location.test, "location" : self.location.location,
-                "message" : self.message}
+        return {'rule_id' : self.rule_id, 'severity' : str(self.severity.name),
+                'test' : self.location.test, 'location' : self.location.location,
+                'message' : self.message}
 
     @classmethod
     def from_element(cls, rule: ET.Element, failed_assert: ET.Element) -> 'TestResult':
@@ -246,4 +246,4 @@ class SchematronLocation():
         return self._location
 
     def __str__(self) -> str:
-        return str(self.context) + " " + str(self.test) + " " + str(self.location)
+        return str(self.context) + ' ' + str(self.test) + ' ' + str(self.location)

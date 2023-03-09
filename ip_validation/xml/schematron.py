@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=UTF-8
+# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -33,8 +33,8 @@ from lxml.isoschematron import Schematron
 from .resources import schematron as SCHEMATRON
 from ip_validation.const import NO_PATH, NOT_FILE
 
-SCHEMATRON_NS = "{http://purl.oclc.org/dsdl/schematron}"
-SVRL_NS = "{http://purl.oclc.org/dsdl/svrl}"
+SCHEMATRON_NS = '{http://purl.oclc.org/dsdl/schematron}'
+SVRL_NS = '{http://purl.oclc.org/dsdl/svrl}'
 
 class SchematronRuleset():
     """Encapsulates a set of Schematron rules loaded from a file."""
@@ -73,6 +73,6 @@ class SchematronRuleset():
         xml_file = ET.parse(to_validate)
         self.schematron.validate(xml_file)
         return self.schematron.validation_report
-    
+
 def get_schematron_path(id: str, section: str) -> str:
     return str(files(SCHEMATRON).joinpath(id).joinpath('mets_{}_rules.xml'.format(section)))

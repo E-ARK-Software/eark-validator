@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=UTF-8
+# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -34,11 +34,11 @@ import ip_validation.infopacks.specification as SPECS
 
 from ip_validation.infopacks.manifest import Checksum
 
-MD_DIR = "metadata"
-REPS_DIR = "representations"
-SCHEMA_DIR = "schemas"
+MD_DIR = 'metadata'
+REPS_DIR = 'representations'
+SCHEMA_DIR = 'schemas'
 METS_NAME = 'METS.xml'
-STR_REQ_PREFIX = "CSIPSTR"
+STR_REQ_PREFIX = 'CSIPSTR'
 SUB_MESS_NOT_EXIST = 'Path {} does not exist'
 SUB_MESS_NOT_ARCH = 'Path {} is not a directory or archive format file.'
 # Map requirement levels to severity
@@ -73,7 +73,7 @@ class StructureReport:
     @status.setter
     def status(self, value: StructureStatus) -> None:
         if value not in self.structure_values:
-            raise ValueError("Illegal package status value")
+            raise ValueError('Illegal package status value')
         self._status = value
 
     @property
@@ -153,7 +153,7 @@ class StructureReport:
 
 
     def __str__(self):
-        return "status:" + str(self.status)
+        return 'status:' + str(self.status)
 
 class StructError():
     """Encapsulates an individual validation test result."""
@@ -175,7 +175,7 @@ class StructError():
     @severity.setter
     def severity(self, value: Severity) -> None:
         if value not in list(Severity):
-            raise ValueError("Illegal severity value")
+            raise ValueError('Illegal severity value')
         self._severity = value
 
     @property
@@ -205,8 +205,8 @@ class StructError():
 
     def to_json(self) -> dict:
         """Output the message in JSON format."""
-        return {"id" : self.id, "severity" : str(self.severity.name),
-                "message" : self.message, "sub_message" : self.sub_message}
+        return {'id' : self.id, 'severity' : str(self.severity.name),
+                'message' : self.message, 'sub_message' : self.sub_message}
 
     def __str__(self) -> str:
         return 'id:{}, severity:{}, message:{}, sub_message:{}'.format(self.id,
@@ -238,7 +238,7 @@ class ArchivePackageHandler():
         """Unpack an archived package to a destination (defaults to tempdir).
         returns the destination folder."""
         if not os.path.isfile(to_unpack) or not self.is_archive(to_unpack):
-            raise PackageStructError("File is not an archive file.")
+            raise PackageStructError('File is not an archive file.')
         sha1 = Checksum.from_file(to_unpack, 'sha1')
         dest_root = dest if dest else self.unpack_root
         destination = os.path.join(dest_root, sha1.value)
@@ -320,13 +320,13 @@ class StructureChecker():
             # [CSIPSTR5] Is there a first level folder called metadata?
             # [CSIPSTR13] Does each representation folder have a metadata folder (W)
             if os.path.isdir(entry_path):
-                if entry == "metadata":
+                if entry == 'metadata':
                     has_md = True
                 # [CSIPSTR15] Is there a schemas folder at the root level/representations? (W)
-                elif entry == "schemas":
+                elif entry == 'schemas':
                     has_schema = True
                 # [CSIPSTR11] Does each representation folder have a sub folder called data? (W)
-                elif entry == "data":
+                elif entry == 'data':
                     has_data = True
                 # [CSIPSTR9] Is there a first level folder called representations (W)
                 elif entry == REPS_DIR:
