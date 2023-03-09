@@ -171,7 +171,7 @@ class FileItemTest(unittest.TestCase):
 
     def test_from_xml(self):
         element = ET.fromstring(FILE_XML)
-        file_item = FileItem.from_file_element(element)
+        file_item = FileItem.from_element(element)
         self.assertEqual(file_item.path, 'representations/rep1/METS.xml')
         self.assertEqual(file_item.name, METS)
         self.assertEqual(file_item.size, 3554)

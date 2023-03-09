@@ -29,12 +29,11 @@ import os
 
 from importlib_resources import files
 
-from ip_validation.xml import (PROFILES, SCHEMA)
+from ip_validation.xml import PROFILES
+from ip_validation.xml.schema import METS_PROF_SCHEMA
+from ip_validation.xml.namespaces import Namespaces
 from ip_validation.infopacks.struct_reqs import STRUCT_REQS
 from ip_validation.const import NOT_FILE, NO_PATH
-
-METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(SCHEMA).joinpath('mets.profile.local.v2-0.xsd')))
-METS_PROFILE_NS = '{http://www.loc.gov/METS_Profile/v2}'
 
 class Specification:
     """Stores the vital facts and figures an IP specification."""
@@ -154,15 +153,15 @@ class Specification:
         profile = ''
         # Loop through the child eles
         for child in spec_ele:
-            if child.tag == _mets_ns('title'):
+            if child.tag == Namespaces.PROFILE.qualify('title'):
                 # Process the title element
                 title = child.text
-            elif child.tag == _mets_ns('date'):
+            elif child.tag == Namespaces.PROFILE.qualify('date'):
                 # Grab the requirement text value
                 date = child.text
-            elif child.tag == _mets_ns('structural_requirements'):
+            elif child.tag == Namespaces.PROFILE.qualify('structural_requirements'):
                 requirements = cls._processs_requirements(child)
-            elif child.tag == _mets_ns('URI'):
+            elif child.tag in [Namespaces.PROFILE.qualify('URI'), 'URI']:
                 profile = child.text
         if add_struct:
             # Add the structural requirements
@@ -175,7 +174,7 @@ class Specification:
     def _processs_requirements(cls, req_root: ET.Element) -> dict[str, 'Requirement']:
         requirements = {}
         for sect_ele in req_root:
-            section = sect_ele.tag.replace(METS_PROFILE_NS, '')
+            section = sect_ele.tag.replace(Namespaces.PROFILE.qualifier, '')
             reqs = {}
             for req_ele in sect_ele:
                 requirement = cls.Requirement.from_element(req_ele)
@@ -228,9 +227,9 @@ class Specification:
             level = req_ele.get('LEVEL')
             name = ''
             for child in req_ele:
-                if child.tag == _mets_ns('description'):
+                if child.tag == Namespaces.METS.qualify('description'):
                     for req_child in child:
-                        if req_child.tag == _mets_ns('head'):
+                        if req_child.tag == Namespaces.METS.qualify('head'):
                             name = req_child.text
             return cls(req_id, name, level)
 
@@ -286,8 +285,6 @@ class Specification:
                                                                 message=req.get('message')))
             return reqs
 
-def _mets_ns(name: str) -> str:
-    return '{}{}'.format(METS_PROFILE_NS, name)
 
 @unique
 class EarkSpecifications(Enum):
@@ -299,6 +296,7 @@ class EarkSpecifications(Enum):
     def __init__(self, value: str):
         self._path = str(files(PROFILES).joinpath(value + '.xml'))
         self._specfication = Specification._from_xml_file(self._path)
+        self._title = value
 
     @property
     def id(self) -> str:
@@ -313,7 +311,7 @@ class EarkSpecifications(Enum):
     @property
     def title(self) -> str:
         """Get the specification title."""
-        self.value
+        self._title
 
     @property
     def specification(self) -> Specification:

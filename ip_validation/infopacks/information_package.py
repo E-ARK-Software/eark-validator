@@ -27,7 +27,7 @@ import os
 from lxml import etree
 
 from ip_validation.const import NO_PATH, NOT_FILE, NOT_VALID_FILE
-from ip_validation.xml.schema import METS_NS, CSIP_NS
+from ip_validation.xml.namespaces import Namespaces
 from ip_validation.infopacks.manifest import Manifest
 
 class PackageDetails:
@@ -99,22 +99,20 @@ class PackageDetails:
                     ns_uri = element[1]
                     ns[prefix] = ns_uri
                 if event == 'start':
-                    if element.tag == _q(METS_NS, 'mets'):
+                    if element.tag == Namespaces.METS.qualify('mets'):
                         objid = element.get('OBJID', '')
                         label = element.get('LABEL', '')
                         ptype = element.get('TYPE', '')
-                        othertype = element.get(_q(CSIP_NS, 'OTHERTYPE'), '')
-                        contentinformationtype = element.get(_q(CSIP_NS, 'CONTENTINFORMATIONTYPE'), '')
+                        othertype = element.get(Namespaces.CSIP.qualify('OTHERTYPE'), '')
+                        contentinformationtype = element.get(Namespaces.CSIP.qualify('CONTENTINFORMATIONTYPE'), '')
                         profile = element.get('PROFILE', '')
-                        oaispackagetype = element.find(_q(METS_NS, 'metsHdr')).get(_q(CSIP_NS, 'OAISPACKAGETYPE'), '')
-                    elif element.tag == _q(METS_NS, 'metsHdr'):
+                        oaispackagetype = element.find(Namespaces.METS.qualify('metsHdr')).get(Namespaces.CSIP.qualify('OAISPACKAGETYPE'), '')
+                    elif element.tag == Namespaces.METS.qualify('metsHdr'):
                         break
         except etree.XMLSyntaxError:
             raise ValueError(NOT_VALID_FILE.format(mets_file, 'XML'))
         return cls(objid, label, ptype, othertype, contentinformationtype, profile, oaispackagetype, ns)
 
-def _q(_ns: str, _v: str) -> str:
-    return '{{{}}}{}'.format(_ns, _v)
 
 class InformationPackage:
     """Stores the vital facts and figures about a package."""

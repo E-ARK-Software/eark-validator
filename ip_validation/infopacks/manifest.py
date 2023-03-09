@@ -26,11 +26,11 @@
 from enum import Enum, unique
 import hashlib
 import os
-from typing import List, Dict  # noqa: F401
 
 import lxml.etree as ET
 
-from ip_validation.const import NO_PATH, NOT_DIR
+from ip_validation.xml.schema import Namespaces
+from ip_validation.const import NO_PATH, NOT_DIR, NOT_FILE
 @unique
 class HashAlgorithms(Enum):
     """Enum covering information package validation statuses."""
@@ -44,7 +44,7 @@ class HashAlgorithms(Enum):
         if (not os.path.exists(path)):
             raise FileNotFoundError(NO_PATH.format(path))
         if (not os.path.isfile(path)):
-            raise ValueError('Path {} is not a file.'.format(path))
+            raise ValueError(NOT_FILE.format(path))
         implemenation = self.get_implementation(self)
         with open(path, 'rb') as file:
             for chunk in iter(lambda: file.read(4096), b""):
@@ -145,20 +145,25 @@ class FileItem:
         return self._mime
 
     @classmethod
-    def from_file_element(cls, element: ET.Element) -> 'FileItem':
-        """Create a FileItem from a METS:file etree element."""
-        # Get the child flocat element and grab the href attribute.
-        path = element.find('{http://www.loc.gov/METS/}FLocat', namespaces=element.nsmap).attrib['{http://www.w3.org/1999/xlink}href'] if hasattr(element, 'nsmap') else element.find('FLocat').attrib['href']
-        size = int(element.attrib['SIZE'])
-        mime = element.attrib['MIMETYPE']
-        checksum = Checksum.from_mets_element(element)
-        return cls(path, size, checksum, mime)
+    def path_from_file_element(cls, element: ET.Element) -> str:
+        return element.find(Namespaces.METS.qualify('FLocat'), namespaces=element.nsmap).attrib[Namespaces.XLINK.qualify('href')] if hasattr(element, 'nsmap') else element.find('FLocat').attrib['href']
 
     @classmethod
-    def from_mdref_element(cls, element: ET.Element) -> 'FileItem':
+    def path_from_mdref_element(cls, element: ET.Element) -> 'FileItem':
         """Create a FileItem from a METS:mdRef etree element."""
         # Get the child flocat element and grab the href attribute.
-        path = element.attrib['{http://www.w3.org/1999/xlink}href'] if hasattr(element, 'nsmap') else element.find('FLocat').attrib['href']
+        return element.attrib[Namespaces.XLINK.qualify('href')] if hasattr(element, 'nsmap') else element.find('FLocat').attrib['href']
+
+    @classmethod
+    def from_element(cls, element: ET.Element) -> 'FileItem':
+        """Create a FileItem from an etree element."""
+        path = ""
+        if element.tag in [Namespaces.METS.qualify('file'), 'file']:
+            path = cls.path_from_file_element(element)
+        elif element.tag in [Namespaces.METS.qualify('mdRef'), 'mdRef']:
+            path = cls.path_from_mdref_element(element)
+        else:
+            raise ValueError('Element {} is not a METS:file or METS:mdRef element.'.format(element.tag))
         size = int(element.attrib['SIZE'])
         mime = element.attrib['MIMETYPE']
         checksum = Checksum.from_mets_element(element)

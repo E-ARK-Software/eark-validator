@@ -28,8 +28,8 @@ import os
 from lxml import etree
 
 from ip_validation.infopacks.manifest import FileItem, Manifest
-from ip_validation.xml.schema import METS_NS, XLINK_NS, IP_SCHEMA
-
+from ip_validation.xml.schema import IP_SCHEMA
+from ip_validation.xml.namespaces import Namespaces
 
 class MetsValidator():
     """Encapsulates METS schema validation."""
@@ -87,20 +87,18 @@ class MetsValidator():
 
     def _process_element(self, element: etree.Element) -> None:
         # Define what to do with specific tags.
-        if element.tag == _q(METS_NS, 'div') and \
+        if element.tag == Namespaces.METS.qualify('div') and \
             element.attrib['LABEL'].startswith('Representations/'):
             self._process_rep_div(element)
             return
-        if element.tag == _q(METS_NS, 'file'):
-            self._file_refs.append(FileItem.from_file_element(element))
-        elif element.tag == _q(METS_NS, 'mdRef'):
-            self._file_refs.append(FileItem.from_mdref_element(element))
+        if element.tag == Namespaces.METS.qualify('file') or element.tag == Namespaces.METS.qualify('mdRef'):
+            self._file_refs.append(FileItem.from_element(element))
 
     def _process_rep_div(self, element: etree.Element) -> None:
         rep = element.attrib['LABEL'].rsplit('/', 1)[1]
         for child in element.getchildren():
-            if child.tag == _q(METS_NS, 'mptr'):
-                metspath = child.attrib[_q(XLINK_NS, 'href')]
+            if child.tag == Namespaces.METS.qualify('mptr'):
+                metspath = child.attrib[Namespaces.XLINK.qualify('href')]
                 self._reps_mets.update({rep: metspath})
 
 def _handle_rel_paths(rootpath: str, metspath: str) -> tuple[str, str]:
@@ -108,6 +106,3 @@ def _handle_rel_paths(rootpath: str, metspath: str) -> tuple[str, str]:
         return metspath.rsplit('/', 1)[0], metspath
     relpath = os.path.join(rootpath, metspath[9:]) if metspath.startswith('file://./') else os.path.join(rootpath, metspath)
     return relpath.rsplit('/', 1)[0], relpath
-
-def _q(_ns: str, _v: str) -> str:
-    return '{{{}}}{}'.format(_ns, _v)

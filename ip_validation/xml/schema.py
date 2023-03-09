@@ -29,58 +29,25 @@ E-ARK : Information package validation
 from lxml import etree
 from importlib_resources import files
 
-
 from .resources import schema as SCHEMA
-
-METS_NS = 'http://www.loc.gov/METS/'
-CSIP_NS = 'https://DILCIS.eu/XML/METS/CSIPExtensionMETS'
-SIP_NS = 'https://DILCIS.eu/XML/METS/SIPExtensionMETS'
-XML_NS = 'http://www.w3.org/XML/1998/namespace'
-XHTML_NS = 'http://www.w3.org/1999/xhtml'
-XLINK_NS = 'http://www.w3.org/1999/xlink'
-PROFILE_NS = 'http://www.loc.gov/METS_Profile/v2',
-XSI_NS = 'http://www.w3.org/2001/XMLSchema-instance'
-
-NS_BY_PREFIX = {
-    None: METS_NS,
-    'csip': CSIP_NS,
-    'sip': SIP_NS,
-    'xml': XML_NS,
-    'xhtml': XHTML_NS,
-    'xlink': XLINK_NS,
-    'mets': METS_NS,
-    'profile': PROFILE_NS,
-    'xsi': XSI_NS
-}
-
-PREFIX_BY_URI = {}
-
-for prefix, uri in NS_BY_PREFIX.items():
-    PREFIX_BY_URI[uri] = prefix
-
-LOCAL_SCHEMA = {
-    CSIP_NS: 'DILCISExtensionMETS.xsd',
-    SIP_NS: 'DILCISExtensionSIPMETS.xsd',
-    XML_NS: 'xml.xsd',
-    XHTML_NS: 'xhtml1-strict.xsd',
-    XLINK_NS: 'xlink.xsd',
-    METS_NS: 'mets.xsd',
-    PROFILE_NS: 'mets-profile.v2-0.xsd'
-}
-
+from .namespaces import Namespaces
 IP_SCHEMA = {
     'csip': etree.XMLSchema(file=str(files(SCHEMA).joinpath('mets.csip.local.v2-0.xsd'))),
     'sip': etree.XMLSchema(file=str(files(SCHEMA).joinpath('mets.sip.local.v2-0.xsd')))
 }
 
-def get_prefix(uri: str) -> str:
-    """Return the prefix for a given namespace URI."""
-    return PREFIX_BY_URI.get(uri, PREFIX_BY_URI[METS_NS])
-
-def  get_uri(prefix: str) -> str:
-    """Return the namespace URI for a given prefix."""
-    return NS_BY_PREFIX.get(prefix, METS_NS)
+LOCAL_SCHEMA = {
+    Namespaces.CSIP: 'DILCISExtensionMETS.xsd',
+    Namespaces.SIP: 'DILCISExtensionSIPMETS.xsd',
+    Namespaces.XML: 'xml.xsd',
+    Namespaces.XHTML: 'xhtml1-strict.xsd',
+    Namespaces.XLINK: 'xlink.xsd',
+    Namespaces.METS: 'mets.xsd',
+    Namespaces.PROFILE: 'mets-profile.v2-0.xsd'
+}
 
 def get_local_schema(uri: str) -> str:
     """Return the local schema file name for a given namespace URI."""
     return str(files(SCHEMA).joinpath(LOCAL_SCHEMA.get(uri, 'mets.xsd')))
+
+METS_PROF_SCHEMA = etree.XMLSchema(file=str(files(SCHEMA).joinpath('mets.profile.local.v2-0.xsd')))
