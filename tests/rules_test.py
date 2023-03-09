@@ -76,23 +76,23 @@ class ValidationRulesTest(unittest.TestCase):
 
     def test_validate_person(self):
         self._person_rules.validate(str(files(XML).joinpath('person.xml')))
-        self.assertTrue(SC.TestReport.from_ruleset(self._person_rules.ruleset.validation_report).is_valid)
+        self.assertTrue(SC.TestReport.from_validation_report(self._person_rules._schematron.validation_report).is_valid)
 
     def test_validate_invalid_person(self):
         self._person_rules.validate(str(files(XML).joinpath('invalid-person.xml')))
-        self.assertFalse(SC.TestReport.from_ruleset(self._person_rules.ruleset.validation_report).is_valid)
+        self.assertFalse(SC.TestReport.from_validation_report(self._person_rules._schematron.validation_report).is_valid)
 
     def test_validate_mets(self):
         self._mets_one_def_rules.validate(METS_VALID_PATH)
-        self.assertTrue(SC.TestReport.from_ruleset(self._mets_one_def_rules.ruleset.validation_report).is_valid)
+        self.assertTrue(SC.TestReport.from_validation_report(self._mets_one_def_rules._schematron.validation_report).is_valid)
 
     def test_validate_mets_no_root(self):
         self._mets_one_def_rules.validate(str(files(XML).joinpath('METS-no-root.xml')))
-        self.assertFalse(SC.TestReport.from_ruleset(self._mets_one_def_rules.ruleset.validation_report).is_valid)
+        self.assertFalse(SC.TestReport.from_validation_report(self._mets_one_def_rules._schematron.validation_report).is_valid)
 
     def test_validate_mets_no_objid(self):
         self._mets_one_def_rules.validate(str(files(XML).joinpath('METS-no-objid.xml')))
-        self.assertFalse(SC.TestReport.from_ruleset(self._mets_one_def_rules.ruleset.validation_report).is_valid)
+        self.assertFalse(SC.TestReport.from_validation_report(self._mets_one_def_rules._schematron.validation_report).is_valid)
 
     def test_mets_root(self):
         result, failures, _, _ = _test_validation(METS_ROOT_RULES, METS_VALID)
@@ -301,19 +301,19 @@ class ResultTest(unittest.TestCase):
 def _test_validation(name, to_validate):
     rules = SC.SchematronRuleset(SC.get_schematron_path('CSIP', name))
     rules.validate(str(files(XML).joinpath(to_validate)))
-    for failure in SC.TestReport.from_ruleset(rules.ruleset.validation_report).errors:
+    for failure in SC.TestReport.from_validation_report(rules._schematron.validation_report).errors:
         print(failure)
-    for warning in SC.TestReport.from_ruleset(rules.ruleset.validation_report).warnings:
+    for warning in SC.TestReport.from_validation_report(rules._schematron.validation_report).warnings:
         print(warning)
-    report = SC.TestReport.from_ruleset(rules.ruleset.validation_report)
+    report = SC.TestReport.from_validation_report(rules._schematron.validation_report)
     return report.is_valid, len(report.errors), len(report.warnings), len(report.infos)
 
 def _full_validation(name, to_validate):
     rules = SC.SchematronRuleset(SC.get_schematron_path('CSIP', name))
     rules.validate(str(files(XML).joinpath(to_validate)))
-    for failure in SC.TestReport.from_ruleset(rules.ruleset.validation_report).errors:
+    for failure in SC.TestReport.from_validation_report(rules._schematron.validation_report).errors:
         print(failure)
-    for warning in SC.TestReport.from_ruleset(rules.ruleset.validation_report).warnings:
+    for warning in SC.TestReport.from_validation_report(rules._schematron.validation_report).warnings:
         print(warning)
-    report = SC.TestReport.from_ruleset(rules.ruleset.validation_report)
+    report = SC.TestReport.from_validation_report(rules._schematron.validation_report)
     return report.is_valid, report.errors, report.warnings

@@ -61,22 +61,20 @@ class ValidationProfile():
             raise FileNotFoundError(NO_PATH.format(to_validate))
         if not os.path.isfile(to_validate):
             raise ValueError(NOT_FILE.format(to_validate))
-        is_valid = True
         self.is_wellformed = True
+        self.is_valid = True
         self.results = {}
         self.messages = []
         for section in self.rulesets.keys():
             try:
-                self.rulesets[section].validate(to_validate)
+                self.results[section] = TestReport.from_validation_report(self.rulesets[section].validate(to_validate))
             except ET.XMLSyntaxError as parse_err:
                 self.is_wellformed = False
                 self.is_valid = False
                 self.messages.append('File {} is not valid XML. {}'.format(to_validate, parse_err.msg))
                 return
-            self.results[section] = TestReport.from_ruleset(self.rulesets[section].ruleset.validation_report)
             if not self.results[section].is_valid:
-                is_valid = False
-        self.is_valid = is_valid
+                self.is_valid = False
 
     def get_results(self) -> dict[str, 'TestReport']:
         """Return the full set of results."""
@@ -203,7 +201,7 @@ class TestReport():
         return self._infos
 
     @classmethod
-    def from_ruleset(cls, ruleset: ET.Element) -> 'TestReport':
+    def from_validation_report(cls, ruleset: ET.Element) -> 'TestReport':
         """Get the report from the last validation."""
         xml_report = ET.XML(bytes(ruleset))
         failures = []

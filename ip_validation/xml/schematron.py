@@ -38,31 +38,41 @@ SVRL_NS = "{http://purl.oclc.org/dsdl/svrl}"
 
 class SchematronRuleset():
     """Encapsulates a set of Schematron rules loaded from a file."""
-    def __init__(self, rules_path: str=None):
-        if not os.path.exists(rules_path):
-            raise FileNotFoundError(NO_PATH.format(rules_path))
-        if not os.path.isfile(rules_path):
-            raise ValueError(NOT_FILE.format(rules_path))
-        self.rules_path = rules_path
+    def __init__(self, sch_path: str=None):
+        if not os.path.exists(sch_path):
+            raise FileNotFoundError(NO_PATH.format(sch_path))
+        if not os.path.isfile(sch_path):
+            raise ValueError(NOT_FILE.format(sch_path))
+        self._path = sch_path
         try:
-            self.ruleset = Schematron(file=self.rules_path, store_schematron=True, store_report=True)
+            self._schematron = Schematron(file=self._path, store_schematron=True, store_report=True)
         except ET.SchematronParseError as ex:
-            raise ValueError('Rules file is not valid XML: {}. {}'.format(rules_path, ex.error_log.last_error.message ))
+            raise ValueError('Rules file is not valid XML: {}. {}'.format(sch_path, ex.error_log.last_error.message ))
         except KeyError as ex:
-            raise ValueError('Rules file is not valid Schematron: {}. {}'.format(rules_path, ex.__doc__))
+            raise ValueError('Rules file is not valid Schematron: {}. {}'.format(sch_path, ex.__doc__))
+
+    @property
+    def path(self) -> str:
+        """Return the path to the Schematron rules file."""
+        return self._path
+
+    @property
+    def schematron(self) -> Schematron:
+        """Return the Schematron object."""
+        return self._schematron
 
     def get_assertions(self) -> Generator[ ET.Element, None, None]:
         """Generator that returns the rules one at a time."""
-        xml_rules = ET.XML(bytes(self.ruleset.schematron))
-
+        xml_rules = ET.XML(bytes(self.schematron.schematron))
         for ele in xml_rules.iter():
             if ele.tag == SCHEMATRON_NS + 'assert':
                 yield ele
 
-    def validate(self, to_validate: str) -> None:
+    def validate(self, to_validate: str) -> ET.Element:
         """Validate a file against the loaded Schematron ruleset."""
         xml_file = ET.parse(to_validate)
-        self.ruleset.validate(xml_file)
+        self.schematron.validate(xml_file)
+        return self.schematron.validation_report
     
 def get_schematron_path(id: str, section: str) -> str:
     return str(files(SCHEMATRON).joinpath(id).joinpath('mets_{}_rules.xml'.format(section)))
