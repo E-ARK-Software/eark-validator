@@ -32,7 +32,7 @@ from importlib_resources import files
 from ip_validation.xml import PROFILES
 from ip_validation.xml.schema import METS_PROF_SCHEMA
 from ip_validation.xml.namespaces import Namespaces
-from ip_validation.infopacks.struct_reqs import STRUCT_REQS
+from ip_validation.specifications.struct_reqs import STRUCT_REQS
 from ip_validation.const import NOT_FILE, NO_PATH
 
 class Specification:

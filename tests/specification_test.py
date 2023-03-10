@@ -29,8 +29,8 @@ from lxml import etree as ET
 
 from importlib_resources import files
 
-from ip_validation.infopacks.specification import EarkSpecifications
-from ip_validation.infopacks.specification import Specification
+from ip_validation.specifications.specification import EarkSpecifications
+from ip_validation.specifications.specification import Specification
 import tests.resources.xml as XML
 
 

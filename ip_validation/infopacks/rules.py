@@ -30,7 +30,7 @@ from importlib_resources import files
 from lxml import etree as ET
 
 from ip_validation.xml.schematron import SchematronRuleset, SVRL_NS, get_schematron_path
-from ip_validation.infopacks.specification import EarkSpecifications, Specification
+from ip_validation.specifications.specification import EarkSpecifications, Specification
 from ip_validation.const import NO_PATH, NOT_FILE
 
 class ValidationProfile():

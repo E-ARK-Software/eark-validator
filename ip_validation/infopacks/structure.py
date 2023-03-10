@@ -30,7 +30,7 @@ import tempfile
 import zipfile
 
 from ip_validation.infopacks.rules import Severity
-import ip_validation.infopacks.specification as SPECS
+import ip_validation.specifications.specification as SPECS
 
 from ip_validation.infopacks.manifest import Checksum
 

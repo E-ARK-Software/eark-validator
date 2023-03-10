@@ -98,8 +98,7 @@ class MetsValidator():
         rep = element.attrib['LABEL'].rsplit('/', 1)[1]
         for child in element.getchildren():
             if child.tag == Namespaces.METS.qualify('mptr'):
-                metspath = child.attrib[Namespaces.XLINK.qualify('href')]
-                self._reps_mets.update({rep: metspath})
+                self._reps_mets.update({rep:  child.attrib[Namespaces.XLINK.qualify('href')]})
 
 def _handle_rel_paths(rootpath: str, metspath: str) -> tuple[str, str]:
     if metspath.startswith('file:///') or os.path.isabs(metspath):

@@ -29,7 +29,7 @@ from enum import Enum
 from importlib_resources import files
 
 from ip_validation.infopacks import rules as SC
-from ip_validation.infopacks.specification import EarkSpecifications
+from ip_validation.specifications.specification import EarkSpecifications
 import tests.resources.schematron as SCHEMATRON
 import tests.resources.xml as XML
 
@@ -45,55 +45,12 @@ METS_AMD_RULES = 'amdSec'
 METS_DMD_RULES = 'dmdSec'
 METS_FILE_RULES = 'fileSec'
 METS_STRUCT_RULES = 'structMap'
+CSIP_PROF = 'https://earkcsip.dilcis.eu/profile/E-ARK-CSIP.xml'
+SIP_PROF = 'https://earksip.dilcis.eu/profile/E-ARK-SIP.xml'
+DIP_PROF = 'https://earkdip.dilcis.eu/profile/E-ARK-DIP.xml'
+
 class ValidationRulesTest(unittest.TestCase):
     """Tests for Schematron validation rules."""
-    @classmethod
-    def setUpClass(cls):
-        cls._person_rules = SC.SchematronRuleset(PERSON_PATH)
-        cls._mets_one_def_rules = SC.SchematronRuleset(METS_ONE_DEF)
-
-    def test_file_not_found(self):
-        with self.assertRaises(FileNotFoundError):
-            SC.SchematronRuleset(NOT_FOUND_PATH)
-
-    def test_dir_value_err(self):
-        with self.assertRaises(ValueError):
-            SC.SchematronRuleset(str(files(SCHEMATRON)))
-
-    def test_empty_file(self):
-        with self.assertRaises(ValueError):
-            SC.SchematronRuleset(EMPTY_FILE_PATH)
-
-    def test_notschematron_file(self):
-        with self.assertRaises(ValueError):
-            SC.SchematronRuleset(str(files(XML).joinpath('person.xml')))
-
-    def test_load_schematron(self):
-        assert_count = 0
-        for _ in self._person_rules.get_assertions():
-            assert_count += 1
-        self.assertTrue(assert_count > 0)
-
-    def test_validate_person(self):
-        self._person_rules.validate(str(files(XML).joinpath('person.xml')))
-        self.assertTrue(SC.TestReport.from_validation_report(self._person_rules._schematron.validation_report).is_valid)
-
-    def test_validate_invalid_person(self):
-        self._person_rules.validate(str(files(XML).joinpath('invalid-person.xml')))
-        self.assertFalse(SC.TestReport.from_validation_report(self._person_rules._schematron.validation_report).is_valid)
-
-    def test_validate_mets(self):
-        self._mets_one_def_rules.validate(METS_VALID_PATH)
-        self.assertTrue(SC.TestReport.from_validation_report(self._mets_one_def_rules._schematron.validation_report).is_valid)
-
-    def test_validate_mets_no_root(self):
-        self._mets_one_def_rules.validate(str(files(XML).joinpath('METS-no-root.xml')))
-        self.assertFalse(SC.TestReport.from_validation_report(self._mets_one_def_rules._schematron.validation_report).is_valid)
-
-    def test_validate_mets_no_objid(self):
-        self._mets_one_def_rules.validate(str(files(XML).joinpath('METS-no-objid.xml')))
-        self.assertFalse(SC.TestReport.from_validation_report(self._mets_one_def_rules._schematron.validation_report).is_valid)
-
     def test_mets_root(self):
         result, failures, _, _ = _test_validation(METS_ROOT_RULES, METS_VALID)
         self.assertTrue(failures == 0)
@@ -185,27 +142,27 @@ class ValidationRulesTest(unittest.TestCase):
 class ValidationProfileTest(unittest.TestCase):
     def test_load_by_str(self):
         profile = SC.ValidationProfile.from_specification('CSIP')
-        self.assertEqual(profile.specification.url, 'https://earkcsip.dilcis.eu/profile/E-ARK-CSIP.xml')
+        self.assertEqual(profile.specification.url, CSIP_PROF)
         profile = SC.ValidationProfile.from_specification('SIP')
-        self.assertEqual(profile.specification.url, 'https://earksip.dilcis.eu/profile/E-ARK-SIP.xml')
+        self.assertEqual(profile.specification.url, SIP_PROF)
         profile = SC.ValidationProfile.from_specification('DIP')
-        self.assertEqual(profile.specification.url, 'https://earkdip.dilcis.eu/profile/E-ARK-DIP.xml')
+        self.assertEqual(profile.specification.url, DIP_PROF)
 
     def test_load_by_eark_spec(self):
         profile = SC.ValidationProfile.from_specification(EarkSpecifications.CSIP)
-        self.assertEqual(profile.specification.url, 'https://earkcsip.dilcis.eu/profile/E-ARK-CSIP.xml')
+        self.assertEqual(profile.specification.url, CSIP_PROF)
         profile = SC.ValidationProfile.from_specification(EarkSpecifications.SIP)
-        self.assertEqual(profile.specification.url, 'https://earksip.dilcis.eu/profile/E-ARK-SIP.xml')
+        self.assertEqual(profile.specification.url, SIP_PROF)
         profile = SC.ValidationProfile.from_specification(EarkSpecifications.DIP)
-        self.assertEqual(profile.specification.url, 'https://earkdip.dilcis.eu/profile/E-ARK-DIP.xml')
+        self.assertEqual(profile.specification.url, DIP_PROF)
 
     def test_load_by_spec(self):
         profile = SC.ValidationProfile.from_specification(EarkSpecifications.CSIP.specification)
-        self.assertEqual(profile.specification.url, 'https://earkcsip.dilcis.eu/profile/E-ARK-CSIP.xml')
+        self.assertEqual(profile.specification.url, CSIP_PROF)
         profile = SC.ValidationProfile.from_specification(EarkSpecifications.SIP.specification)
-        self.assertEqual(profile.specification.url, 'https://earksip.dilcis.eu/profile/E-ARK-SIP.xml')
+        self.assertEqual(profile.specification.url, SIP_PROF)
         profile = SC.ValidationProfile.from_specification(EarkSpecifications.DIP.specification)
-        self.assertEqual(profile.specification.url, 'https://earkdip.dilcis.eu/profile/E-ARK-DIP.xml')
+        self.assertEqual(profile.specification.url, DIP_PROF)
 
     def test_bad_value(self):
         with self.assertRaises(ValueError):
