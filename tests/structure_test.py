@@ -26,8 +26,8 @@
 import os
 import unittest
 
-from ip_validation.infopacks import structure as STRUCT
-from ip_validation.infopacks.rules import Severity
+from ip_validation import structure as STRUCT
+from ip_validation.rules import Severity
 from tests.utils_test import contains_rule_id
 
 EXP_NOT_WELLFORMED = 'Expecting status NotWellFormed, not {}'

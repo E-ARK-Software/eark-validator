@@ -29,7 +29,7 @@ import tarfile
 import tempfile
 import zipfile
 
-from ip_validation.infopacks.rules import Severity
+from ip_validation.rules import Severity
 import ip_validation.specifications.specification as SPECS
 
 from ip_validation.infopacks.manifest import Checksum

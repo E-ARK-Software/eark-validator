@@ -29,4 +29,3 @@ E-ARK : Information package validation
 from .resources import profiles as PROFILES
 from .resources import schema as SCHEMA
 from .resources import schematron as SCHEMATRON
-from .resources.schematron import CSIP as CSIP
