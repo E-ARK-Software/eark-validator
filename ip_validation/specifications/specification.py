@@ -37,7 +37,7 @@ from ip_validation.const import NOT_FILE, NO_PATH
 
 class Specification:
     """Stores the vital facts and figures an IP specification."""
-    def __init__(self, title: str, url: str, version: str, date: str, requirements:dict[str, 'Requirement']=None):
+    def __init__(self, title: str, url: str, version: str, date: str, requirements:dict[str, 'Requirement']=None): # pylint: disable=unsubscriptable-object
         self._title = title
         self._url = url
         self._version = version
@@ -99,7 +99,7 @@ class Specification:
             return sect.get(id)
         return None
 
-    def section_requirements(self, section: str=None) -> list['Requirement']:
+    def section_requirements(self, section: str=None) -> list['Requirement']: # pylint: disable=unsubscriptable-object
         """Get the specification requirements, by section if offered."""
         requirements = []
         if section:
@@ -115,7 +115,7 @@ class Specification:
         return len(self._requirements)
 
     @property
-    def sections(self) -> list[str]:
+    def sections(self) -> list[str]: # pylint: disable=unsubscriptable-object
         """Get the specification sections."""
         return self._requirements.keys()
 
@@ -171,7 +171,7 @@ class Specification:
         return cls(title, profile, version, date, requirements=requirements)
 
     @classmethod
-    def _processs_requirements(cls, req_root: ET.Element) -> dict[str, 'Requirement']:
+    def _processs_requirements(cls, req_root: ET.Element) -> dict[str, 'Requirement']: # pylint: disable=unsubscriptable-object
         requirements = {}
         for sect_ele in req_root:
             section = sect_ele.tag.replace(Namespaces.PROFILE.qualifier, '')
@@ -276,7 +276,7 @@ class Specification:
             return cls(req_id, level, message)
 
         @staticmethod
-        def _get_struct_reqs() -> list['Specification.StructuralRequirement']:
+        def _get_struct_reqs() -> list['Specification.StructuralRequirement']: # pylint: disable=unsubscriptable-object
             reqs = []
             for req_num in STRUCT_REQS:
                 req = STRUCT_REQS.get(req_num)

@@ -59,7 +59,7 @@ class StructureStatus(Enum):
 class StructureReport:
     """Stores the vital facts and figures about a package."""
     structure_values = list(StructureStatus)
-    def __init__(self, status: StructureStatus=StructureStatus.Unknown, errors: list[str]=None, warnings: list[str]=None, infos: list[str]=None):
+    def __init__(self, status: StructureStatus=StructureStatus.Unknown, errors: list[str]=None, warnings: list[str]=None, infos: list[str]=None): # pylint: disable=unsubscriptable-object
         self.status = status
         self._errors = errors if errors else []
         self._warnings = warnings if warnings else []
@@ -77,17 +77,17 @@ class StructureReport:
         self._status = value
 
     @property
-    def errors(self) -> list[str]:
+    def errors(self) -> list[str]: # pylint: disable=unsubscriptable-object
         """Return the full list of error messages."""
         return self._errors
 
     @property
-    def warnings(self) -> list[str]:
+    def warnings(self) -> list[str]: # pylint: disable=unsubscriptable-object
         """Return the full list of warnings messages."""
         return self._warnings
 
     @property
-    def infos(self) -> list[str]:
+    def infos(self) -> list[str]: # pylint: disable=unsubscriptable-object
         """Return the full list of info messages."""
         return self._infos
 
@@ -111,7 +111,7 @@ class StructureReport:
             self._errors.append(error)
             self.status = StructureStatus.NotWellFormed
 
-    def add_errors(self, errors: list[str]) -> None:
+    def add_errors(self, errors: list[str]) -> None: # pylint: disable=unsubscriptable-object
         """Add a validation error to package lists."""
         for error in errors:
             self.add_error(error)

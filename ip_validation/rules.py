@@ -51,7 +51,7 @@ class ValidationProfile():
         return self._specification
 
     @property
-    def rulesets(self) -> dict[str, SchematronRuleset]:
+    def rulesets(self) -> dict[str, SchematronRuleset]: # pylint: disable=unsubscriptable-object
         """ Get the Schematron rulesets."""
         return self._rulesets
 
@@ -76,7 +76,7 @@ class ValidationProfile():
             if not self.results[section].is_valid:
                 self.is_valid = False
 
-    def get_results(self) -> dict[str, 'TestReport']:
+    def get_results(self) -> dict[str, 'TestReport']: # pylint: disable=unsubscriptable-object
         """Return the full set of results."""
         return self.results
 
@@ -174,7 +174,7 @@ class TestResult():
 
 class TestReport():
     """A report made up of validation results."""
-    def __init__(self, is_valid: bool, errors: list[TestResult]=None, warnings: list[TestResult]=None, infos: list[TestResult]=None):
+    def __init__(self, is_valid: bool, errors: list[TestResult]=None, warnings: list[TestResult]=None, infos: list[TestResult]=None): # pylint: disable=unsubscriptable-object
         self._is_valid = is_valid
         self._errors = errors if errors else []
         self._warnings = warnings if warnings else []
@@ -186,17 +186,17 @@ class TestReport():
         return self._is_valid
 
     @property
-    def errors(self) -> list[TestResult]:
+    def errors(self) -> list[TestResult]: # pylint: disable=unsubscriptable-object
         """Get the failures."""
         return self._errors
 
     @property
-    def warnings(self) -> list[TestResult]:
+    def warnings(self) -> list[TestResult]: # pylint: disable=unsubscriptable-object
         """Get the warnings."""
         return self._warnings
 
     @property
-    def infos(self) -> list[TestResult]:
+    def infos(self) -> list[TestResult]: # pylint: disable=unsubscriptable-object
         """Get the warnings."""
         return self._infos
 

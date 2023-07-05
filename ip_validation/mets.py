@@ -44,19 +44,19 @@ class MetsValidator():
         return self._package_root
 
     @property
-    def validation_errors(self) -> list[str]:
+    def validation_errors(self) -> list[str]: # pylint: disable=unsubscriptable-object
         return self._validation_errors
 
     @property
-    def representations(self) -> list[str]:
+    def representations(self) -> list[str]: # pylint: disable=unsubscriptable-object
         return self._reps_mets.keys()
 
     @property
-    def representation_mets(self) -> list[str]:
+    def representation_mets(self) -> list[str]: # pylint: disable=unsubscriptable-object
         return self._reps_mets.values()
 
     @property
-    def file_references(self) -> list[FileItem]:
+    def file_references(self) -> list[FileItem]: # pylint: disable=unsubscriptable-object
         return self._file_refs
 
     def get_mets_path(self, rep_name: str) -> str:
@@ -100,7 +100,7 @@ class MetsValidator():
             if child.tag == Namespaces.METS.qualify('mptr'):
                 self._reps_mets.update({rep:  child.attrib[Namespaces.XLINK.qualify('href')]})
 
-def _handle_rel_paths(rootpath: str, metspath: str) -> tuple[str, str]:
+def _handle_rel_paths(rootpath: str, metspath: str) -> tuple[str, str]: # pylint: disable=unsubscriptable-object
     if metspath.startswith('file:///') or os.path.isabs(metspath):
         return metspath.rsplit('/', 1)[0], metspath
     relpath = os.path.join(rootpath, metspath[9:]) if metspath.startswith('file://./') else os.path.join(rootpath, metspath)

@@ -182,7 +182,7 @@ class FileItem:
         return cls(path, size, checksum, mimetype)
 
 class Manifest:
-    def __init__(self, root_path: str, file_items: dict[str, FileItem] or list[FileItem] = None):
+    def __init__(self, root_path: str, file_items: dict[str, FileItem] or list[FileItem] = None): # pylint: disable=unsubscriptable-object
         if (not os.path.exists(root_path)):
             raise FileNotFoundError(NO_PATH.format(root_path))
         if (not os.path.isdir(root_path)):
@@ -206,7 +206,7 @@ class Manifest:
         return sum([item.size for item in self._file_items.values()])
 
     @property
-    def items(self) -> dict[str, FileItem]:
+    def items(self) -> dict[str, FileItem]: # pylint: disable=unsubscriptable-object
         """Get the file items."""
         return self._file_items
 
@@ -215,7 +215,7 @@ class Manifest:
         search_path = self._relative_path(self._root_path, path)
         return self._file_items.get(search_path)
 
-    def check_integrity(self) -> tuple[bool, list[str]]:
+    def check_integrity(self) -> tuple[bool, list[str]]: # pylint: disable=unsubscriptable-object
         """Check the integrity of the manifest."""
         is_valid = True
         issues = []
@@ -252,7 +252,7 @@ class Manifest:
         return cls(root_path, items)
 
     @classmethod
-    def from_file_items(cls, root_path: str, file_items: dict[str, FileItem] or list[FileItem]) -> 'Manifest':
+    def from_file_items(cls, root_path: str, file_items: dict[str, FileItem] or list[FileItem]) -> 'Manifest': # pylint: disable=unsubscriptable-object
         if (not os.path.exists(root_path)):
             raise FileNotFoundError(NO_PATH.format(root_path))
         if (not os.path.isdir(root_path)):
@@ -260,5 +260,5 @@ class Manifest:
         return cls(root_path, file_items)
 
     @classmethod
-    def _list_to_dict(cls, root_path: str, file_items: list[FileItem]) -> dict[str, FileItem]:
+    def _list_to_dict(cls, root_path: str, file_items: list[FileItem]) -> dict[str, FileItem]: # pylint: disable=unsubscriptable-object
         return {cls._relative_path(root_path, item.path): FileItem(cls._relative_path(root_path, item.path), item.size, item.checksum, item.mime) for item in file_items}
