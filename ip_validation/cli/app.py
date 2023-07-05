@@ -31,7 +31,7 @@ from pprint import pprint
 import os.path
 import sys
 
-import ip_validation.infopacks.structure as STRUCT
+import ip_validation.structure as STRUCT
 
 __version__ = '0.1.0'
 
@@ -44,8 +44,8 @@ It is designed for simple integration into automated work-flows.""",
 DILCIS Board (http://dilcis.eu)
 See LICENSE for license information.
 GitHub: https://github.com/E-ARK-Software/py-rest-ip-validator
-Author: Carl Wilson (OPF), 2020
-Maintainer: Carl Wilson (OPF), 2020"""
+Author: Carl Wilson (OPF), 2020-2023
+Maintainer: Carl Wilson (OPF), 2020-2023"""
 }
 
 # Create PARSER
