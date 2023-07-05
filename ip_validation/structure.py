@@ -273,7 +273,7 @@ class StructureChecker():
         self.has_data = has_data
         self.has_reps = has_reps
 
-    def validate_manifest(self, is_root: bool=True) -> list[StructError]:
+    def validate_manifest(self, is_root: bool=True) -> list[StructError]: # pylint: disable=unsubscriptable-object
         """Validate a manifest report and return the list of validation errors."""
         validation_errors = []
         # [CSIPSTR4] Is there a file called METS.xml (perform case checks)
