@@ -31,3 +31,7 @@ jobs:
         run: pre-commit run --all-files --verbose
       - name: Test with pytest
         run: pytest
+      - name: Test setuptools-git-versioning versioning
+        run: |
+          python -m pip install setuptools_git_versioning
+          python -m setuptools_git_versioning
