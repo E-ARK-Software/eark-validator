@@ -24,13 +24,10 @@
 #
 """Module that holds common utilities for unit testing."""
 from ip_validation.infopacks.rules import Severity
-import pprint
-def contains_rule_id(error_list, rule_id, severity=Severity.Error):
+def contains_rule_id(error_list, rule_id, severity=Severity.ERR):
     """Check that a particular error with specified severity is present in a list
     of errors."""
     for val_error in error_list:
-        pprint.pprint(str(val_error))
-        if val_error.id == rule_id:
-            if val_error.severity == severity:
-                return True
+        if val_error.id == rule_id and val_error.severity == severity:
+            return True
     return False

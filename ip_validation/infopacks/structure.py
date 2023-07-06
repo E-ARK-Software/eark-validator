@@ -32,7 +32,7 @@ import zipfile
 from ip_validation.infopacks.rules import Severity
 import ip_validation.infopacks.specification as SPECS
 
-import ip_validation.utils as UTILS
+from ip_validation.infopacks.manifest import Checksum
 
 MD_DIR = "metadata"
 REPS_DIR = "representations"
@@ -43,18 +43,18 @@ SUB_MESS_NOT_EXIST = 'Path {} does not exist'
 SUB_MESS_NOT_ARCH = 'Path {} is not a directory or archive format file.'
 # Map requirement levels to severity
 LEVEL_SEVERITY = {
-    'MUST': Severity.Error,
-    'SHOULD': Severity.Warn,
-    'MAY': Severity.Info
+    'MUST': Severity.ERR,
+    'SHOULD': Severity.WRN,
+    'MAY': Severity.INF
 }
 @unique
 class StructureStatus(Enum):
     """Enum covering information package validation statuses."""
-    Unknown = 1
+    Unknown = 'Unknown'
     # Package has basic parse / structure problems and can't be validated
-    NotWellFormed = 2
+    NotWellFormed = 'Not Well Formed'
     # Package structure is OK
-    WellFormed = 3
+    WellFormed = 'Well Formed'
 
 class StructureReport:
     """Stores the vital facts and figures about a package."""
@@ -72,7 +72,7 @@ class StructureReport:
 
     @status.setter
     def status(self, value):
-        if not value in self.structure_values:
+        if value not in self.structure_values:
             raise ValueError("Illegal package status value")
         self._status = value
 
@@ -103,11 +103,11 @@ class StructureReport:
 
     def add_error(self, error):
         """Add a validation error to package lists."""
-        if error.severity == Severity.Info:
+        if error.severity == Severity.INF:
             self._infos.append(error)
-        elif error.severity == Severity.Warn:
+        elif error.severity == Severity.WRN:
             self._warnings.append(error)
-        elif error.severity == Severity.Error:
+        elif error.severity == Severity.ERR:
             self._errors.append(error)
             self.status = StructureStatus.NotWellFormed
 
@@ -126,13 +126,7 @@ class StructureReport:
             rep.add_error(StructError.from_rule_no(1, sub_message=SUB_MESS_NOT_EXIST.format(path)))
         elif os.path.isfile(path):
             if ArchivePackageHandler.is_archive(path):
-                arch_handler = ArchivePackageHandler()
-                root = arch_handler.unpack_package(path)
-                if len(os.listdir(root)) == 1:
-                    for entry in os.listdir(root):
-                        ent_path = os.path.join(root, entry)
-                        if os.path.isdir(ent_path):
-                            root = ent_path
+                root = cls._handle_archive(path)
             else:
                 rep.add_error(StructError.from_rule_no(1,
                                                      sub_message=SUB_MESS_NOT_ARCH.format(path)))
@@ -146,17 +140,26 @@ class StructureReport:
                 rep.add_errors(struct_checker.validate_manifest(is_root=False))
         return rep
 
+    @classmethod
+    def _handle_archive(cls, archive_path):
+        arch_handler = ArchivePackageHandler()
+        root = arch_handler.unpack_package(archive_path)
+        if len(os.listdir(root)) == 1:
+            for entry in os.listdir(root):
+                ent_path = os.path.join(root, entry)
+                if os.path.isdir(ent_path):
+                    root = ent_path
+        return root
+
+
     def __str__(self):
         return "status:" + str(self.status)
 
-import pprint
 class StructError():
     """Encapsulates an individual validation test result."""
     def __init__(self, requirement, sub_message):
-        pprint.pprint("REQ")
-        pprint.pprint(str(requirement))
         self._requirement = requirement
-        self.severity = LEVEL_SEVERITY.get(requirement.level, Severity.Unknown)
+        self.severity = LEVEL_SEVERITY.get(requirement.level, Severity.UNK)
         self._sub_message = sub_message
 
     @property
@@ -171,24 +174,24 @@ class StructError():
 
     @severity.setter
     def severity(self, value):
-        if not value in list(Severity):
+        if value not in list(Severity):
             raise ValueError("Illegal severity value")
         self._severity = value
 
     @property
     def is_error(self):
         """Returns True if this is an error message, false otherwise."""
-        return self.severity == Severity.Error
+        return self.severity == Severity.ERR
 
     @property
     def is_info(self):
         """Returns True if this is an info message, false otherwise."""
-        return self.severity == Severity.Info
+        return self.severity == Severity.INF
 
     @property
     def is_warning(self):
         """Returns True if this is an warning message, false otherwise."""
-        return self.severity == Severity.Warn
+        return self.severity == Severity.WRN
 
     @property
     def message(self):
@@ -214,15 +217,11 @@ class StructError():
     def from_rule_no(cls, rule_no, sub_message=None):
         """Create an StructError from values supplied."""
         requirement = SPECS.Specification.StructuralRequirement.from_rule_no(rule_no)
-        pprint.pprint("NOREQ")
-        pprint.pprint(str(requirement))
         return StructError(requirement, sub_message)
 
     @classmethod
     def from_values(cls, requirement, sub_message=None):
         """Create an StructError from values supplied."""
-        pprint.pprint("VALREQ")
-        pprint.pprint(str(requirement))
         return StructError(requirement, sub_message)
 
 class ArchivePackageHandler():
@@ -240,9 +239,9 @@ class ArchivePackageHandler():
         returns the destination folder."""
         if not os.path.isfile(to_unpack) or not self.is_archive(to_unpack):
             raise PackageStructError("File is not an archive file.")
-        sha1 = UTILS.sha1(to_unpack)
+        sha1 = Checksum.from_file(to_unpack, 'sha1')
         dest_root = dest if dest else self.unpack_root
-        destination = os.path.join(dest_root, sha1)
+        destination = os.path.join(dest_root, sha1.value)
         if zipfile.is_zipfile(to_unpack):
             zip_ip = zipfile.ZipFile(to_unpack)
             zip_ip.extractall(path=destination)

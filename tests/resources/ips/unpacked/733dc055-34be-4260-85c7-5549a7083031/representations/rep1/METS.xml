@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<mets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sip="https://DILCIS.eu/XML/METS/SIPExtensionMETS" xmlns="http://www.loc.gov/METS/" xmlns:csip="https://DILCIS.eu/XML/METS/CSIPExtensionMETS" xmlns:xlink="http://www.w3.org/1999/xlink" OBJID="rep1" LABEL="" TYPE="Mixed" csip:CONTENTINFORMATIONTYPE="MIXED" PROFILE="NOT_DEFINED" xsi:schemaLocation="http://www.loc.gov/METS/ ../../schemas/mets1_12.xsd http://www.w3.org/1999/xlink ../../schemas/xlink.xsd https://dilcis.eu/XML/METS/CSIPExtensionMETS ../../schemas/DILCISExtensionMETS.xsd https://dilcis.eu/XML/METS/SIPExtensionMETS ../../schemas/DILCISExtensionSIPMETS.xsd">
+    <metsHdr CREATEDATE="2021-11-17T16:56:44.161Z" LASTMODDATE="2021-11-17T16:56:44.161Z" RECORDSTATUS="NEW" csip:OAISPACKAGETYPE="AIP"/>
+    <dmdSec ID="uuid-FC4AF4AD-4794-46BF-8FDB-1EB3D794E619" CREATED="2021-11-17T16:56:44.162Z" STATUS="CURRENT">
+        <mdRef ID="RODA-in.png" LOCTYPE="URL" MDTYPE="OTHER" xlink:type="simple" xlink:href="metadata/other/Siegfried/RODA-in.png.json" MIMETYPE="application/json" SIZE="365" CREATED="2021-11-17T16:56:44.162Z" CHECKSUM="D626E2213AAC10D15106D667600330046445AA2862E6BD24D998CF4E2AF110C5" CHECKSUMTYPE="SHA-256"/>
+    </dmdSec>
+    <amdSec ID="uuid-18BE6F5E-CDF0-4554-80C1-07F6CFF32EC8">
+        <digiprovMD ID="uuid-1C51719D-4D4F-4F73-92B5-D8EAD0759638" STATUS="CURRENT">
+            <mdRef ID="urn_roda_premis_file_RODA-in.png" LOCTYPE="URL" MDTYPE="PREMIS" xlink:type="simple" xlink:href="metadata/preservation/urn:roda:premis:file:RODA-in.png.xml" MIMETYPE="application/xml" SIZE="2167" CREATED="2021-11-17T16:56:44.161Z" CHECKSUM="6482EEE737F11901AE4AA8A85CF6680F5206034F41BAA26014A4007D141FA88B" CHECKSUMTYPE="SHA-256"/>
+        </digiprovMD>
+        <digiprovMD ID="uuid-C8065BDC-71AA-4C53-90D5-746A6F2C79B6" STATUS="CURRENT">
+            <mdRef ID="urn_roda_premis_representation_cfb449b3-ca41-3f81-ba06-bb8f57ee601e" LOCTYPE="URL" MDTYPE="PREMIS" xlink:type="simple" xlink:href="metadata/preservation/urn:roda:premis:representation:cfb449b3-ca41-3f81-ba06-bb8f57ee601e.xml" MIMETYPE="application/xml" SIZE="911" CREATED="2021-11-17T16:56:44.161Z" CHECKSUM="13C3E6DF3A1372434DBF18A3F9C249B4A3862932419395281F6F6898A2C4114D" CHECKSUMTYPE="SHA-256"/>
+        </digiprovMD>
+    </amdSec>
+    <fileSec ID="uuid-32D908A1-EB11-49D9-88E8-B0F8F003FC1A">
+        <fileGrp ID="uuid-55717D67-3FFC-4ECC-8D96-31D11B105600" USE="Data">
+            <file ID="ID-EE25ECC6-F631-46A1-8728-8E4615AEBB54" MIMETYPE="image/png" SIZE="2002" CREATED="2021-11-17T16:56:44.161Z" CHECKSUM="552F7310A3C65ED2E4853E0B191025800B3C01E19976160EE7A2755120B7244B" CHECKSUMTYPE="SHA-256">
+                <FLocat xlink:type="simple" xlink:href="data/RODA-in.png" LOCTYPE="URL"/>
+            </file>
+        </fileGrp>
+    </fileSec>
+    <structMap ID="uuid-BA1070E5-E74B-4557-989D-2AFD9287ECAD" TYPE="PHYSICAL" LABEL="CSIP">
+        <div ID="uuid-54E387AB-4CA4-49FF-AAC7-EB816426F75F" TYPE="ORIGINAL" LABEL="rep1">
+            <div ID="uuid-D12C9269-0BD7-4AB9-AE91-BB32E5F5E1E4" ADMID="uuid-1C51719D-4D4F-4F73-92B5-D8EAD0759638 uuid-C8065BDC-71AA-4C53-90D5-746A6F2C79B6" LABEL="Metadata"/>
+            <div ID="uuid-56FAEA74-77C4-4BAB-A62C-CFD450CA7FAB" DMDID="uuid-FC4AF4AD-4794-46BF-8FDB-1EB3D794E619" LABEL="Metadata/Other"/>
+            <div ID="uuid-D0A26B1D-F35E-412F-98A0-E9AE65658FCB" LABEL="Data">
+                <fptr FILEID="uuid-55717D67-3FFC-4ECC-8D96-31D11B105600"/>
+            </div>
+        </div>
+    </structMap>
+</mets>

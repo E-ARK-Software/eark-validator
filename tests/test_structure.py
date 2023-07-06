@@ -30,6 +30,9 @@ from ip_validation.infopacks import structure as STRUCT
 from ip_validation.infopacks.rules import Severity
 from tests.utils import contains_rule_id
 
+EXP_NOT_WELLFORMED = 'Expecting status NotWellFormed, not {}'
+EXP_WELLFORMED = 'Expecting status WellFormed, not {}'
+EXP_ERRORS = 'Expecting {} errors but found {}'
 class StructValidationTests(unittest.TestCase):
     """Unit tests covering structural validation of information packages, spcifically
     unpacking archived packages and establishing that the files and folders specified
@@ -41,12 +44,13 @@ class StructValidationTests(unittest.TestCase):
                                'single_file')
         details = STRUCT.validate_package_structure(ip_path)
         self.assertTrue(details.status == STRUCT.StructureStatus.NotWellFormed,
-                        'Expecting status NotWellFormed, not {}'.format(details.status))
+                        EXP_NOT_WELLFORMED.format(details.status))
         val_errors = details.errors
-        self.assertTrue(len(val_errors) == 1,
-                        'Expecting 1 errors but found {}'.format(len(val_errors)))
+        err_count = 1
+        self.assertTrue(len(val_errors) == err_count,
+                        EXP_ERRORS.format(err_count, len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
-                                         severity=Severity.Error))
+                                         severity=Severity.ERR))
 
     def test_check_package_root_multi_dir(self):
         """Dedicated test for package root detection errors."""
@@ -54,12 +58,13 @@ class StructValidationTests(unittest.TestCase):
                                'multi_dir')
         details = STRUCT.validate_package_structure(ip_path)
         self.assertTrue(details.status == STRUCT.StructureStatus.NotWellFormed,
-                        'Expecting status NotWellFormed, not {}'.format(details.status))
+                        EXP_NOT_WELLFORMED.format(details.status))
         val_errors = details.errors
-        self.assertTrue(len(val_errors) == 1,
-                        'Expecting 1 errors but found {}'.format(len(val_errors)))
+        err_count = 1
+        self.assertTrue(len(val_errors) == err_count,
+                        EXP_ERRORS.format(err_count, len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
-                                         severity=Severity.Error))
+                                         severity=Severity.ERR))
 
     def test_check_package_root_multi_file(self):
         """Dedicated test for package root detection errors."""
@@ -67,12 +72,13 @@ class StructValidationTests(unittest.TestCase):
                                'multi_file')
         details = STRUCT.validate_package_structure(ip_path)
         self.assertTrue(details.status == STRUCT.StructureStatus.NotWellFormed,
-                        'Expecting status NotWellFormed, not {}'.format(details.status))
+                        EXP_NOT_WELLFORMED.format(details.status))
         val_errors = details.errors
-        self.assertTrue(len(val_errors) == 1,
-                        'Expecting 1 errors but found {}'.format(len(val_errors)))
+        err_count = 1
+        self.assertTrue(len(val_errors) == err_count,
+                        EXP_ERRORS.format(err_count, len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
-                                         severity=Severity.Error))
+                                         severity=Severity.ERR))
 
     def test_check_package_root_multi_var(self):
         """Dedicated test for package root detection errors."""
@@ -80,18 +86,25 @@ class StructValidationTests(unittest.TestCase):
                                'multi_var')
         details = STRUCT.validate_package_structure(ip_path)
         self.assertTrue(details.status == STRUCT.StructureStatus.NotWellFormed,
-                        'Expecting status NotWellFormed, not {}'.format(details.status))
+                        EXP_NOT_WELLFORMED.format(details.status))
         val_errors = details.errors
-        self.assertTrue(len(val_errors) == 1,
-                        'Expecting 1 errors but found {}'.format(len(val_errors)))
+        err_count = 1
+        self.assertTrue(len(val_errors) == err_count,
+                        EXP_ERRORS.format(err_count, len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
-                                         severity=Severity.Error))
+                                         severity=Severity.ERR))
 
     def test_single_file_archive(self):
         """Test a package that's just a compressed single file."""
         ip_path = os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'struct',
                                'empty.zip')
         details = STRUCT.validate_package_structure(ip_path)
+        val_errors = details.errors
+        err_count = 1
+        self.assertTrue(len(val_errors) == err_count,
+                        EXP_ERRORS.format(err_count, len(val_errors)))
+        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4",
+                                         severity=Severity.ERR))
 
     def test_minimal(self):
         """Test minimal STRUCT with schemas, the basic no errors but with warnings package."""
@@ -99,16 +112,16 @@ class StructValidationTests(unittest.TestCase):
                                'minimal_IP_with_schemas.zip')
         details = STRUCT.validate_package_structure(ip_path)
         self.assertTrue(details.status == STRUCT.StructureStatus.WellFormed,
-                        'Expecting status WellFormed, not {}'.format(details.status))
+                        EXP_WELLFORMED.format(details.status))
         val_errors = details.warnings
         self.assertTrue(len(val_errors) == 3,
                         'Expecting 3 errors but found {}'.format(len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR12",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR13",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_nomets(self):
         """Test package with no METS.xml file"""
@@ -116,21 +129,22 @@ class StructValidationTests(unittest.TestCase):
                                'no_mets.tar.gz')
         details = STRUCT.validate_package_structure(ip_path)
         self.assertTrue(details.status == STRUCT.StructureStatus.NotWellFormed,
-                        'Expecting status NotWellFormed, not {}'.format(details.status))
+                        EXP_NOT_WELLFORMED.format(details.status))
         val_errors = details.errors
-        self.assertTrue(len(val_errors) == 1,
-                        'Expecting 1 errors but found {}'.format(len(val_errors)))
+        err_count = 1
+        self.assertTrue(len(val_errors) == err_count,
+                        EXP_ERRORS.format(err_count, len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4"))
 
         val_warnings = details.warnings
         self.assertTrue(len(val_warnings) == 3,
                         'Expecting 3 errors but found {}'.format(len(val_warnings)))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR12",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR13",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR15",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_nomd(self):
         # test as root
@@ -138,18 +152,19 @@ class StructValidationTests(unittest.TestCase):
                                'no_md.tar.gz')
         details = STRUCT.validate_package_structure(ip_path)
         self.assertTrue(details.status == STRUCT.StructureStatus.WellFormed,
-                        'Expecting status WellFormed, not {}'.format(details.status))
+                        EXP_WELLFORMED.format(details.status))
         val_errors = details.warnings
-        self.assertTrue(len(val_errors) == 4,
-                        'Expecting 4 errors but found {}'.format(len(val_errors)))
+        err_count = 4
+        self.assertTrue(len(val_errors) == err_count,
+                        EXP_ERRORS.format(err_count, len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR5",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR12",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR13",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_noschema(self):
         # test as root
@@ -158,18 +173,19 @@ class StructValidationTests(unittest.TestCase):
         details = STRUCT.validate_package_structure(ip_path)
 
         self.assertTrue(details.status == STRUCT.StructureStatus.WellFormed,
-                        'Expecting status WellFormed, not {}'.format(details.status))
+                        EXP_WELLFORMED.format(details.status))
         val_warnings = details.warnings
         for entry in val_warnings:
             print(str(entry))
-        self.assertTrue(len(val_warnings) == 4,
-                        'Expecting 4 errors but found {}'.format(len(val_warnings)))
+        err_count = 4
+        self.assertTrue(len(val_warnings) == err_count,
+                        EXP_ERRORS.format(err_count, len(val_warnings)))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR12",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR13",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR15",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_nodata(self):
         # test as root
@@ -177,30 +193,96 @@ class StructValidationTests(unittest.TestCase):
                                'no_data.tar.gz')
         details = STRUCT.validate_package_structure(ip_path)
         self.assertTrue(details.status == STRUCT.StructureStatus.WellFormed,
-                        'Expecting status WellFormed, not {}'.format(details.status))
+                        EXP_WELLFORMED.format(details.status))
         val_errors = details.warnings
-        self.assertTrue(len(val_errors) == 4,
-                        'Expecting 4 errors but found {}'.format(len(val_errors)))
+        err_count = 4
+        self.assertTrue(len(val_errors) == err_count,
+                        EXP_ERRORS.format(err_count, len(val_errors)))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR12",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR13",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
         self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
 
     def test_noreps(self):
         ip_path = os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'struct',
                                'no_reps.tar.gz')
         details = STRUCT.validate_package_structure(ip_path)
         self.assertTrue(details.status == STRUCT.StructureStatus.WellFormed,
-                        'Expecting status WellFormed, not {}'.format(details.status))
+                        EXP_WELLFORMED.format(details.status))
         val_warnings = details.warnings
         print("ERRORS")
         for err in details.messages:
             print(err)
-        self.assertTrue(len(val_warnings) == 1,
-                        'Expecting 1 errors but found {}'.format(len(val_warnings)))
+        err_count = 1
+        self.assertTrue(len(val_warnings) == err_count,
+                        EXP_ERRORS.format(err_count, len(val_warnings)))
         self.assertTrue(contains_rule_id(val_warnings, "CSIPSTR9",
-                                         severity=Severity.Warn))
+                                         severity=Severity.WRN))
+    """Unit tests covering structural validation of information packages, spcifically
+    unpacking archived packages and establishing that the files and folders specified
+    if the CSIP are present."""
+
+    def test_manifest_nomets(self):
+        """Ensure proper behaviour when no METS file is present."""
+        # test as root
+        man_no_mets = STRUCT.StructureChecker("no_mets", has_mets=False)
+        val_errors = man_no_mets.validate_manifest()
+        self.assertTrue(len(val_errors) == 1)
+        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR4"))
+        val_errors = man_no_mets.validate_manifest(is_root=False)
+        self.assertTrue(len(val_errors) == 2)
+        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR12",
+                                         severity=Severity.WRN))
+        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
+                                         severity=Severity.WRN))
+
+    def test_manifest_nomd(self):
+        # test as root
+        man_no_md = STRUCT.StructureChecker("no_md", has_md=False)
+        val_errors = man_no_md.validate_manifest()
+        self.assertTrue(len(val_errors) == 1)
+        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR5",
+                                         severity=Severity.WRN))
+        val_errors = man_no_md.validate_manifest(is_root=False)
+        self.assertTrue(len(val_errors) == 2)
+        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR13",
+                                         severity=Severity.WRN))
+        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
+                                         severity=Severity.WRN))
+
+    def test_manifest_noschema(self):
+        # test as root
+        man_no_schema = STRUCT.StructureChecker("no_schema", has_schema=False)
+        val_errors = man_no_schema.validate_manifest()
+        self.assertTrue(len(val_errors) == 1)
+        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
+                                         severity=Severity.WRN))
+        val_errors = man_no_schema.validate_manifest(is_root=False)
+        self.assertTrue(len(val_errors) == 2)
+        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR15",
+                                         severity=Severity.WRN))
+        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
+                                         severity=Severity.WRN))
+
+    def test_manifest_data(self):
+        # test as root
+        man_data = STRUCT.StructureChecker("data", has_data=True)
+        val_errors = man_data.validate_manifest()
+        self.assertTrue(len(val_errors) == 0)
+        val_errors = man_data.validate_manifest(is_root=False)
+        self.assertTrue(len(val_errors) == 0)
+
+    def test_manifest_noreps(self):
+        man_no_reps = STRUCT.StructureChecker("no_reps", has_reps=False)
+        val_errors = man_no_reps.validate_manifest()
+        self.assertTrue(len(val_errors) == 1)
+        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR9",
+                                         severity=Severity.WRN))
+        val_errors = man_no_reps.validate_manifest(is_root=False)
+        self.assertTrue(len(val_errors) == 1)
+        self.assertTrue(contains_rule_id(val_errors, "CSIPSTR11",
+                                         severity=Severity.WRN))

@@ -23,31 +23,47 @@
 # under the License.
 #
 """Module covering information package structure validation and navigation."""
-import lxml.etree as ET
+from enum import Enum, unique
+from lxml import etree as ET
 
 from importlib_resources import files
 
-import ip_validation.cli.resources as RES
+import ip_validation.infopacks.resources.profiles as PROFILES
+import ip_validation.infopacks.resources.schemas as SCHEMA
 from ip_validation.infopacks.struct_reqs import STRUCT_REQS
 
-METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(RES).joinpath('mets.profile.v2-0.xsd')))
-CSIP_XML = str(files(RES).joinpath('E-ARK-CSIP.xml'))
-SIP_XML = str(files(RES).joinpath('E-ARK-SIP.xml'))
-DIP_XML = str(files(RES).joinpath('E-ARK-DIP.xml'))
-METS_NS = '{http://www.loc.gov/METS_Profile/v2}'
+@unique
+class EarkSpecifications(Enum):
+    """Enumeration of E-ARK specifications."""
+    CSIP = 'E-ARK-CSIP'
+    SIP = 'E-ARK-SIP'
+    DIP = 'E-ARK-DIP'
+
+    @property
+    def path(self):
+        """Get the path to the specification file."""
+        return str(files(PROFILES).joinpath(self.value + '.xml'))
+
+    @property
+    def specification(self):
+        """Get the specification."""
+        return Specification.from_xml_file(self.path)
+
+METS_PROF_SCHEMA = ET.XMLSchema(file=str(files(SCHEMA).joinpath('mets.profile.v2-0.xsd')))
+METS_PROFILE_NS = '{http://www.loc.gov/METS_Profile/v2}'
 
 class Specification:
     """Stores the vital facts and figures an IP specification."""
-    def __init__(self, name, version, date, requirements=None):
-        self._name = name
+    def __init__(self, title, version, date, requirements=None):
+        self._title = title
         self._version = version
         self._date = date
         self._requirements = requirements if requirements else {}
 
     @property
-    def name(self):
+    def title(self):
         """Get the name of the specification."""
-        return self._name
+        return self._title
 
     @property
     def version(self):
@@ -95,7 +111,7 @@ class Specification:
         return self._requirements.keys()
 
     def __str__(self):
-        return "name:" + self.name + ", version:" + \
+        return "name:" + self.title + ", version:" + \
             str(self.version) + ", date:" + str(self.date)
 
     @classmethod
@@ -105,22 +121,7 @@ class Specification:
         return cls._from_xml(tree, schema)
 
     @classmethod
-    def csip(cls):
-        """Create a Specification from an XML file with CSIP."""
-        return  cls.from_xml_file(xml_file=CSIP_XML, schema=METS_PROF_SCHEMA, add_struct=True)
-
-    @classmethod
-    def sip(cls):
-        """Create a Specification from an XML file with SIP."""
-        return  cls.from_xml_file(xml_file=SIP_XML, schema=METS_PROF_SCHEMA)
-
-    @classmethod
-    def dip(cls):
-        """Create a Specification from an XML file with DIP."""
-        return  cls.from_xml_file(xml_file=DIP_XML, schema=METS_PROF_SCHEMA)
-
-    @classmethod
-    def from_xml_file(cls, xml_file=CSIP_XML, schema=METS_PROF_SCHEMA, add_struct=False):
+    def from_xml_file(cls, xml_file=EarkSpecifications.CSIP.path, schema=METS_PROF_SCHEMA, add_struct=False):
         """Create a Specification from an XML file."""
         tree = ET.parse(xml_file)
         return  cls._from_xml(tree, schema, add_struct=add_struct)
@@ -133,35 +134,38 @@ class Specification:
     @classmethod
     def from_element(cls, spec_ele, schema=METS_PROF_SCHEMA, add_struct=False):
         """Create a Specification from an XML element."""
-        # is_valid = schema.assertValid(spec_ele)
-        # if not is_valid:
-        #     raise ValueError('Specification invalid')
         version = spec_ele.get('ID')
-        name = date = ''
+        title = date = ''
         requirements = {}
         # Loop through the child eles
         for child in spec_ele:
-            if child.tag == '{}title'.format(METS_NS):
+            if child.tag == _mets_ns('title'):
                 # Process the title element
-                name = child.text
-            elif child.tag == '{}date'.format(METS_NS):
+                title = child.text
+            elif child.tag == _mets_ns('date'):
                 # Grab the requirement text value
                 date = child.text
-            elif child.tag == '{}structural_requirements'.format(METS_NS):
-                for sect_ele in child:
-                    section = sect_ele.get('ID')
-                    reqs = []
-                    for req_ele in sect_ele:
-                        requirement = cls.Requirement.from_element(req_ele)
-                        if not requirement.id.startswith('REF_'):
-                            reqs.append(cls.Requirement.from_element(req_ele))
-                    requirements[section] = reqs
+            elif child.tag == _mets_ns('structural_requirements'):
+                requirements = cls._processs_requirements(child)
         if add_struct:
             # Add the structural requirements
             struct_reqs = Specification.StructuralRequirement._get_struct_reqs()
             requirements['structure'] = struct_reqs
-        # Return the TestCase instance
-        return cls(name, version, date, requirements=requirements)
+        # Return the Specification
+        return cls(title, version, date, requirements=requirements)
+
+    @classmethod
+    def _processs_requirements(cls, req_root):
+        requirements = {}
+        for sect_ele in req_root:
+            section = sect_ele.tag.replace(METS_PROFILE_NS, '')
+            reqs = []
+            for req_ele in sect_ele:
+                requirement = cls.Requirement.from_element(req_ele)
+                if not requirement.id.startswith('REF_'):
+                    reqs.append(cls.Requirement.from_element(req_ele))
+            requirements[section] = reqs
+        return requirements
 
     class Requirement():
         """Encapsulates a requirement."""
@@ -207,9 +211,9 @@ class Specification:
             level = req_ele.get('LEVEL')
             name = ''
             for child in req_ele:
-                if child.tag == '{http://www.loc.gov/METS_Profile/v2}description':
+                if child.tag == _mets_ns('description'):
                     for req_child in child:
-                        if req_child.tag == '{http://www.loc.gov/METS_Profile/v2}head':
+                        if req_child.tag == _mets_ns('head'):
                             name = req_child.text
             return cls(req_id, name, level)
 
@@ -265,8 +269,5 @@ class Specification:
                                                                 message=req.get('message')))
             return reqs
 
-SPECIFICATIONS = {
-    'CSIP': Specification.csip(),
-    'SIP': Specification.sip(),
-    'DIP': Specification.dip()
-}
+def _mets_ns(name):
+    return '{}{}'.format(METS_PROFILE_NS, name)

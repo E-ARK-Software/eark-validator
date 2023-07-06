@@ -26,3 +26,5 @@
 E-ARK : Information package validation
         Information Package modules
 """
+
+from .mets import MetsValidator

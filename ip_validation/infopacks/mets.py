@@ -31,19 +31,47 @@ from lxml import etree
 from importlib_resources import files
 
 import ip_validation.infopacks.resources.schemas as SCHEMA
+from ip_validation.infopacks.manifest import FileItem, Manifest
 
 XLINK_NS = 'http://www.w3.org/1999/xlink'
 METS_NS = 'http://www.loc.gov/METS/'
 DILCIS_EXT_NS = 'https://DILCIS.eu/XML/METS/CSIPExtensionMETS'
 
 class MetsValidator():
+    schema_mets = etree.XMLSchema(file=str(files(SCHEMA).joinpath('mets.xsd')))
+
     """Encapsulates METS schema validation."""
     def __init__(self, root):
-        self.validation_errors = []
-        self.total_files = 0
-        self.schema_mets = etree.XMLSchema(file=str(files(SCHEMA).joinpath('mets.xsd')))
-        self.rootpath = root
-        self.subsequent_mets = []
+        self._validation_errors = []
+        self._package_root = root
+        self._reps_mets = {}
+        self._file_refs = []
+
+    @property
+    def root(self):
+        return self._package_root
+
+    @property
+    def validation_errors(self):
+        return self._validation_errors
+
+    @property
+    def representations(self):
+        return self._reps_mets.keys()
+
+    @property
+    def representation_mets(self):
+        return self._reps_mets.values()
+
+    @property
+    def file_references(self):
+        return self._file_refs
+
+    def get_mets_path(self, rep_name):
+        return self._reps_mets[rep_name]
+
+    def get_manifest(self):
+        return Manifest.from_file_items(self._package_root, self._file_refs)
 
     def validate_mets(self, mets):
         '''
@@ -56,54 +84,40 @@ class MetsValidator():
         @return:        Boolean validation result.
         '''
         # Handle relative package paths for representation METS files.
-        self.rootpath, mets = _handle_rel_paths(self.rootpath, mets)
+        self._package_root, mets = _handle_rel_paths(self._package_root, mets)
         try:
-            parsed_mets = etree.iterparse(mets, events=('start', 'end'), schema=self.schema_mets)
+            parsed_mets = etree.iterparse(mets, events=('start', 'end'), schema=MetsValidator.schema_mets)
             for event, element in parsed_mets:
-                # Define what to do with specific tags.
-                if event == 'end' and element.tag == _q(METS_NS, 'file'):
-                    # files
-                    # self.total_files += 1
-                    element.clear()
-                    while element.getprevious() is not None:
-                        del element.getparent()[0]
-                elif event == 'end' and \
-                    element.tag == _q(METS_NS, 'div') and \
-                    element.attrib['LABEL'].startswith('representations/'):
-                    if fnmatch.fnmatch(element.attrib['LABEL'].rsplit('/', 1)[1], '*_mig-*'):
-                        # representation mets files
-                        rep = element.attrib['LABEL'].rsplit('/', 1)[1]
-                        for child in element.getchildren():
-                            if child.tag == _q(METS_NS, 'mptr'):
-                                metspath = child.attrib[_q(XLINK_NS, 'href')]
-                                sub_mets = rep, metspath
-                                self.subsequent_mets.append(sub_mets)
-                        element.clear()
-                        while element.getprevious() is not None:
-                            del element.getparent()[0]
-                elif event == 'end' and element.tag == _q(METS_NS, 'dmdSec'):
-                    # dmdSec
-                    pass
-                elif event == 'end' and element.tag == _q(METS_NS, 'amdSec'):
-                    pass
+                self._process_element(event, element)
         except etree.XMLSyntaxError as synt_err:
-            self.validation_errors.append(synt_err)
-        except BaseException as base_err:
-            self.validation_errors.append(base_err)
+            self._validation_errors.append(synt_err)
+        return len(self._validation_errors) == 0
 
-        if self.total_files != 0:
-            self.validation_errors.append('File count yielded %d instead of 0.' % self.total_files)
+    def _process_element(self, event, element):
+        # Define what to do with specific tags.
+        if event != 'end':
+            return
+        if element.tag == _q(METS_NS, 'div') and \
+            element.attrib['LABEL'].startswith('Representations/'):
+            self._process_rep_div(element)
+            return
+        if element.tag == _q(METS_NS, 'file'):
+            self._file_refs.append(FileItem.from_file_element(element))
+        elif element.tag == _q(METS_NS, 'mdRef'):
+            self._file_refs.append(FileItem.from_mdref_element(element))
 
-        return len(self.validation_errors) == 0
+    def _process_rep_div(self, element):
+        rep = element.attrib['LABEL'].rsplit('/', 1)[1]
+        for child in element.getchildren():
+            if child.tag == _q(METS_NS, 'mptr'):
+                metspath = child.attrib[_q(XLINK_NS, 'href')]
+                self._reps_mets.update({rep: metspath})
 
 def _handle_rel_paths(rootpath, metspath):
-    if metspath.startswith('file://./'):
-        relpath = os.path.join(rootpath, metspath[9:])
-        # change self.rootpath to match any relative path found in the
-        # current (subsequent) mets
-        return relpath.rsplit('/', 1)[0], relpath
-    return metspath.rsplit('/', 1)[0], metspath
-
+    if metspath.startswith('file:///') or os.path.isabs(metspath):
+        return metspath.rsplit('/', 1)[0], metspath
+    relpath = os.path.join(rootpath, metspath[9:]) if metspath.startswith('file://./') else os.path.join(rootpath, metspath)
+    return relpath.rsplit('/', 1)[0], relpath
 
 def _q(_ns, _v):
     return '{{{}}}{}'.format(_ns, _v)

@@ -26,4 +26,6 @@
 E-ARK : Python information package validation
 
 """
+from .infopacks import MetsValidator
+
 __version__ = '2.0.3'
