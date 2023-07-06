@@ -20,7 +20,7 @@ def find_version(version_id, *file_paths):
     version_match = re.search(r"^{} = ['\"]([^'\"]*)['\"]".format(version_id), version_file, re.M)
     if version_match:
         return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")
+    raise RuntimeError('Unable to find version string.')
 
 INSTALL_REQUIRES = [
     'setuptools',
@@ -37,6 +37,7 @@ TEST_DEPS = [
     'pytest',
     'pylint',
     'pytest-cov',
+    'pre-commit',
 ]
 
 EXTRAS = {
@@ -57,11 +58,11 @@ setup(name='eark-ip-validation',
       author_email='carl@openpreservation.org',
       maintainer='Carl Wilson',
       maintainer_email='carl@openpreservation.org',
-      url="https://github.com/E-ARK-Software/py-e-ark-ip-validator",
+      url='https://github.com/E-ARK-Software/py-e-ark-ip-validator',
       download_url='https://github.com/E-ARK-Software/py-e-ark-ip-validator/archive/' \
         + find_version('__version__', 'ip_validation', '__init__.py') + '.tar.gz',
       package_data={'ip_validation': ['*.*', 'cli/resources/*.*']},
-      license="Apache License 2.0",
+      license='Apache License 2.0',
       entry_points={'console_scripts': [
           'ip-check = ip_validation.cli.app:main',
       ]},

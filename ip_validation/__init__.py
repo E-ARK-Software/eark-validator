@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=UTF-8
+# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -26,6 +26,5 @@
 E-ARK : Python information package validation
 
 """
-from .infopacks import MetsValidator
 
 __version__ = '2.0.3'

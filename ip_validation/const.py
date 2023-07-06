@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=UTF-8
+# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -34,3 +34,8 @@ as grant number LC-01390244 CEF-TC-2019-3 E-ARK3 under
 CONNECTING EUROPE FACILITY (CEF) - TELECOMMUNICATIONS SECTOR
 You can read more about this at:
 https://ec.europa.eu/inea/en/connecting-europe-facility/cef-telecom"""
+
+NO_PATH='Path {} does not exist.'
+NOT_DIR='Path {} is not a directory.'
+NOT_FILE='Path {} is not a file.'
+NOT_VALID_FILE='Path {} is not a vald {} file.'

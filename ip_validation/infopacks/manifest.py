@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=UTF-8
+# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -27,8 +27,10 @@ from enum import Enum, unique
 import hashlib
 import os
 
-NO_PATH='Path {} does not exist.'
-NOT_DIR='Path {} is not a directory.'
+import lxml.etree as ET
+
+from ip_validation.xml.schema import Namespaces
+from ip_validation.const import NO_PATH, NOT_DIR, NOT_FILE
 @unique
 class HashAlgorithms(Enum):
     """Enum covering information package validation statuses."""
@@ -38,19 +40,19 @@ class HashAlgorithms(Enum):
     SHA384 = 'SHA-384'
     SHA512 = 'SHA-512'
 
-    def hash_file(self, path):
+    def hash_file(self, path: str) -> 'Checksum':
         if (not os.path.exists(path)):
             raise FileNotFoundError(NO_PATH.format(path))
         if (not os.path.isfile(path)):
-            raise ValueError('Path {} is not a file.'.format(path))
+            raise ValueError(NOT_FILE.format(path))
         implemenation = self.get_implementation(self)
         with open(path, 'rb') as file:
-            for chunk in iter(lambda: file.read(4096), b""):
+            for chunk in iter(lambda: file.read(4096), b''):
                 implemenation.update(chunk)
         return Checksum(self, implemenation.hexdigest())
 
     @classmethod
-    def from_string(cls, value):
+    def from_string(cls, value: str) -> 'HashAlgorithms':
         search_value = value.upper() if hasattr(value, 'upper') else value
         for algorithm in cls:
             if (algorithm.value == search_value) or (algorithm.name == search_value) or (algorithm == value):
@@ -58,7 +60,7 @@ class HashAlgorithms(Enum):
         return None
 
     @classmethod
-    def get_implementation(cls, algorithm):
+    def get_implementation(cls, algorithm: 'HashAlgorithms'):
         if algorithm not in cls:
             algorithm = cls.from_string(algorithm)
         if algorithm is None:
@@ -74,28 +76,28 @@ class HashAlgorithms(Enum):
 
 
 class Checksum:
-    def __init__(self, algorithm, value):
+    def __init__(self, algorithm: HashAlgorithms, value: str):
         self._algorithm = algorithm
         self._value = value.lower()
 
     @property
-    def algorithm(self):
+    def algorithm(self) -> HashAlgorithms:
         """Get the algorithm."""
         return self._algorithm
 
     @property
-    def value(self):
+    def value(self) -> str:
         """Get the value."""
         return self._value
 
-    def is_value(self, value):
+    def is_value(self, value: 'Checksum') -> bool:
         """Check if the checksum value is equal to the given value."""
         if isinstance(value, Checksum):
             return (self._value == value.value) and (self._algorithm == value.algorithm)
         return self._value == value.lower()
 
     @classmethod
-    def from_mets_element(cls, element):
+    def from_mets_element(cls, element: ET.Element) -> 'Checksum':
         """Create a Checksum from an etree element."""
         # Get the child flocat element and grab the href attribute.
         algorithm = HashAlgorithms.from_string(element.attrib['CHECKSUMTYPE'])
@@ -103,7 +105,7 @@ class Checksum:
         return cls(algorithm, value)
 
     @classmethod
-    def from_file(cls, path, algorithm):
+    def from_file(cls, path: str, algorithm: 'Checksum') -> 'Checksum':
         """Create a Checksum from an etree element."""
         # Get the child flocat element and grab the href attribute.
         algorithm = HashAlgorithms.from_string(algorithm)
@@ -111,59 +113,64 @@ class Checksum:
 
 
 class FileItem:
-    def __init__(self, path, size, checksum, mime):
+    def __init__(self, path: str, size: int, checksum: Checksum, mime: str):
         self._path = path
         self._size = size
         self._checksum = checksum
         self._mime = mime
 
     @property
-    def path(self):
+    def path(self) -> str:
         """Get the path."""
         return self._path
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Get the name."""
         return os.path.basename(self._path)
 
     @property
-    def size(self):
+    def size(self) -> int:
         """Get the size."""
         return self._size
 
     @property
-    def checksum(self):
+    def checksum(self) -> Checksum:
         """Get the checksum value."""
         return self._checksum
 
     @property
-    def mime(self):
+    def mime(self) -> str:
         """Get the mime type."""
         return self._mime
 
     @classmethod
-    def from_file_element(cls, element):
-        """Create a FileItem from a METS:file etree element."""
-        # Get the child flocat element and grab the href attribute.
-        path = element.find('{http://www.loc.gov/METS/}FLocat', namespaces=element.nsmap).attrib['{http://www.w3.org/1999/xlink}href'] if hasattr(element, 'nsmap') else element.find('FLocat').attrib['href']
-        size = int(element.attrib['SIZE'])
-        mime = element.attrib['MIMETYPE']
-        checksum = Checksum.from_mets_element(element)
-        return cls(path, size, checksum, mime)
+    def path_from_file_element(cls, element: ET.Element) -> str:
+        return element.find(Namespaces.METS.qualify('FLocat'), namespaces=element.nsmap).attrib[Namespaces.XLINK.qualify('href')] if hasattr(element, 'nsmap') else element.find('FLocat').attrib['href']
 
     @classmethod
-    def from_mdref_element(cls, element):
+    def path_from_mdref_element(cls, element: ET.Element) -> 'FileItem':
         """Create a FileItem from a METS:mdRef etree element."""
         # Get the child flocat element and grab the href attribute.
-        path = element.attrib['{http://www.w3.org/1999/xlink}href'] if hasattr(element, 'nsmap') else element.find('FLocat').attrib['href']
+        return element.attrib[Namespaces.XLINK.qualify('href')] if hasattr(element, 'nsmap') else element.find('FLocat').attrib['href']
+
+    @classmethod
+    def from_element(cls, element: ET.Element) -> 'FileItem':
+        """Create a FileItem from an etree element."""
+        path = ''
+        if element.tag in [Namespaces.METS.qualify('file'), 'file']:
+            path = cls.path_from_file_element(element)
+        elif element.tag in [Namespaces.METS.qualify('mdRef'), 'mdRef']:
+            path = cls.path_from_mdref_element(element)
+        else:
+            raise ValueError('Element {} is not a METS:file or METS:mdRef element.'.format(element.tag))
         size = int(element.attrib['SIZE'])
         mime = element.attrib['MIMETYPE']
         checksum = Checksum.from_mets_element(element)
         return cls(path, size, checksum, mime)
 
     @classmethod
-    def from_file_path(cls, path, mime=None, checksum_algorithm=None):
+    def from_file_path(cls, path: str, mime:str=None, checksum_algorithm:HashAlgorithms=None) -> 'FileItem':
         """Create a FileItem from a file path."""
         if (not os.path.exists(path)):
             raise FileNotFoundError(NO_PATH.format(path))
@@ -175,7 +182,7 @@ class FileItem:
         return cls(path, size, checksum, mimetype)
 
 class Manifest:
-    def __init__(self, root_path, file_items):
+    def __init__(self, root_path: str, file_items: dict[str, FileItem] or list[FileItem] = None):
         if (not os.path.exists(root_path)):
             raise FileNotFoundError(NO_PATH.format(root_path))
         if (not os.path.isdir(root_path)):
@@ -184,31 +191,31 @@ class Manifest:
         self._file_items = file_items if isinstance(file_items, dict) else self._list_to_dict(root_path, file_items)
 
     @property
-    def root_path(self):
+    def root_path(self) -> str:
         """Get the root path."""
         return self._root_path
 
     @property
-    def file_count(self):
+    def file_count(self) -> int:
         """Get the number of files."""
         return len(self._file_items)
 
     @property
-    def size(self):
+    def size(self) -> int:
         """Get the total file size in bytes."""
         return sum([item.size for item in self._file_items.values()])
 
     @property
-    def items(self):
+    def items(self) -> dict[str, FileItem]:
         """Get the file items."""
         return self._file_items
 
-    def get_item(self, path):
+    def get_item(self, path: str) -> FileItem or None:
         """Get a file item by path."""
         search_path = self._relative_path(self._root_path, path)
         return self._file_items.get(search_path)
 
-    def check_integrity(self):
+    def check_integrity(self) -> tuple[bool, list[str]]:
         """Check the integrity of the manifest."""
         is_valid = True
         issues = []
@@ -228,11 +235,11 @@ class Manifest:
         return is_valid, issues
 
     @staticmethod
-    def _relative_path(root_path, path):
+    def _relative_path(root_path: str, path: str) -> str:
         return path if not os.path.isabs(path) else os.path.relpath(path, root_path)
 
     @classmethod
-    def from_directory(cls, root_path, checksum_algorithm=None):
+    def from_directory(cls, root_path: str, checksum_algorithm: HashAlgorithms=None) -> 'Manifest':
         if (not os.path.exists(root_path)):
             raise FileNotFoundError(NO_PATH.format(root_path))
         if (not os.path.isdir(root_path)):
@@ -245,7 +252,7 @@ class Manifest:
         return cls(root_path, items)
 
     @classmethod
-    def from_file_items(cls, root_path, file_items):
+    def from_file_items(cls, root_path: str, file_items: dict[str, FileItem] or list[FileItem]) -> 'Manifest':
         if (not os.path.exists(root_path)):
             raise FileNotFoundError(NO_PATH.format(root_path))
         if (not os.path.isdir(root_path)):
@@ -253,5 +260,5 @@ class Manifest:
         return cls(root_path, file_items)
 
     @classmethod
-    def _list_to_dict(cls, root_path, file_items):
+    def _list_to_dict(cls, root_path: str, file_items: list[FileItem]) -> dict[str, FileItem]:
         return {cls._relative_path(root_path, item.path): FileItem(cls._relative_path(root_path, item.path), item.size, item.checksum, item.mime) for item in file_items}
