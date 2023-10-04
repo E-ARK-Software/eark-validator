@@ -31,7 +31,9 @@ from pprint import pprint
 import os.path
 import sys
 
-import ip_validation.infopacks.structure as STRUCT
+sys.path.append('../../')
+
+import ip_validation.structure as STRUCT
 
 __version__ = '0.1.0'
 
