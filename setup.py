@@ -67,11 +67,6 @@ setup(name='eark-ip-validation',
           'ip-check = ip_validation.cli.app:main',
       ]},
       classifiers=[
-        "Programming Language :: Python :: 3",
-        'License :: OSI Approved :: Apache Software License',
-        "Operating System :: OS Independent",
-      ],
-      classifiers=[
           'Intended Audience :: Developers',
           'Programming Language :: Python :: 3',
           'Programming Language :: Python :: 3.5',
