@@ -48,7 +48,7 @@ EXTRAS = {
 with open('README.md', 'r') as README:
     README_TEXT = README.read()
 
-setup(name='eark-ip-validation',
+setup(name='py-eark-ip-validator',
       packages=find_packages(),
       version=find_version('__version__', 'ip_validation', '__init__.py'),
       description='E-ARK Python Information Package Validation',
