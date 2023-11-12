@@ -27,8 +27,8 @@ from enum import Enum
 import os
 import unittest
 
-from ip_validation import structure as STRUCT
-from ip_validation.infopacks.manifest import Checksum
+from eark_validator import structure as STRUCT
+from eark_validator.infopacks.manifest import Checksum
 
 MIN_TAR_SHA1 = '47ca3a9d7f5f23bf35b852a99785878c5e543076'
 

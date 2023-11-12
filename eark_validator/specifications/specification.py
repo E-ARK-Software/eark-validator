@@ -29,11 +29,11 @@ import os
 
 from importlib_resources import files
 
-from ip_validation.xml import PROFILES
-from ip_validation.xml.schema import METS_PROF_SCHEMA
-from ip_validation.xml.namespaces import Namespaces
-from ip_validation.specifications.struct_reqs import STRUCT_REQS
-from ip_validation.const import NOT_FILE, NO_PATH
+from eark_validator.xml import PROFILES
+from eark_validator.xml.schema import METS_PROF_SCHEMA
+from eark_validator.xml.namespaces import Namespaces
+from eark_validator.specifications.struct_reqs import STRUCT_REQS
+from eark_validator.const import NOT_FILE, NO_PATH
 
 class Specification:
     """Stores the vital facts and figures an IP specification."""

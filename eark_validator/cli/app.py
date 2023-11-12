@@ -33,7 +33,7 @@ import sys
 
 sys.path.append('../../')
 
-import ip_validation.structure as STRUCT
+import eark_validator.structure as STRUCT
 
 __version__ = '0.1.0'
 

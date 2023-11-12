@@ -48,9 +48,9 @@ EXTRAS = {
 with open('README.md', 'r') as README:
     README_TEXT = README.read()
 
-setup(name='py-eark-ip-validator',
+setup(name='eark-validator',
       packages=find_packages(),
-      version=find_version('__version__', 'ip_validation', '__init__.py'),
+      version=find_version('__version__', 'eark_validator', '__init__.py'),
       description='E-ARK Python Information Package Validation',
       long_description=README_TEXT,
       long_description_content_type='text/markdown',
@@ -60,11 +60,11 @@ setup(name='py-eark-ip-validator',
       maintainer_email='admin@e-ark-foundation.eu',
       url='https://www.e-ark-foundation.eu/e-ark-software-py-e-ark-ip-validator/',
       download_url='https://github.com/E-ARK-Software/py-e-ark-ip-validator/archive/' \
-        + find_version('__version__', 'ip_validation', '__init__.py') + '.tar.gz',
-      package_data={'ip_validation': ['*.*', 'cli/resources/*.*', 'xml/resources/schema/*.*', 'xml/resources/profiles/*.*']},
+                   + find_version('__version__', 'eark_validator', '__init__.py') + '.tar.gz',
+      package_data={'eark_validator': ['*.*', 'cli/resources/*.*', 'xml/resources/schema/*.*', 'xml/resources/profiles/*.*']},
       license='Apache License 2.0',
       entry_points={'console_scripts': [
-          'ip-check = ip_validation.cli.app:main',
+          'ip-check = eark_validator.cli.app:main',
       ]},
       classifiers=[
           'Intended Audience :: Developers',
@@ -78,4 +78,4 @@ setup(name='py-eark-ip-validator',
       tests_require=TEST_DEPS,
       extras_require=EXTRAS,
       test_suite='tests',
-     )
+      )

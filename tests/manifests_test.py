@@ -32,7 +32,7 @@ import xml.etree.ElementTree as ET
 import tests.resources.xml as XML
 import tests.resources.ips.unpacked as UNPACKED
 
-from ip_validation.infopacks.manifest import (
+from eark_validator.infopacks.manifest import (
     HashAlgorithms,
     FileItem,
     Checksum,

@@ -31,7 +31,7 @@ from lxml import etree as ET
 from lxml.isoschematron import Schematron
 
 from .resources import schematron as SCHEMATRON
-from ip_validation.const import NO_PATH, NOT_FILE
+from eark_validator.const import NO_PATH, NOT_FILE
 
 SCHEMATRON_NS = '{http://purl.oclc.org/dsdl/schematron}'
 SVRL_NS = '{http://purl.oclc.org/dsdl/svrl}'

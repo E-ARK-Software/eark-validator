@@ -28,8 +28,8 @@ from enum import Enum
 
 from importlib_resources import files
 
-from ip_validation import rules as SC
-from ip_validation.specifications.specification import EarkSpecifications
+from eark_validator import rules as SC
+from eark_validator.specifications.specification import EarkSpecifications
 import tests.resources.schematron as SCHEMATRON
 import tests.resources.xml as XML
 
