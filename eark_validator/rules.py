@@ -29,7 +29,7 @@ from importlib_resources import files
 
 from lxml import etree as ET
 
-from eark_validator.xml.schematron import SchematronRuleset, SVRL_NS, get_schematron_path
+from eark_validator.ipxml.schematron import SchematronRuleset, SVRL_NS, get_schematron_path
 from eark_validator.specifications.specification import EarkSpecifications, Specification
 from eark_validator.const import NO_PATH, NOT_FILE
 

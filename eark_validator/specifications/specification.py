@@ -29,9 +29,9 @@ import os
 
 from importlib_resources import files
 
-from eark_validator.xml import PROFILES
-from eark_validator.xml.schema import METS_PROF_SCHEMA
-from eark_validator.xml.namespaces import Namespaces
+from eark_validator.ipxml import PROFILES
+from eark_validator.ipxml.schema import METS_PROF_SCHEMA
+from eark_validator.ipxml.namespaces import Namespaces
 from eark_validator.specifications.struct_reqs import STRUCT_REQS
 from eark_validator.const import NOT_FILE, NO_PATH
 

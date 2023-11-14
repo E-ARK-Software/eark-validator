@@ -61,7 +61,7 @@ setup(name='eark-validator',
       url='https://www.e-ark-foundation.eu/e-ark-software-py-e-ark-ip-validator/',
       download_url='https://github.com/E-ARK-Software/py-e-ark-ip-validator/archive/' \
                    + find_version('__version__', 'eark_validator', '__init__.py') + '.tar.gz',
-      package_data={'eark_validator': ['*.*', 'cli/resources/*.*', 'xml/resources/schema/*.*', 'xml/resources/profiles/*.*']},
+      package_data={'eark_validator': ['*.*', 'cli/resources/*.*', 'ipxml/resources/schema/*.*', 'ipxml/resources/profiles/*.*']},
       license='Apache License 2.0',
       entry_points={'console_scripts': [
           'ip-check = eark_validator.cli.app:main',

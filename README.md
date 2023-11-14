@@ -53,12 +53,12 @@ user@machine:~$ tree input
 <path to directory>
   ├── documentation
   ├── metadata
-  ├── METS.xml
+  ├── METS.ipxml
   ├── representations
   │   └── rep1
   │       ├── data
   │       ├── metadata
-  │       └── METS.xml
+  │       └── METS.ipxml
   └── schemas
 ```
 

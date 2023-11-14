@@ -27,7 +27,7 @@ import os
 from lxml import etree
 
 from eark_validator.const import NO_PATH, NOT_FILE, NOT_VALID_FILE
-from eark_validator.xml.namespaces import Namespaces
+from eark_validator.ipxml.namespaces import Namespaces
 from eark_validator.infopacks.manifest import Manifest
 
 class PackageDetails:

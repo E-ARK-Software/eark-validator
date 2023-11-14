@@ -28,8 +28,8 @@ import os
 from lxml import etree
 
 from eark_validator.infopacks.manifest import FileItem, Manifest
-from eark_validator.xml.schema import IP_SCHEMA
-from eark_validator.xml.namespaces import Namespaces
+from eark_validator.ipxml.schema import IP_SCHEMA
+from eark_validator.ipxml.namespaces import Namespaces
 
 class MetsValidator():
     """Encapsulates METS schema validation."""

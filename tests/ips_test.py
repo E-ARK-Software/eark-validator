@@ -31,7 +31,7 @@ import tests.resources.xml as XML
 import tests.resources.ips.unpacked as UNPACKED
 
 from eark_validator.infopacks.information_package import PackageDetails
-from eark_validator.xml.schema import LOCAL_SCHEMA, get_local_schema
+from eark_validator.ipxml.schema import LOCAL_SCHEMA, get_local_schema
 
 METS_XML = 'METS.xml'
 

@@ -29,7 +29,7 @@ import os
 
 import lxml.etree as ET
 
-from eark_validator.xml.schema import Namespaces
+from eark_validator.ipxml.schema import Namespaces
 from eark_validator.const import NO_PATH, NOT_DIR, NOT_FILE
 @unique
 class HashAlgorithms(Enum):
