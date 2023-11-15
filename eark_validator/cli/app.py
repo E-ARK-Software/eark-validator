@@ -45,7 +45,7 @@ It is designed for simple integration into automated work-flows.""",
     'epilog': """
 DILCIS Board (http://dilcis.eu)
 See LICENSE for license information.
-GitHub: https://github.com/E-ARK-Software/py-rest-ip-validator
+GitHub: https://github.com/E-ARK-Software/eark-validator
 Author: Carl Wilson (OPF), 2020
 Maintainer: Carl Wilson (OPF), 2020"""
 }

@@ -18,8 +18,8 @@ Python 3.7+ is required.
 Clone the project move into the directory:
 
 ```shell
-git clone https://github.com/E-ARK-Software/py-e-ark-ip-validator.git
-cd py-e-ark-ip-validator
+git clone https://github.com/E-ARK-Software/eark-validator.git
+cd eark-validator
 ```
 
 ### Installating the application
