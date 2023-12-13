@@ -23,22 +23,26 @@ For getting Windows Subsystem for Linux up and running, please follow the guide 
 
 It is recommended that you create a directory for your EARK work. Write the following:
 
-```mkdir EARK
+```
+mkdir EARK
 ```
 
 To enter the directory use the following command
 
-```cd EARK/
+```
+cd EARK/
 ```
 
 To retrieve the source code from Github use the following command:
 
-```git clone https://github.com/E-ARK-Software/eark-validator.git
+```
+git clone https://github.com/E-ARK-Software/eark-validator.git
 ```
 
 To enter the new directory containing the source code do:
 
-```cd eark-validator/
+```
+cd eark-validator/
 ```
 
 
@@ -46,21 +50,24 @@ It is recommended that you create a virtual environment for Python. By doing tha
 
 To create a virtual environment we need to install virtualenv (not to be confused with the venv package). But we also need python3-pip to handle our Python packages. Install this by issuing the following command:
 
-```sudo apt install python3-pip
+```
+sudo apt install python3-pip
 ```
 
 It will list a number of dependencies. Confirm that you wish to install python3-pip by pressing Y followed by ENTER
 
 Now we can install the virtual environment with the following command:
 
-```sudo apt install python3-virtualenv
+```
+sudo apt install python3-virtualenv
 ```
 
 It will list a number of dependencies. Confirm that you wish to install python3-pip by pressing Y followed by ENTER
 
 Finally we will need unzip. Install that by doing:
 
-```sudo apt install unzip
+```
+sudo apt install unzip
 ```
 
 It will list a number of dependencies. Confirm that you wish to install python3-pip by pressing Y followed by ENTER
@@ -70,13 +77,15 @@ It will list a number of dependencies. Confirm that you wish to install python3-
 
 Set up a local virtual environment by issuing the following commands (one line at the time):
 
-```virtualenv -p python3 venv
+```
+virtualenv -p python3 venv
 source venv/bin/activate
 ```
 
 Update pip to ensure you have the latest and install all the packages required:
 
-```pip install -U pip
+```
+pip install -U pip
 pip install .
 ```
 
@@ -87,51 +96,33 @@ You are now able to run the application "ip-check". It will validate an Informat
 
 You can test a valid package by first retrieving it from the test corpus:
 
-```wget https://github.com/DILCISBoard/eark-ip-test-corpus/raw/integration/corpora/csip/metadata/metshdr/CSIP12/valid/mets-xml_metsHdr_agent_TYPE_exist.zip
+```
+wget https://github.com/DILCISBoard/eark-ip-test-corpus/raw/integration/corpora/csip/metadata/metshdr/CSIP12/valid/mets-xml_metsHdr_agent_TYPE_exist.zip
 ```
 
 Unzip the package:
 
-```unzip mets-xml_metsHdr_agent_TYPE_exist.zip
+```
+unzip mets-xml_metsHdr_agent_TYPE_exist.zip
 ```
 
 Delete the .zip-file you just downloaded:
 
-```rm mets-xml_metsHdr_agent_TYPE_exist.zip
+```
+rm mets-xml_metsHdr_agent_TYPE_exist.zip
 ```
 
 Run the ip-check:
 
-```ip-check mets-xml_metsHdr_agent_TYPE_exist/
+```
+ip-check mets-xml_metsHdr_agent_TYPE_exist/
 ```
 
 Result:
 
-```('Path mets-xml_metsHdr_agent_TYPE_exist/ is dir, struct result is: '
+```
+('Path mets-xml_metsHdr_agent_TYPE_exist/ is dir, struct result is: '
  'StructureStatus.WellFormed')
-```
-
-
-#### Testing an invalid package:
-
-You can test an invalid package by first retrieving it from the test corpus:
-
-```wget https://github.com/DILCISBoard/eark-ip-test-corpus/raw/integration/corpora/csip/metadata/metshdr/CSIP12/invalid/mets-xml_metsHdr_agent_TYPE_not_exist.zip
-```
-
-Unzip the package:
-
-```unzip mets-xml_metsHdr_agent_TYPE_not_exist.zip
-```
-
-Delete the .zip-file you just downloaded:
-
-```rm mets-xml_metsHdr_agent_TYPE_not_exist.zip
-```
-
-Run the ip-check:
-
-```ip-check mets-xml_metsHdr_agent_TYPE_not_exist/
 ```
 
 #### A note on testing a directory
@@ -158,7 +149,8 @@ If you do not have Linux and have not previously used WSL please perform the fol
 
 Start er command prompt (cmd.exe) and then enter the following command: 
 
-```wsl --install
+```
+wsl --install
 ```
 
 Confirm that the app is allowed to make changes to your device. Installation begins.
@@ -179,16 +171,18 @@ You will be prompted to set a password.
 
 You are now logged into Ubuntu (the default Linux distribution used by Windows Subsystem for Linux).
 
-Update the system
+##### Update the system
 
 No matter how fresh the install, there will almost always be updates available. To fetch them write the following:
 
-```sudo apt update
+```
+sudo apt update
 ```
 
 And to install them:
 
-```sudo apt upgrade
+```
+sudo apt upgrade
 ```
 
 Confirm that you wish to upgrade your packages by pressing Y followed by ENTER
