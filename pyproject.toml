@@ -3,16 +3,17 @@ requires = ["setuptools>=61.0", "setuptools-git-versioning<2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "eark-ip-validation"
+name = "eark-validator"
 dynamic = ["version"]
 authors = [
-  { name="Carl Wilson", email="carl@openpreservation.org" },
+  { name="E-ARK Foundation", email="admin@e-ark-foundation.eu" },
 ]
 maintainers = [
+  { name="E-ARK Foundation", email="admin@e-ark-foundation.eu" },
   { name="Carl Wilson", email="carl@openpreservation.org" },
 ]
 license = {file = "LICENSE"}
-description = "E-ARK Python Information Package validation library."
+description = "E-ARK Python Information Package Validation"
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
@@ -33,9 +34,9 @@ testing = [
     'pytest-runner',
 ]
 [project.urls]
-"Homepage" = "https://github.com/E-ARK-Software/py-eark-ip-validator"
-"Bug Tracker" = "https://github.com/E-ARK-Software/py-eark-ip-validator/issues"
-"Repository" = "https://github.com/E-ARK-Software/py-eark-ip-validator.git"
+"Homepage" = "https://www.e-ark-foundation.eu/e-ark-software-py-e-ark-ip-validator/"
+"Issues" = "https://github.com/E-ARK-Software/eark-validator/issues"
+"Repository" = "https://github.com/E-ARK-Software/eark-validator.git"
 [project.scripts]
 ip-check = "ip_validation.cli.app:main"
 [tool.pytest.ini_options]

@@ -29,9 +29,9 @@ from importlib_resources import files
 
 from lxml import etree as ET
 
-from ip_validation.xml.schematron import SchematronRuleset, SVRL_NS, get_schematron_path
-from ip_validation.specifications.specification import EarkSpecifications, Specification
-from ip_validation.const import NO_PATH, NOT_FILE
+from eark_validator.ipxml.schematron import SchematronRuleset, SVRL_NS, get_schematron_path
+from eark_validator.specifications.specification import EarkSpecifications, Specification
+from eark_validator.const import NO_PATH, NOT_FILE
 
 class ValidationProfile():
     """ A complete set of Schematron rule sets that comprise a complete validation profile."""

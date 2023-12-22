@@ -31,7 +31,7 @@ from pprint import pprint
 import os.path
 import sys
 
-import ip_validation.structure as STRUCT
+import eark_validator.structure as STRUCT
 
 __version__ = '0.1.0'
 
@@ -94,7 +94,7 @@ def main():
 
     # Iterate the file arguments
     for file_arg in args.files:
-        _loop_exit, results = _validate_ip(file_arg)
+        _loop_exit, _ = _validate_ip(file_arg)
         _exit = _loop_exit if (_loop_exit > 0) else _exit
     sys.exit(_exit)
 

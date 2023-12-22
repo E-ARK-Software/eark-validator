@@ -30,8 +30,8 @@ from importlib_resources import files
 import tests.resources.xml as XML
 import tests.resources.ips.unpacked as UNPACKED
 
-from ip_validation.mets import MetsValidator
-from ip_validation.xml.schema import LOCAL_SCHEMA, get_local_schema
+from eark_validator.mets import MetsValidator
+from eark_validator.ipxml.schema import LOCAL_SCHEMA, get_local_schema
 
 METS_XML = 'METS.xml'
 class MetsValidatorTest(unittest.TestCase):

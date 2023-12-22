@@ -6,10 +6,10 @@
     </dmdSec>
     <amdSec ID="uuid-18BE6F5E-CDF0-4554-80C1-07F6CFF32EC8">
         <digiprovMD ID="uuid-1C51719D-4D4F-4F73-92B5-D8EAD0759638" STATUS="CURRENT">
-            <mdRef ID="urn_roda_premis_file_RODA-in.png" LOCTYPE="URL" MDTYPE="PREMIS" xlink:type="simple" xlink:href="metadata/preservation/urn:roda:premis:file:RODA-in.png.xml" MIMETYPE="application/xml" SIZE="2167" CREATED="2021-11-17T16:56:44.161Z" CHECKSUM="6482EEE737F11901AE4AA8A85CF6680F5206034F41BAA26014A4007D141FA88B" CHECKSUMTYPE="SHA-256"/>
+            <mdRef ID="urn_roda_premis_file_RODA-in.png" LOCTYPE="URL" MDTYPE="PREMIS" xlink:type="simple" xlink:href="metadata/preservation/RODA-in.png.xml" MIMETYPE="application/xml" SIZE="2167" CREATED="2021-11-17T16:56:44.161Z" CHECKSUM="6482EEE737F11901AE4AA8A85CF6680F5206034F41BAA26014A4007D141FA88B" CHECKSUMTYPE="SHA-256"/>
         </digiprovMD>
         <digiprovMD ID="uuid-C8065BDC-71AA-4C53-90D5-746A6F2C79B6" STATUS="CURRENT">
-            <mdRef ID="urn_roda_premis_representation_cfb449b3-ca41-3f81-ba06-bb8f57ee601e" LOCTYPE="URL" MDTYPE="PREMIS" xlink:type="simple" xlink:href="metadata/preservation/urn:roda:premis:representation:cfb449b3-ca41-3f81-ba06-bb8f57ee601e.xml" MIMETYPE="application/xml" SIZE="911" CREATED="2021-11-17T16:56:44.161Z" CHECKSUM="13C3E6DF3A1372434DBF18A3F9C249B4A3862932419395281F6F6898A2C4114D" CHECKSUMTYPE="SHA-256"/>
+            <mdRef ID="urn_roda_premis_representation_cfb449b3-ca41-3f81-ba06-bb8f57ee601e" LOCTYPE="URL" MDTYPE="PREMIS" xlink:type="simple" xlink:href="metadata/preservation/cfb449b3-ca41-3f81-ba06-bb8f57ee601e.xml" MIMETYPE="application/xml" SIZE="911" CREATED="2021-11-17T16:56:44.161Z" CHECKSUM="13C3E6DF3A1372434DBF18A3F9C249B4A3862932419395281F6F6898A2C4114D" CHECKSUMTYPE="SHA-256"/>
         </digiprovMD>
     </amdSec>
     <fileSec ID="uuid-32D908A1-EB11-49D9-88E8-B0F8F003FC1A">

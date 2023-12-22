@@ -28,7 +28,7 @@ from enum import Enum
 
 from importlib_resources import files
 
-from ip_validation import rules as SC
+from eark_validator import rules as SC
 import tests.resources.schematron as SCHEMATRON
 import tests.resources.xml as XML
 

@@ -29,10 +29,10 @@ import tarfile
 import tempfile
 import zipfile
 
-from ip_validation.rules import Severity
-import ip_validation.specifications.specification as SPECS
+from eark_validator.rules import Severity
+import eark_validator.specifications.specification as SPECS
 
-from ip_validation.infopacks.manifest import Checksum
+from eark_validator.infopacks.manifest import Checksum
 
 MD_DIR = 'metadata'
 REPS_DIR = 'representations'

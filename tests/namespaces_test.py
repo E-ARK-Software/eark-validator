@@ -29,7 +29,7 @@ from importlib_resources import files
 
 import tests.resources.xml as XML
 
-from ip_validation.xml import namespaces as NS
+from eark_validator.ipxml import namespaces as NS
 
 class MetsValidatorTest(unittest.TestCase):
     """Tests for Schematron validation rules."""
