@@ -36,7 +36,7 @@ jobs:
         pip install --editable ".[testing]"
     - name: Static Pylint code QA
       run: |
-        pylint --errors-only ip_validation
+        pylint --errors-only eark_validator
     - name: Run pre-commit tests
       run: pre-commit run --all-files --verbose
     - name: Test with pytest
