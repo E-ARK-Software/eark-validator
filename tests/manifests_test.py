@@ -211,7 +211,7 @@ class ManifestTest(unittest.TestCase):
         self.assertEqual(self._manifest.file_count, 23)
 
     def test_manifest_size(self):
-        self.assertEqual(self._manifest.size, 306266)
+        self.assertEqual(self._manifest.size, 306216)
 
     def test_manifest_get_rel_file(self):
         mets_file = self._manifest.get_item(METS)

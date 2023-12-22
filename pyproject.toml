@@ -38,7 +38,7 @@ testing = [
 "Issues" = "https://github.com/E-ARK-Software/eark-validator/issues"
 "Repository" = "https://github.com/E-ARK-Software/eark-validator.git"
 [project.scripts]
-ip-check = "ip_validation.cli.app:main"
+ip-check = "eark_validator.cli.app:main"
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-ra -q"
