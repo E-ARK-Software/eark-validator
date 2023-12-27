@@ -103,15 +103,15 @@ class SpecificationTest(unittest.TestCase):
 
     def test_sections(self):
         spec = EarkSpecifications.CSIP.specification
-        self.assertTrue(spec.section_count > 0)
+        self.assertGreater(spec.section_count, 0)
         self.assertEqual(self._count_reqs_via_section(spec), spec.requirement_count)
         self.assertEqual(len(spec.section_requirements()), spec.requirement_count)
         spec = EarkSpecifications.SIP.specification
-        self.assertTrue(spec.section_count > 0)
+        self.assertGreater(spec.section_count, 0)
         self.assertEqual(self._count_reqs_via_section(spec), spec.requirement_count)
         self.assertEqual(len(spec.section_requirements()), spec.requirement_count)
         spec = EarkSpecifications.DIP.specification
-        self.assertTrue(spec.section_count > 0)
+        self.assertGreater(spec.section_count, 0)
         self.assertEqual(self._count_reqs_via_section(spec), spec.requirement_count)
         self.assertEqual(len(spec.section_requirements()), spec.requirement_count)
 

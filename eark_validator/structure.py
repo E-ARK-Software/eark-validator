@@ -130,6 +130,8 @@ class StructureReport:
             else:
                 rep.add_error(StructError.from_rule_no(1,
                                                      sub_message=SUB_MESS_NOT_ARCH.format(path)))
+        if rep.errors:
+            return rep
 
         struct_checker = StructureChecker.from_directory(root)
         rep.add_errors(struct_checker.validate_manifest())
