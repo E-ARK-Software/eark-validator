@@ -27,4 +27,4 @@ E-ARK : Python information package validation
 
 """
 
-__version__ = '2.0.3'
+__version__ = '1.1.1'

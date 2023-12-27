@@ -28,14 +28,16 @@ from enum import Enum
 
 from importlib_resources import files
 
-from ip_validation import rules as SC
-from ip_validation.specifications.specification import EarkSpecifications
+from eark_validator import rules as SC
+from eark_validator.specifications.specification import EarkSpecifications
 import tests.resources.schematron as SCHEMATRON
 import tests.resources.xml as XML
 
+TEST_RES = 'tests.resources'
+TEST_RES_XML = TEST_RES + '.xml'
 PERSON_PATH = str(files(SCHEMATRON).joinpath('person.xml'))
 NOT_FOUND_PATH = str(files(SCHEMATRON).joinpath('not-found.xml'))
-EMPTY_FILE_PATH = str(files('tests.resources').joinpath('empty.file'))
+EMPTY_FILE_PATH = str(files(TEST_RES).joinpath('empty.file'))
 METS_VALID = 'METS-valid.xml'
 METS_VALID_PATH = str(files(XML).joinpath(METS_VALID))
 METS_ONE_DEF = str(files(SCHEMATRON).joinpath('METS-one-default-ns.xml'))
@@ -48,62 +50,61 @@ METS_STRUCT_RULES = 'structMap'
 CSIP_PROF = 'https://earkcsip.dilcis.eu/profile/E-ARK-CSIP.xml'
 SIP_PROF = 'https://earksip.dilcis.eu/profile/E-ARK-SIP.xml'
 DIP_PROF = 'https://earkdip.dilcis.eu/profile/E-ARK-DIP.xml'
-
 class ValidationRulesTest(unittest.TestCase):
     """Tests for Schematron validation rules."""
     def test_mets_root(self):
         result, failures, _, _ = _test_validation(METS_ROOT_RULES, METS_VALID)
-        self.assertTrue(failures == 0)
+        self.assertEqual(failures, 0)
         self.assertTrue(result)
 
     def test_mets_root_no_objid(self):
         result, failures, _, _ = _test_validation(METS_ROOT_RULES, 'METS-no-objid.xml')
-        self.assertTrue(failures == 1)
+        self.assertEqual(failures, 1)
         self.assertFalse(result)
 
     def test_mets_root_no_type(self):
         result, failures, _, _ = _test_validation(METS_ROOT_RULES, 'METS-no-type.xml')
-        self.assertTrue(failures == 1)
+        self.assertEqual(failures, 1)
         self.assertFalse(result)
 
     def test_mets_root_other_type(self):
         result, failures, _, _ = _test_validation(METS_ROOT_RULES, 'METS-other-type.xml')
-        self.assertTrue(failures == 0)
+        self.assertEqual(failures, 0)
         self.assertTrue(result)
 
     def test_mets_root_no_profile(self):
         result, failures, _, _ = _test_validation(METS_ROOT_RULES, 'METS-no-profile.xml')
-        self.assertTrue(failures == 1)
+        self.assertEqual(failures, 1)
         self.assertFalse(result)
 
     def test_mets_root_no_hdr(self):
         result, failures, _, _ = _test_validation(METS_ROOT_RULES, 'METS-no-hdr.xml')
-        self.assertTrue(failures == 1)
+        self.assertEqual(failures, 1)
         self.assertFalse(result)
 
     def test_mets_hdr_valid(self):
         result, failures, _, _ = _test_validation(METS_HDR_RULES, METS_VALID)
-        self.assertTrue(failures == 0)
+        self.assertEqual(failures, 0)
         self.assertTrue(result)
 
     def test_mets_hdr_no_createdate(self):
         result, failures, _, _ = _test_validation(METS_HDR_RULES, 'METS-no-createdate.xml')
-        self.assertTrue(failures == 1)
+        self.assertEqual(failures, 1)
         self.assertFalse(result)
 
     def test_mets_file_ownerid(self):
-        result, errors, _, infos = _test_validation(METS_FILE_RULES, 'METS-ownerid.xml')
-        self.assertTrue(infos == 1)
+        result, _, _, infos = _test_validation(METS_FILE_RULES, 'METS-ownerid.xml')
+        self.assertEqual(infos, 1)
         self.assertTrue(result)
 
     def test_mets_hdr_no_type(self):
         result, failures, _, _ = _test_validation(METS_HDR_RULES, 'METS-hdr-no-type.xml')
-        self.assertTrue(failures == 1)
+        self.assertEqual(failures, 1)
         self.assertFalse(result)
 
     def test_mets_hdr_no_version(self):
         result, failures, _, _ = _test_validation(METS_HDR_RULES, 'METS-hdr-no-version.xml')
-        self.assertTrue(failures == 1)
+        self.assertEqual(failures, 1)
         self.assertFalse(result)
 
     def test_mets_root_dmd(self):
@@ -117,26 +118,26 @@ class ValidationRulesTest(unittest.TestCase):
 
     def test_mets_dmd(self):
         result, failures, warnings, _ = _test_validation(METS_DMD_RULES, METS_VALID)
-        self.assertTrue(failures == 0)
-        self.assertTrue(warnings == 0)
+        self.assertEqual(failures, 0)
+        self.assertEqual(warnings, 0)
         self.assertTrue(result)
 
     def test_mets_amd(self):
         result, failures, warnings, _ = _test_validation(METS_AMD_RULES, METS_VALID)
-        self.assertTrue(failures == 0)
-        self.assertTrue(warnings == 0)
+        self.assertEqual(failures, 0)
+        self.assertEqual(warnings, 0)
         self.assertTrue(result)
 
     def test_mets_file(self):
         result, failures, warnings, _ = _test_validation(METS_FILE_RULES, METS_VALID)
-        self.assertTrue(failures == 0)
-        self.assertTrue(warnings == 0)
+        self.assertEqual(failures, 0)
+        self.assertEqual(warnings, 0)
         self.assertTrue(result)
 
     def test_mets_structmap(self):
         result, failures, warnings, _ = _test_validation(METS_STRUCT_RULES, METS_VALID)
-        self.assertTrue(failures == 0)
-        self.assertTrue(warnings == 1)
+        self.assertEqual(failures, 0)
+        self.assertEqual(warnings, 1)
         self.assertTrue(result)
 
 class ValidationProfileTest(unittest.TestCase):
@@ -170,12 +171,12 @@ class ValidationProfileTest(unittest.TestCase):
 
     def test_valid(self):
         profile = SC.ValidationProfile.from_specification('CSIP')
-        profile.validate(str(files('tests.resources.xml').joinpath(METS_VALID)))
+        profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
         self.assertTrue(profile.is_valid)
 
     def test_invalid(self):
         profile = SC.ValidationProfile.from_specification('CSIP')
-        profile.validate(str(files('tests.resources.xml').joinpath('METS-no-hdr.xml')))
+        profile.validate(str(files(TEST_RES_XML).joinpath('METS-no-hdr.xml')))
         self.assertFalse(profile.is_valid)
 
     def test_validate_file_not_found(self):
@@ -190,35 +191,35 @@ class ValidationProfileTest(unittest.TestCase):
 
     def test_validate_empty_file(self):
         profile = SC.ValidationProfile.from_specification('CSIP')
-        profile.validate(str(files('tests.resources').joinpath('empty.file')))
+        profile.validate(str(files(TEST_RES).joinpath('empty.file')))
         self.assertFalse(profile.is_valid)
 
     def test_validate_not_mets(self):
         profile = SC.ValidationProfile.from_specification('CSIP')
-        profile.validate(str(files('tests.resources.xml').joinpath('person.xml')))
+        profile.validate(str(files(TEST_RES_XML).joinpath('person.xml')))
         self.assertFalse(profile.is_valid)
 
     def test_validate_json(self):
         profile = SC.ValidationProfile.from_specification('CSIP')
-        profile.validate(str(files('tests.resources').joinpath('aip.json')))
+        profile.validate(str(files(TEST_RES).joinpath('aip.json')))
         self.assertFalse(profile.is_valid)
 
     def test_get_results(self):
         profile = SC.ValidationProfile.from_specification('CSIP')
-        profile.validate(str(files('tests.resources.xml').joinpath(METS_VALID)))
+        profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
         self.assertTrue(profile.is_valid)
-        self.assertTrue(len(profile.get_results()) == 8)
+        self.assertEqual(len(profile.get_results()), 8)
 
     def test_get_result(self):
         profile = SC.ValidationProfile.from_specification('CSIP')
-        profile.validate(str(files('tests.resources.xml').joinpath(METS_VALID)))
+        profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
         result = profile.get_result('metsHdr')
         self.assertTrue(profile.is_valid)
         self.assertEqual(len(result.warnings), 1)
 
     def test_get_bad_key(self):
         profile = SC.ValidationProfile.from_specification('CSIP')
-        profile.validate(str(files('tests.resources.xml').joinpath(METS_VALID)))
+        profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
         result = profile.get_result('badkey')
         self.assertIsNone(result)
 
@@ -229,7 +230,7 @@ class ResultTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         profile = SC.ValidationProfile.from_specification('CSIP')
-        profile.validate(str(files('tests.resources.xml').joinpath(METS_VALID)))
+        profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
         cls._result = profile.get_result('metsHdr').warnings[0]
 
     def test_get_message(self):

@@ -29,10 +29,10 @@ import tarfile
 import tempfile
 import zipfile
 
-from ip_validation.rules import Severity
-import ip_validation.specifications.specification as SPECS
+from eark_validator.rules import Severity
+import eark_validator.specifications.specification as SPECS
 
-from ip_validation.infopacks.manifest import Checksum
+from eark_validator.infopacks.manifest import Checksum
 
 MD_DIR = 'metadata'
 REPS_DIR = 'representations'
@@ -130,6 +130,8 @@ class StructureReport:
             else:
                 rep.add_error(StructError.from_rule_no(1,
                                                      sub_message=SUB_MESS_NOT_ARCH.format(path)))
+        if rep.errors:
+            return rep
 
         struct_checker = StructureChecker.from_directory(root)
         rep.add_errors(struct_checker.validate_manifest())

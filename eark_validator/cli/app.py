@@ -31,7 +31,7 @@ from pprint import pprint
 import os.path
 import sys
 
-import ip_validation.infopacks.structure as STRUCT
+import eark_validator.structure as STRUCT
 
 __version__ = '0.1.0'
 
@@ -44,8 +44,8 @@ It is designed for simple integration into automated work-flows.""",
 DILCIS Board (http://dilcis.eu)
 See LICENSE for license information.
 GitHub: https://github.com/E-ARK-Software/py-rest-ip-validator
-Author: Carl Wilson (OPF), 2020
-Maintainer: Carl Wilson (OPF), 2020"""
+Author: Carl Wilson (OPF), 2020-2023
+Maintainer: Carl Wilson (OPF), 2020-2023"""
 }
 
 # Create PARSER
@@ -94,38 +94,32 @@ def main():
 
     # Iterate the file arguments
     for file_arg in args.files:
-        _loop_exit, results = _validate_ip(file_arg)
+        _loop_exit, _ = _validate_ip(file_arg)
         _exit = _loop_exit if (_loop_exit > 0) else _exit
     sys.exit(_exit)
 
 def _validate_ip(info_pack):
-    ret_stat, to_validate = _get_ip_root(info_pack)
-    struct_details = STRUCT.validate_package_structure(to_validate)
-    pprint('Path {} is dir, struct result is: {}'.format(to_validate,
+    ret_stat = _check_path(info_pack)
+    struct_details = STRUCT.validate_package_structure(info_pack)
+    pprint('Path {}, struct result is: {}'.format(info_pack,
                                                          struct_details.status))
     for error in struct_details.errors:
         pprint(error.to_json())
 
     return ret_stat, struct_details
 
-def _get_ip_root(info_pack):
-    arch_processor = STRUCT.ArchivePackageHandler()
-    # This is a var for the final source to validate
-    to_validate = info_pack
-
-    if not os.path.exists(info_pack):
+def _check_path(path):
+    if not os.path.exists(path):
         # Skip files that don't exist
-        pprint('Path {} does not exist'.format(info_pack))
-        return 1, None
-    if os.path.isfile(info_pack):
+        pprint('Path {} does not exist'.format(path))
+        return 1
+    if os.path.isfile(path):
         # Check if file is a archive format
-        if not STRUCT.ArchivePackageHandler.is_archive(info_pack):
+        if not STRUCT.ArchivePackageHandler.is_archive(path):
             # If not we can't process so report and iterate
-            pprint('Path {} is not a file we can process.'.format(info_pack))
-            return 2, None
-        # Unpack the archive and set the source
-        to_validate = arch_processor.unpack_package(info_pack)
-    return 0, to_validate
+            pprint('Path {} is not a file we can process.'.format(path))
+            return 2
+    return 0
 
 # def _test_case_schema_checks():
 if __name__ == '__main__':

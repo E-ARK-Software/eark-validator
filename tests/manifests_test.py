@@ -32,7 +32,7 @@ import xml.etree.ElementTree as ET
 import tests.resources.xml as XML
 import tests.resources.ips.unpacked as UNPACKED
 
-from ip_validation.infopacks.manifest import (
+from eark_validator.infopacks.manifest import (
     HashAlgorithms,
     FileItem,
     Checksum,
@@ -45,7 +45,7 @@ DIR_PATH = str(files(XML))
 PERSON_PATH = os.path.join(DIR_PATH, PERSON)
 MISSING_PATH = os.path.join(DIR_PATH, 'missing.xml')
 FILE_XML = """
-    <file ID="ID-A73FA446-1DC7-499A-BE1E-15B7AE09B3B3" MIMETYPE="application/xml" SIZE="3554" CREATED="2021-11-17T16:56:44.180Z" CHECKSUM="F37E90511B5DDE2E9C60378A0F0A0A1CF07145C8F12651E0E19731892C608DA7" CHECKSUMTYPE="SHA-256">
+    <file ID="ID-A73FA446-1DC7-499A-BE1E-15B7AE09B3B3" MIMETYPE="application/ipxml" SIZE="3554" CREATED="2021-11-17T16:56:44.180Z" CHECKSUM="F37E90511B5DDE2E9C60378A0F0A0A1CF07145C8F12651E0E19731892C608DA7" CHECKSUMTYPE="SHA-256">
         <FLocat type="simple" href="representations/rep1/METS.xml" LOCTYPE="URL"/>
     </file>"""
 
@@ -145,11 +145,11 @@ class FileItemTest(unittest.TestCase):
         self.assertIsNone(item.checksum)
 
     def test_from_path_with_mime(self):
-        item = FileItem.from_file_path(PERSON_PATH, mime='text/xml')
+        item = FileItem.from_file_path(PERSON_PATH, mime='text/ipxml')
         self.assertEqual(item.path, PERSON_PATH)
         self.assertEqual(item.name, PERSON)
         self.assertEqual(item.size, 75)
-        self.assertEqual(item.mime, 'text/xml')
+        self.assertEqual(item.mime, 'text/ipxml')
         self.assertIsNone(item.checksum)
 
     def test_from_path_with_checksum(self):
@@ -211,7 +211,7 @@ class ManifestTest(unittest.TestCase):
         self.assertEqual(self._manifest.file_count, 23)
 
     def test_manifest_size(self):
-        self.assertEqual(self._manifest.size, 306486)
+        self.assertEqual(self._manifest.size, 306216)
 
     def test_manifest_get_rel_file(self):
         mets_file = self._manifest.get_item(METS)

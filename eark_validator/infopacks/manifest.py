@@ -29,8 +29,8 @@ import os
 
 import lxml.etree as ET
 
-from ip_validation.xml.schema import Namespaces
-from ip_validation.const import NO_PATH, NOT_DIR, NOT_FILE
+from eark_validator.ipxml.schema import Namespaces
+from eark_validator.const import NO_PATH, NOT_DIR, NOT_FILE
 @unique
 class HashAlgorithms(Enum):
     """Enum covering information package validation statuses."""

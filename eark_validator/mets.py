@@ -27,9 +27,9 @@ import os
 
 from lxml import etree
 
-from ip_validation.infopacks.manifest import FileItem, Manifest
-from ip_validation.xml.schema import IP_SCHEMA
-from ip_validation.xml.namespaces import Namespaces
+from eark_validator.infopacks.manifest import FileItem, Manifest
+from eark_validator.ipxml.schema import IP_SCHEMA
+from eark_validator.ipxml.namespaces import Namespaces
 
 class MetsValidator():
     """Encapsulates METS schema validation."""
