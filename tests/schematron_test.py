@@ -24,8 +24,6 @@
 #
 import unittest
 
-from enum import Enum
-
 from importlib_resources import files
 
 from eark_validator import rules as SC
@@ -70,7 +68,7 @@ class SchematronTest(unittest.TestCase):
         assert_count = 0
         for _ in self._person_rules.get_assertions():
             assert_count += 1
-        self.assertTrue(assert_count > 0)
+        self.assertGreater(assert_count, 0)
 
     def test_validate_person(self):
         self._person_rules.validate(str(files(XML).joinpath(PERSON_XML)))

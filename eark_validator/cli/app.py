@@ -31,7 +31,8 @@ from pprint import pprint
 import os.path
 import sys
 
-import eark_validator.structure as STRUCT
+import eark_validator.packages as PACKAGES
+from eark_validator.infopacks.package_handler import PackageHandler
 
 __version__ = '0.1.0'
 
@@ -100,13 +101,13 @@ def main():
 
 def _validate_ip(info_pack):
     ret_stat = _check_path(info_pack)
-    struct_details = STRUCT.validate_package_structure(info_pack)
+    report = PACKAGES.PackageValidator(info_pack).validation_report
     pprint('Path {}, struct result is: {}'.format(info_pack,
-                                                         struct_details.status))
-    for error in struct_details.errors:
-        pprint(error.to_json())
+                                                         report.structure.status))
+    for message in report.structure.messages:
+        pprint(str(message))
 
-    return ret_stat, struct_details
+    return ret_stat, report.structure
 
 def _check_path(path):
     if not os.path.exists(path):
@@ -115,7 +116,7 @@ def _check_path(path):
         return 1
     if os.path.isfile(path):
         # Check if file is a archive format
-        if not STRUCT.ArchivePackageHandler.is_archive(path):
+        if not PackageHandler.is_archive(path):
             # If not we can't process so report and iterate
             pprint('Path {} is not a file we can process.'.format(path))
             return 2

@@ -23,24 +23,28 @@
 # under the License.
 #
 """Structural requirements as a dictionary."""
-STRUCT_REQS = {
+
+from eark_validator.model import Level
+
+
+REQUIREMENTS = {
     1: {
            'id': 'CSIPSTR1',
-           'level': 'MUST',
+           'level': Level.MUST,
             'message': """Any Information Package MUST be included within a single physical root
               folder (known as the “Information Package root folder”). For packages contained
               in an archive format, see CSIPSTR3, the archive MUST unpack to a single root folder."""
         },
     2: {
             'id': 'CSIPSTR2',
-            'level': 'SHOULD',
+            'level': Level.SHOULD,
             'message': """The Information Package root folder SHOULD be named with the ID or name of
               the Information Package, that is the value of the package METS.xml's root <mets>
               element's @OBJID attribute."""
         },
     3: {
             'id': 'CSIPSTR3',
-            'level': 'MAY',
+            'level': Level.MAY,
             'message': """The Information Package MAY be contained in an archive/compressed form,
               e.g. TAR or ZIP, for storage or transfer. The specific format details should be decided
               by the interested parties and documented, for example in a submission agreement or
@@ -48,7 +52,7 @@ STRUCT_REQS = {
         },
     4: {
             'id': 'CSIPSTR4',
-            'level': 'MUST',
+            'level': Level.MUST,
             'message': """The Information Package root folder MUST include a file named METS.xml.
               This file MUST contain metadata that identifies the package, provides a high-level
               package description, and describes its structure, including pointers to constituent
@@ -56,37 +60,37 @@ STRUCT_REQS = {
         },
     5: {
             'id': 'CSIPSTR5',
-            'level': 'SHOULD',
+            'level': Level.SHOULD,
             'message': """The Information Package root folder SHOULD include a folder named
               metadata, which SHOULD include metadata relevant to the whole package."""
         },
     6: {
             'id': 'CSIPSTR6',
-            'level': 'SHOULD',
+            'level': Level.SHOULD,
             'message': """If preservation metadata are available, they SHOULD be included in
               sub-folder preservation."""
         },
     7: {
             'id': 'CSIPSTR7',
-            'level': 'SHOULD',
+            'level': Level.SHOULD,
             'message': """If descriptive metadata are available, they SHOULD be included in
               sub-folder descriptive."""
         },
     8: {
            'id': 'CSIPSTR8',
-           'level': 'MAY',
+           'level': Level.MAY,
            'message': """If any other metadata are available, they MAY be included in separate
               sub-folders, for example an additional folder named other."""
        },
     9: {
            'id': 'CSIPSTR9',
-           'level': 'SHOULD',
+           'level': Level.SHOULD,
            'message': """The Information Package folder SHOULD include a folder named
               representations."""
        },
     10: {
             'id': 'CSIPSTR10',
-            'level': 'SHOULD',
+            'level': Level.SHOULD,
             'message': """The representations folder SHOULD include a sub-folder for each
               individual representation (i.e. the “representation folder”). Each representation
               folder should have a string name that is unique within the package scope. For
@@ -95,13 +99,13 @@ STRUCT_REQS = {
         },
     11: {
             'id': 'CSIPSTR11',
-            'level': 'SHOULD',
+            'level': Level.SHOULD,
             'message': """The representation folder SHOULD include a sub-folder named data
               which MAY include all data constituting the representation."""
         },
     12: {
             'id': 'CSIPSTR12',
-            'level': 'SHOULD',
+            'level': Level.SHOULD,
             'message': """The representation folder SHOULD include a metadata file named METS.xml
               which includes information about the identity and structure of the representation
               and its components. The recommended best practice is to always have a METS.xml in
@@ -109,18 +113,18 @@ STRUCT_REQS = {
         },
     13: {
             'id': 'CSIPSTR13',
-            'level': 'SHOULD',
+            'level': Level.SHOULD,
             'message': """The representation folder SHOULD include a sub-folder named metadata
               which MAY include all metadata about the specific representation."""
         },
     14: {
             'id': 'CSIPSTR14',
-            'level': 'MAY',
+            'level': Level.MAY,
             'message': """The Information Package MAY be extended with additional sub-folders."""
         },
     15: {
             'id': 'CSIPSTR15',
-            'level': 'SHOULD',
+            'level': Level.SHOULD,
             'message': """We recommend including all XML schema documents for any structured
               metadata within package. These schema documents SHOULD be placed in a sub-folder
               called schemas within the Information Package root folder and/or the representation
@@ -128,7 +132,7 @@ STRUCT_REQS = {
         },
     16: {
             'id': 'CSIPSTR16',
-            'level': 'SHOULD',
+            'level': Level.SHOULD,
             'message': """We recommend including any supplementary documentation for the package
               or a specific representation within the package. Supplementary documentation SHOULD
               be placed in a sub-folder called documentation within the Information Package root

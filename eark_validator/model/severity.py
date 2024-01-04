@@ -26,5 +26,25 @@
 #
 """
 E-ARK : Information Package Validation
-        Information Package unit test data
+        Information Package Test Result Severity type
 """
+from enum import Enum, unique
+
+@unique
+class Severity(str, Enum):
+    """Enum covering information package validation statuses."""
+    Unknown = 'Unknown'
+    # Information level, possibly not best practise
+    Information = 'Information'
+    # Non-fatal issue that should be corrected
+    Warning = 'Warning'
+    # Error level message means invalid package
+    Error = 'Error'
+
+    @classmethod
+    def from_id(cls, id: str) -> 'Severity':
+        """Get the enum from the value."""
+        for severity in cls:
+            if severity.name == id or severity.value == id:
+                return severity
+        return None

@@ -26,5 +26,26 @@
 #
 """
 E-ARK : Information Package Validation
-        Information Package unit test data
+        Information Package Requirement Level type
 """
+
+from enum import Enum, unique
+
+from eark_validator.model import Severity
+
+@unique
+class Level(str, Enum):
+    """Enum covering information package validation statuses."""
+    MAY = 'MAY'
+    # Package has basic parse / structure problems and can't be validated
+    SHOULD = 'SHOULD'
+    # Package structure is OK
+    MUST = 'MUST'
+
+def severity_from_level(level) -> Severity:
+    """Return the correct test result severity from a Level instance."""
+    if level is Level.MUST:
+        return Severity.Error
+    if level is Level.SHOULD:
+        return Severity.Warning
+    return Severity.Information

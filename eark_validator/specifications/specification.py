@@ -32,7 +32,7 @@ from importlib_resources import files
 from eark_validator.ipxml import PROFILES
 from eark_validator.ipxml.schema import METS_PROF_SCHEMA
 from eark_validator.ipxml.namespaces import Namespaces
-from eark_validator.specifications.struct_reqs import STRUCT_REQS
+from eark_validator.specifications.struct_reqs import Level, REQUIREMENTS as STRUCT_REQS
 from eark_validator.const import NOT_FILE, NO_PATH
 
 class Specification:
@@ -185,7 +185,7 @@ class Specification:
 
     class Requirement():
         """Encapsulates a requirement."""
-        def __init__(self, req_id: str, name: str, level: str='MUST', xpath: str=None, cardinality: str=None):
+        def __init__(self, req_id: str, name: str, level: Level=Level.MUST, xpath: str=None, cardinality: str=None):
             self._id = req_id
             self._name = name
             self._level = level
@@ -203,7 +203,7 @@ class Specification:
             return self._name
 
         @property
-        def level(self) -> str:
+        def level(self) -> Level:
             """Return the level."""
             return self._level
 
@@ -235,7 +235,7 @@ class Specification:
 
     class StructuralRequirement():
         """Encapsulates a structural requirement."""
-        def __init__(self, req_id: str, level: str='MUST', message: str=None):
+        def __init__(self, req_id: str, level: Level='MUST', message: str=None):
             self._id = req_id
             self._level = level
             self._message = message

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # flake8: noqa
-# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -26,5 +25,10 @@
 #
 """
 E-ARK : Information Package Validation
-        Information Package unit test data
+        Information Package API model types
 """
+from __future__ import absolute_import
+# import models into model package
+from eark_validator.model.severity import Severity
+from eark_validator.model.level import Level
+from eark_validator.model.struct_status import StructureStatus

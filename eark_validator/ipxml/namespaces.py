@@ -27,8 +27,6 @@ E-ARK : Information package validation
         Information Package modules
 """
 from enum import Enum, unique
-from lxml import etree
-from importlib_resources import files
 
 @unique
 class Namespaces(Enum):

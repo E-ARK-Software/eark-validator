@@ -26,5 +26,17 @@
 #
 """
 E-ARK : Information Package Validation
-        Information Package unit test data
+        Information Package Structure Status type
 """
+
+from enum import Enum, unique
+
+
+@unique
+class StructureStatus(Enum):
+    """Enum covering information package validation statuses."""
+    Unknown = 'Unknown'
+    # Package has basic parse / structure problems and can't be validated
+    NotWellFormed = 'Not Well Formed'
+    # Package structure is OK
+    WellFormed = 'Well Formed'

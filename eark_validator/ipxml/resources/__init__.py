@@ -23,9 +23,6 @@
 # under the License.
 #
 """
-E-ARK : Information package validation
-        Information Package modules
+E-ARK : Information Package Validation
+        Information Package XML vocabularies
 """
-from . import profiles as PROFILES
-from . import schema as SCHEMA
-from . import schematron as SCHEMATRON

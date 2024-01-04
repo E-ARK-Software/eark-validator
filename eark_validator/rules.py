@@ -23,15 +23,14 @@
 # under the License.
 #
 """Module to capture everything schematron validation related."""
-from enum import Enum, unique
 import os
-from importlib_resources import files
 
 from lxml import etree as ET
 
 from eark_validator.ipxml.schematron import SchematronRuleset, SVRL_NS, get_schematron_path
 from eark_validator.specifications.specification import EarkSpecifications, Specification
 from eark_validator.const import NO_PATH, NOT_FILE
+from eark_validator.model.severity import Severity
 
 class ValidationProfile():
     """ A complete set of Schematron rule sets that comprise a complete validation profile."""
@@ -95,28 +94,10 @@ class ValidationProfile():
             raise ValueError('Specification must be a Specification instance or valid specification ID.')
         return cls(specification)
 
-@unique
-class Severity(Enum):
-    """Enum covering information package validation statuses."""
-    UNKNOWN = 'Unknown'
-    # Information level, possibly not best practise
-    INFO = 'Information'
-    # Non-fatal issue that should be corrected
-    WARN = 'Warning'
-    # Error level message means invalid package
-    ERROR = 'Error'
-
-    @classmethod
-    def from_id(cls, id: str) -> 'Severity':
-        """Get the enum from the value."""
-        for severity in cls:
-            if severity.name == id or severity.value == id:
-                return severity
-        return None
 
 class TestResult():
     """Encapsulates an individual validation test result."""
-    def __init__(self, rule_id: str, location: 'SchematronLocation', message: str, severity: Severity = Severity.UNKNOWN):
+    def __init__(self, rule_id: str, location: 'SchematronLocation', message: str, severity: Severity = Severity.Unknown):
         self._rule_id = rule_id
         self._severity = severity
         self._location = location
@@ -165,7 +146,7 @@ class TestResult():
         context = rule.get('context')
         rule_id = failed_assert.get('id')
         test = failed_assert.get('test')
-        severity = Severity.from_id(failed_assert.get('role', Severity.UNKNOWN.name))
+        severity = Severity.from_id(failed_assert.get('role', Severity.Unknown))
         location = failed_assert.get('location')
         message = failed_assert.find(SVRL_NS + 'text').text
         schmtrn_loc = SchematronLocation(context, test, location)
