@@ -31,49 +31,8 @@ E-ARK : Information Package Validation
 
 from eark_validator.model.struct_results import StructResults
 
-class ValidationReport:
-    def __init__(self, uid: str=None, structure: StructResults=None):  # noqa: E501
-        self._uid = uid
-        self._structure = structure
+from pydantic import BaseModel
 
-    @property
-    def uid(self) -> str:
-        """Gets the uid of this ValidationReport.
-
-
-        :return: The uid of this ValidationReport.
-        :rtype: str
-        """
-        return self._uid
-
-    @uid.setter
-    def uid(self, uid: str):
-        """Sets the uid of this ValidationReport.
-
-
-        :param uid: The uid of this ValidationReport.
-        :type uid: str
-        """
-
-        self._uid = uid
-
-    @property
-    def structure(self) -> StructResults:
-        """Gets the structure of this ValidationReport.
-
-
-        :return: The structure of this ValidationReport.
-        :rtype: StructResults
-        """
-        return self._structure
-
-    @structure.setter
-    def structure(self, structure: StructResults):
-        """Sets the structure of this ValidationReport.
-
-
-        :param structure: The structure of this ValidationReport.
-        :type structure: StructResults
-        """
-
-        self._structure = structure
+class ValidationReport(BaseModel):
+    uid: str | None
+    structure: StructResults | None

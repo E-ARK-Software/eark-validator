@@ -27,7 +27,6 @@
 E-ARK : Information Package Validation
         Information Package API model types
 """
-from __future__ import absolute_import
 # import models into model package
 from eark_validator.model.severity import Severity
 from eark_validator.model.level import Level

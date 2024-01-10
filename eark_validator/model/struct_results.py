@@ -30,65 +30,15 @@ E-ARK : Information Package Validation
 """
 from typing import List
 
+from pydantic import BaseModel
 
 from eark_validator.model.struct_status import StructureStatus
 from eark_validator.model.test_result import TestResult
 from eark_validator.model.severity import Severity
 
-class StructResults:
-    def __init__(self, status: StructureStatus=StructureStatus.Unknown, messages: List[TestResult]=None):  # noqa: E501
-        """StructResults - a model defined in Swagger
-
-        :param status: The status of this StructResults.  # noqa: E501
-        :type status: StructStatus
-        :param messages: The messages of this StructResults.  # noqa: E501
-        :type messages: List[TestResult]
-        """
-        self.status = status
-        self.messages = messages
-
-    @property
-    def status(self) -> StructureStatus:
-        """Gets the status of this StructResults.
-
-
-        :return: The status of this StructResults.
-        :rtype: StructStatus
-        """
-        return self._status
-
-    @status.setter
-    def status(self, status: StructureStatus):
-        """Sets the status of this StructResults.
-
-
-        :param status: The status of this StructResults.
-        :type status: StructStatus
-        """
-        if status not in list(StructureStatus):
-            raise ValueError('Invalid value for `status`, must be one of {0}'
-                             .format(list(StructureStatus)))
-        self._status = status
-
-    @property
-    def messages(self) -> List[TestResult]:
-        """Gets the messages of this StructResults.
-
-
-        :return: The messages of this StructResults.
-        :rtype: List[TestResult]
-        """
-        return self._messages
-
-    @messages.setter
-    def messages(self, messages: List[TestResult]):
-        """Sets the messages of this StructResults.
-
-
-        :param messages: The messages of this StructResults.
-        :type messages: List[TestResult]
-        """
-        self._messages = messages
+class StructResults(BaseModel):
+    status: StructureStatus
+    messages: List[TestResult]
 
     @property
     def errors(self) -> List[TestResult]:

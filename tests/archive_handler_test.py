@@ -44,7 +44,7 @@ class StatusValuesTest(unittest.TestCase):
     """Tests for package and manifest status values."""
     def test_lgl_pckg_status(self):
         for status in list(StructureStatus):
-            results = StructResults(status=status)
+            results = StructResults(status=status, messages=[])
             self.assertEqual(results.status, status)
 
     def test_illgl_pckg_status(self):

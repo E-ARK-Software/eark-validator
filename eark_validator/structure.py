@@ -32,6 +32,7 @@ from eark_validator.model.struct_results import StructResults
 from eark_validator.model.struct_status import StructureStatus
 from eark_validator.model.test_result import TestResult
 from eark_validator.model.severity import Severity
+from eark_validator.model.representation import Representation
 from eark_validator.model.level import severity_from_level
 
 METS_NAME = 'METS.xml'
@@ -128,12 +129,12 @@ class StructureChecker():
                 results.append(test_result_from_id(12, location))
             if not tests.has_metadata():
                 results.append(test_result_from_id(13, location))
-        return StructResults(self.get_status(results), results)
+        return StructResults(status=self.get_status(results), messages=results)
 
     def get_representations(self):
         reps = []
-        # for rep in self.representations.keys():
-        #     reps.append(Representation(name=rep))
+        for rep in self.representations.keys():
+            reps.append(Representation(name=rep))
         return reps
 
     def get_root_results(self):
@@ -201,13 +202,13 @@ def test_result_from_id(requirement_id, location, message=None):
     req = REQUIREMENTS[requirement_id]
     test_msg = message if message else req['message']
     """Return a TestResult instance created from the requirment ID and location."""
-    return TestResult(rule_id=req['id'], location=location, message=test_msg, severity=severity_from_level(req['level']))
+    return TestResult(rule_id=req['id'], location=str(location), message=test_msg, severity=severity_from_level(req['level']))
 
 def get_multi_root_results(name):
-    return StructResults(StructureStatus.NotWellFormed, [ test_result_from_id(1, name) ])
+    return StructResults(status=StructureStatus.NotWellFormed, messages=[ test_result_from_id(1, name) ])
 
 def get_bad_path_results(path):
-    return StructResults(StructureStatus.NotWellFormed, [ test_result_from_id(1, path) ])
+    return StructResults(status=StructureStatus.NotWellFormed, messages=[ test_result_from_id(1, path) ])
 
 def validate(to_validate):
     try:

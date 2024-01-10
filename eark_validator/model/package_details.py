@@ -30,49 +30,10 @@ E-ARK : Information Package Validation
 """
 from typing import List
 
-class PackageDetails():
-    def __init__(self, name: str=None, checksums: List=None):  # noqa: E501
-        self._name = name
-        self._checksums = checksums if checksums is not None else []
+from pydantic import BaseModel
 
-    @property
-    def name(self) -> str:
-        """Gets the name of this PackageDetails.
+from eark_validator.model.checksum import Checksum
 
-
-        :return: The name of this PackageDetails.
-        :rtype: str
-        """
-        return self._name
-
-    @name.setter
-    def name(self, name: str):
-        """Sets the name of this PackageDetails.
-
-
-        :param name: The name of this PackageDetails.
-        :type name: str
-        """
-
-        self._name = name
-
-    @property
-    def checksums(self) -> List:
-        """Gets the checksums of this PackageDetails.
-
-
-        :return: The checksums of this PackageDetails.
-        :rtype: List[Checksum]
-        """
-        return self._checksums
-
-    @checksums.setter
-    def checksums(self, checksums: List):
-        """Sets the checksums of this PackageDetails.
-
-
-        :param checksums: The checksums of this PackageDetails.
-        :type checksums: List[Checksum]
-        """
-
-        self._checksums = checksums
+class PackageDetails(BaseModel):
+    name: str | None
+    checksums: List[Checksum] | None
