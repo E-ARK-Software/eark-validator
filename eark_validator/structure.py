@@ -132,8 +132,8 @@ class StructureChecker():
 
     def get_representations(self):
         reps = []
-        for rep in self.representations.keys():
-            reps.append(Representation(name=rep))
+        # for rep in self.representations.keys():
+        #     reps.append(Representation(name=rep))
         return reps
 
     def get_root_results(self):

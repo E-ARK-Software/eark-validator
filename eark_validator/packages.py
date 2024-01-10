@@ -37,7 +37,7 @@ from eark_validator.model.package_details import PackageDetails
 def validate(to_validate, check_metadata=True, is_archive=False):
     """Returns the validation report that results from validating the path
     to_validate as a folder. The method does not validate archive files."""
-    _, struct_results = structure.validate(to_validate, is_archive)
+    _, struct_results = structure.validate(to_validate)
     package = _get_info_pack(name=os.path.basename(to_validate))
     return ValidationReport(uid=uuid.uuid4(), structure=struct_results)
 
