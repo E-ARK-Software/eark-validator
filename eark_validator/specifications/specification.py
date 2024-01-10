@@ -29,7 +29,7 @@ import os
 
 from importlib_resources import files
 
-from eark_validator.ipxml import PROFILES
+from eark_validator.ipxml.resources import profiles
 from eark_validator.ipxml.schema import METS_PROF_SCHEMA
 from eark_validator.ipxml.namespaces import Namespaces
 from eark_validator.specifications.struct_reqs import Level, REQUIREMENTS as STRUCT_REQS
@@ -294,7 +294,7 @@ class EarkSpecifications(Enum):
     DIP = 'E-ARK-DIP'
 
     def __init__(self, value: str):
-        self._path = str(files(PROFILES).joinpath(value + '.xml'))
+        self._path = str(files(profiles).joinpath(value + '.xml'))
         self._specfication = Specification._from_xml_file(self._path)
         self._title = value
 
