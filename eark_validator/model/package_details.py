@@ -35,5 +35,5 @@ from pydantic import BaseModel
 from eark_validator.model.checksum import Checksum
 
 class PackageDetails(BaseModel):
-    name: str | None
-    checksums: List[Checksum] | None
+    name: str = 'unknown'
+    checksums: List[Checksum] = []

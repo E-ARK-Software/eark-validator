@@ -34,7 +34,7 @@ from eark_validator.infopacks.package_handler import PackageHandler, PackageErro
 from eark_validator.model.validation_report import ValidationReport
 from eark_validator.model.package_details import PackageDetails
 
-def validate(to_validate, check_metadata=True, is_archive=False):
+def validate(to_validate, check_metadata=True):
     """Returns the validation report that results from validating the path
     to_validate as a folder. The method does not validate archive files."""
     _, struct_results = structure.validate(to_validate)
@@ -45,23 +45,12 @@ class PackageValidator():
     """Class for performing full package validation."""
     _package_handler = PackageHandler()
     def __init__(self, package_path, check_metadata=True):
-        self._orig_path = Path(package_path)
+        self._path = Path(package_path)
         self._name = os.path.basename(package_path)
         self._report = None
-        self._is_archive = False
-        if os.path.isdir(package_path):
-            # If a directory
-            self._to_proc = self._orig_path.absolute()
-        elif PackageHandler.is_archive(package_path):
-            self._is_archive = True
-            try:
-                self._to_proc = Path(self._package_handler.unpack_package(package_path)).absolute()
-            except ValueError:
-                self._report = _report_from_bad_path(self.name, package_path)
-                return
-            except PackageError:
-                self._report = _report_from_unpack_except(self.name, package_path)
-                return
+        if os.path.isdir(package_path) or PackageHandler.is_archive(package_path):
+            # If a directory or archive get the path to process
+            self._to_proc = self._path.absolute()
         elif self._name == 'METS.xml':
             mets_path = Path(package_path)
             self._to_proc = mets_path.parent.absolute()
@@ -70,12 +59,12 @@ class PackageValidator():
             # If not an archive we can't process
             self._report = _report_from_bad_path(self.name, package_path)
             return
-        self._report = validate(self._to_proc, check_metadata, self.is_archive)
+        self._report = validate(self._to_proc, check_metadata)
 
     @property
     def original_path(self):
         """Returns the original parsed path."""
-        return self._orig_path
+        return self._path
 
     @property
     def is_archive(self):

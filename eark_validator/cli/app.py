@@ -102,23 +102,23 @@ def main():
 def _validate_ip(info_pack):
     ret_stat = _check_path(info_pack)
     report = PACKAGES.PackageValidator(info_pack).validation_report
-    pprint('Path {}, struct result is: {}'.format(info_pack,
+    print('Path {}, struct result is: {}'.format(info_pack,
                                                          report.structure.status))
     for message in report.structure.messages:
-        pprint(str(message))
+        print(message)
 
     return ret_stat, report.structure
 
 def _check_path(path):
     if not os.path.exists(path):
         # Skip files that don't exist
-        pprint('Path {} does not exist'.format(path))
+        print('Path {} does not exist'.format(path))
         return 1
     if os.path.isfile(path):
         # Check if file is a archive format
         if not PackageHandler.is_archive(path):
             # If not we can't process so report and iterate
-            pprint('Path {} is not a file we can process.'.format(path))
+            print('Path {} is not a file we can process.'.format(path))
             return 2
     return 0
 

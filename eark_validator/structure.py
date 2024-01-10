@@ -115,7 +115,7 @@ class StructureChecker():
         _reps = os.path.join(dir_to_scan, DIR_NAMES['REPS'])
         if os.path.isdir(_reps):
             for entry in  os.listdir(_reps):
-                self.representations[entry] = StructureParser(os.path.join(_reps, entry))
+                self.representations[entry] = StructureParser(Path(os.path.join(_reps, entry)))
 
     def get_test_results(self):
         results = self.get_root_results()
