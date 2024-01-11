@@ -31,86 +31,42 @@ import lxml.etree as ET
 
 from eark_validator.ipxml.schema import Namespaces
 from eark_validator.const import NO_PATH, NOT_DIR, NOT_FILE
-@unique
-class HashAlgorithms(Enum):
-    """Enum covering information package validation statuses."""
-    MD5 = 'MD5'
-    SHA1 = 'SHA-1'
-    SHA256 = 'SHA-256'
-    SHA384 = 'SHA-384'
-    SHA512 = 'SHA-512'
+from eark_validator.model.checksum import Checksum
+from eark_validator.model.checksum_alg import ChecksumAlg
+
+class Checksummer:
+    def __init__(self, algorithm: ChecksumAlg):
+        self._algorithm = algorithm
+
+    @property
+    def algorithm(self) -> ChecksumAlg:
+        """Get the algorithm."""
+        return self._algorithm
 
     def hash_file(self, path: str) -> 'Checksum':
         if (not os.path.exists(path)):
             raise FileNotFoundError(NO_PATH.format(path))
         if (not os.path.isfile(path)):
             raise ValueError(NOT_FILE.format(path))
-        implemenation = self.get_implementation(self)
+        implemenation = ChecksumAlg.get_implementation(self._algorithm)
         with open(path, 'rb') as file:
             for chunk in iter(lambda: file.read(4096), b''):
                 implemenation.update(chunk)
-        return Checksum(self, implemenation.hexdigest())
-
-    @classmethod
-    def from_string(cls, value: str) -> 'HashAlgorithms':
-        search_value = value.upper() if hasattr(value, 'upper') else value
-        for algorithm in cls:
-            if (algorithm.value == search_value) or (algorithm.name == search_value) or (algorithm == value):
-                return algorithm
-        return None
-
-    @classmethod
-    def get_implementation(cls, algorithm: 'HashAlgorithms'):
-        if algorithm not in cls:
-            algorithm = cls.from_string(algorithm)
-        if algorithm is None:
-            raise ValueError('Algorithm {} not supported.'.format(algorithm))
-        algorithms = {
-            cls.MD5: hashlib.md5(),
-            cls.SHA1: hashlib.sha1(),
-            cls.SHA256: hashlib.sha256(),
-            cls.SHA384: hashlib.sha384(),
-            cls.SHA512: hashlib.sha512()
-        }
-        return algorithms.get(algorithm)
-
-
-class Checksum:
-    def __init__(self, algorithm: HashAlgorithms, value: str):
-        self._algorithm = algorithm
-        self._value = value.lower()
-
-    @property
-    def algorithm(self) -> HashAlgorithms:
-        """Get the algorithm."""
-        return self._algorithm
-
-    @property
-    def value(self) -> str:
-        """Get the value."""
-        return self._value
-
-    def is_value(self, value: 'Checksum') -> bool:
-        """Check if the checksum value is equal to the given value."""
-        if isinstance(value, Checksum):
-            return (self._value == value.value) and (self._algorithm == value.algorithm)
-        return self._value == value.lower()
+        return Checksum(algorithm=self._algorithm, value=implemenation.hexdigest().upper())
 
     @classmethod
     def from_mets_element(cls, element: ET.Element) -> 'Checksum':
         """Create a Checksum from an etree element."""
         # Get the child flocat element and grab the href attribute.
-        algorithm = HashAlgorithms.from_string(element.attrib['CHECKSUMTYPE'])
+        algorithm = ChecksumAlg.from_string(element.attrib['CHECKSUMTYPE'])
         value = element.attrib['CHECKSUM']
-        return cls(algorithm, value)
+        return Checksum(algorithm=algorithm, value=value.upper())
 
     @classmethod
-    def from_file(cls, path: str, algorithm: 'Checksum') -> 'Checksum':
+    def from_file(cls, path: str, algorithm: 'ChecksumAlg') -> 'Checksum':
         """Create a Checksum from an etree element."""
         # Get the child flocat element and grab the href attribute.
-        algorithm = HashAlgorithms.from_string(algorithm)
-        return algorithm.hash_file(path)
-
+        return Checksummer(algorithm).hash_file(path)
 
 class FileItem:
     def __init__(self, path: str, size: int, checksum: Checksum, mime: str):
@@ -166,11 +122,11 @@ class FileItem:
             raise ValueError('Element {} is not a METS:file or METS:mdRef element.'.format(element.tag))
         size = int(element.attrib['SIZE'])
         mime = element.attrib['MIMETYPE']
-        checksum = Checksum.from_mets_element(element)
+        checksum = Checksummer.from_mets_element(element)
         return cls(path, size, checksum, mime)
 
     @classmethod
-    def from_file_path(cls, path: str, mime:str=None, checksum_algorithm:HashAlgorithms=None) -> 'FileItem':
+    def from_file_path(cls, path: str, mime:str=None, checksum_algorithm:ChecksumAlg=None) -> 'FileItem':
         """Create a FileItem from a file path."""
         if (not os.path.exists(path)):
             raise FileNotFoundError(NO_PATH.format(path))
@@ -178,7 +134,7 @@ class FileItem:
             raise ValueError('Path {} is not a file.'.format(path))
         size = os.path.getsize(path)
         mimetype = mime or 'application/octet-stream'
-        checksum = Checksum.from_file(path, checksum_algorithm) if checksum_algorithm else None
+        checksum = Checksummer.from_file(path, checksum_algorithm) if checksum_algorithm else None
         return cls(path, size, checksum, mimetype)
 
 class Manifest:
@@ -228,8 +184,8 @@ class Manifest:
             if (item.size != os.path.getsize(abs_path)):
                 issues.append('File {} manifest size {}, filesystem size {}.'.format(item.path, item.size, os.path.getsize(abs_path)))
                 is_valid = False
-            calced_checksum = item.checksum.algorithm.hash_file(abs_path)
-            if (not item.checksum.is_value(calced_checksum)):
+            calced_checksum = Checksummer.from_file(abs_path, item.checksum.algorithm)
+            if not item.checksum == calced_checksum:
                 issues.append('File {} manifest checksum {}, calculated checksum {}.'.format(item.path, item.checksum, calced_checksum))
                 is_valid = False
         return is_valid, issues
@@ -239,7 +195,7 @@ class Manifest:
         return path if not os.path.isabs(path) else os.path.relpath(path, root_path)
 
     @classmethod
-    def from_directory(cls, root_path: str, checksum_algorithm: HashAlgorithms=None) -> 'Manifest':
+    def from_directory(cls, root_path: str, checksum_algorithm: ChecksumAlg=None) -> 'Manifest':
         if (not os.path.exists(root_path)):
             raise FileNotFoundError(NO_PATH.format(root_path))
         if (not os.path.isdir(root_path)):

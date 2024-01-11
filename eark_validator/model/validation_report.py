@@ -30,10 +30,10 @@ E-ARK : Information Package Validation
 """
 
 from eark_validator.model.struct_results import StructResults
-from uuid import UUID
+import uuid
 
 from pydantic import BaseModel
 
 class ValidationReport(BaseModel):
-    uid: UUID | None
+    uid: uuid.UUID = uuid.uuid4()
     structure: StructResults | None

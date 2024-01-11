@@ -67,11 +67,6 @@ class PackageValidator():
         return self._path
 
     @property
-    def is_archive(self):
-        """Returns the original parsed path."""
-        return self._is_archive
-
-    @property
     def name(self):
         """Returns the package name."""
         return self._name
@@ -83,11 +78,11 @@ class PackageValidator():
 
 def _report_from_unpack_except(name, package_path):
     struct_results = structure.get_multi_root_results(package_path)
-    return ValidationReport(uid=uuid.uuid4(), structure=struct_results)
+    return ValidationReport(structure=struct_results)
 
 def _report_from_bad_path(name, package_path):
     struct_results = structure.get_bad_path_results(package_path)
-    return ValidationReport(uid=uuid.uuid4(), structure=struct_results)
+    return ValidationReport(structure=struct_results)
 
 def _get_info_pack(name, profile=None):
     return PackageDetails(name=name)

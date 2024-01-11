@@ -30,7 +30,7 @@ from pathlib import Path
 import tarfile
 import tempfile
 import zipfile
-from eark_validator.infopacks.manifest import Checksum
+from eark_validator.infopacks.manifest import Checksummer
 SUB_MESS_NOT_EXIST = 'Path {} does not exist'
 SUB_MESS_NOT_ARCH = 'Parameter "to_unpack": {} does not reference a file of known archive format (zip or tar).'
 
@@ -59,7 +59,7 @@ class PackageHandler():
         returns the destination folder."""
         if not os.path.isfile(to_unpack) or not self.is_archive(to_unpack):
             raise ValueError(SUB_MESS_NOT_ARCH.format(to_unpack))
-        sha1 = Checksum.from_file(to_unpack, 'SHA1')
+        sha1 = Checksummer('SHA-1').hash_file(to_unpack)
         dest_root = dest if dest else self.unpack_root
         destination = os.path.join(dest_root, sha1.value)
         self._unpack(to_unpack, destination)
