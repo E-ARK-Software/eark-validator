@@ -29,10 +29,79 @@ E-ARK : Information Package Validation
         Information Package Validation Report type
 """
 
-from eark_validator.model.struct_results import StructResults
+from enum import Enum, unique
+from typing import List
 import uuid
 
 from pydantic import BaseModel
+
+@unique
+class Level(str, Enum):
+    """Enum covering information package validation statuses."""
+    MAY = 'MAY'
+    # Package has basic parse / structure problems and can't be validated
+    SHOULD = 'SHOULD'
+    # Package structure is OK
+    MUST = 'MUST'
+
+@unique
+class Severity(str, Enum):
+    """Enum covering information package validation statuses."""
+    Unknown = 'Unknown'
+    # Information level, possibly not best practise
+    Information = 'Information'
+    # Non-fatal issue that should be corrected
+    Warning = 'Warning'
+    # Error level message means invalid package
+    Error = 'Error'
+
+    @classmethod
+    def from_id(cls, id: str) -> 'Severity':
+        """Get the enum from the value."""
+        for severity in cls:
+            if severity.name == id or severity.value == id:
+                return severity
+        return None
+
+    @classmethod
+    def from_level(cls, level: Level) -> 'Severity':
+        """Return the correct test result severity from a Level instance."""
+        if level is Level.MUST:
+            return Severity.Error
+        if level is Level.SHOULD:
+            return Severity.Warning
+        return Severity.Information
+
+class TestResult(BaseModel):
+    rule_id: str | None
+    severity: Severity | None
+    location: str | None
+    message: str | None
+
+@unique
+class StructureStatus(str, Enum):
+    """Enum covering information package validation statuses."""
+    Unknown = 'Unknown'
+    # Package has basic parse / structure problems and can't be validated
+    NotWellFormed = 'Not Well Formed'
+    # Package structure is OK
+    WellFormed = 'Well Formed'
+
+class StructResults(BaseModel):
+    status: StructureStatus
+    messages: List[TestResult]
+
+    @property
+    def errors(self) -> List[TestResult]:
+        return [m for m in self.messages if m.severity == Severity.Error]
+
+    @property
+    def warnings(self) -> List[TestResult]:
+        return [m for m in self.messages if m.severity == Severity.Warning]
+
+    @property
+    def infos(self) -> List[TestResult]:
+        return [m for m in self.messages if m.severity == Severity.Information]
 
 class ValidationReport(BaseModel):
     uid: uuid.UUID = uuid.uuid4()

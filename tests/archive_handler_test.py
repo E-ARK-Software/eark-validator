@@ -31,8 +31,7 @@ import unittest
 from eark_validator.infopacks.manifest import Checksummer
 from eark_validator.infopacks.package_handler import PackageHandler
 
-from eark_validator.model.struct_status import StructureStatus
-from eark_validator.model.struct_results import StructResults
+from eark_validator.model import StructureStatus, StructResults
 
 MIN_TAR_SHA1 = '47CA3A9D7F5F23BF35B852A99785878C5E543076'
 

@@ -24,6 +24,7 @@
 #
 """METS Schema validation."""
 import os
+from typing import Dict, List
 
 from lxml import etree
 
@@ -34,29 +35,29 @@ from eark_validator.ipxml.namespaces import Namespaces
 class MetsValidator():
     """Encapsulates METS schema validation."""
     def __init__(self, root: str):
-        self._validation_errors = []
-        self._package_root = root
-        self._reps_mets = {}
-        self._file_refs = []
+        self._validation_errors: List[str] = []
+        self._package_root: str = root
+        self._reps_mets: Dict[str , str] = {}
+        self._file_refs: List[FileItem] = []
 
     @property
     def root(self) -> str:
         return self._package_root
 
     @property
-    def validation_errors(self) -> list[str]:
+    def validation_errors(self) -> List[str]:
         return self._validation_errors
 
     @property
-    def representations(self) -> list[str]:
+    def representations(self) -> List[str]:
         return self._reps_mets.keys()
 
     @property
-    def representation_mets(self) -> list[str]:
+    def representation_mets(self) -> List[str]:
         return self._reps_mets.values()
 
     @property
-    def file_references(self) -> list[FileItem]:
+    def file_references(self) -> List[FileItem]:
         return self._file_refs
 
     def get_mets_path(self, rep_name: str) -> str:

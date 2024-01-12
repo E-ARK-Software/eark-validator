@@ -31,8 +31,7 @@ import lxml.etree as ET
 
 from eark_validator.ipxml.schema import Namespaces
 from eark_validator.const import NO_PATH, NOT_DIR, NOT_FILE
-from eark_validator.model.checksum import Checksum
-from eark_validator.model.checksum_alg import ChecksumAlg
+from eark_validator.model import Checksum, ChecksumAlg
 
 class Checksummer:
     def __init__(self, algorithm: ChecksumAlg):

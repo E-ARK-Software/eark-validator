@@ -39,22 +39,22 @@ class PackageError(Exception):
 
 class PackageHandler():
     """Class to handle archive / compressed information packages."""
-    def __init__(self, unpack_root=tempfile.gettempdir()):
-        self._unpack_root = unpack_root
+    def __init__(self, unpack_root: Path=Path(tempfile.gettempdir())):
+        self._unpack_root : Path = unpack_root
 
     @property
-    def unpack_root(self):
+    def unpack_root(self) -> Path:
         """Returns the root directory for archive unpacking."""
         return self._unpack_root
 
-    def prepare_package(self, to_prepare: Path, dest=None):
+    def prepare_package(self, to_prepare: Path, dest: Path=None) -> Path:
         if not os.path.exists(to_prepare):
             raise ValueError(SUB_MESS_NOT_EXIST.format(to_prepare))
         if os.path.isdir(to_prepare):
             return to_prepare
         return self.unpack_package(to_prepare, dest)
 
-    def unpack_package(self, to_unpack, dest=None):
+    def unpack_package(self, to_unpack: Path, dest: Path=None) -> Path:
         """Unpack an archived package to a destination (defaults to tempdir).
         returns the destination folder."""
         if not os.path.isfile(to_unpack) or not self.is_archive(to_unpack):
@@ -77,7 +77,7 @@ class PackageHandler():
         return children[0].absolute()
 
     @staticmethod
-    def _unpack(to_unpack, destination):
+    def _unpack(to_unpack: Path, destination: Path):
         if zipfile.is_zipfile(to_unpack):
             with zipfile.ZipFile(to_unpack) as zip_ip:
                 zip_ip.extractall(path=destination)
@@ -86,7 +86,7 @@ class PackageHandler():
                 tar_ip.extractall(path=destination)
 
     @staticmethod
-    def is_archive(to_test):
+    def is_archive(to_test: Path) -> bool:
         """Return True if the file is a recognised archive type, False otherwise."""
         if os.path.isfile(to_test):
             if zipfile.is_zipfile(to_test):

@@ -28,6 +28,15 @@ E-ARK : Information Package Validation
         Information Package API model types
 """
 # import models into model package
-from eark_validator.model.severity import Severity
-from eark_validator.model.level import Level
-from eark_validator.model.struct_status import StructureStatus
+from .checksum import Checksum, ChecksumAlg
+from .manifest import Manifest, ManifestEntry, SourceType
+from .validation_report import ValidationReport
+from .package_details import PackageDetails
+from .representation import Representation
+from .validation_report import (
+        Level,
+        Severity,
+        StructureStatus,
+        StructResults,
+        TestResult
+)

@@ -37,8 +37,7 @@ from eark_validator.infopacks.manifest import (
     Checksummer,
     Manifest
 )
-from eark_validator.model.checksum import Checksum
-from eark_validator.model.checksum_alg import ChecksumAlg
+from eark_validator.model import ChecksumAlg
 
 
 METS = 'METS.xml'

@@ -27,9 +27,11 @@ E-ARK : Information package validation
         Command line validation application
 """
 import argparse
-from pprint import pprint
 import os.path
+from pathlib import Path
 import sys
+from typing import Optional, Tuple
+from eark_validator.model import StructResults
 
 import eark_validator.packages as PACKAGES
 from eark_validator.infopacks.package_handler import PackageHandler
@@ -99,28 +101,33 @@ def main():
         _exit = _loop_exit if (_loop_exit > 0) else _exit
     sys.exit(_exit)
 
-def _validate_ip(info_pack):
-    ret_stat = _check_path(info_pack)
-    report = PACKAGES.PackageValidator(info_pack).validation_report
-    print('Path {}, struct result is: {}'.format(info_pack,
-                                                         report.structure.status))
+def _validate_ip(path: str) -> Tuple[int, Optional[StructResults]]:
+    ret_stat, checked_path = _check_path(path)
+    if ret_stat > 0:
+        return ret_stat, None
+    report = PACKAGES.PackageValidator(checked_path).validation_report
+    print('Path {}, struct result is: {}'.format(checked_path,
+                                                 report.structure.status.value))
     for message in report.structure.messages:
-        print(message)
+        print(message.model_dump_json())
 
     return ret_stat, report.structure
 
-def _check_path(path):
+def _check_path(path: str) -> Tuple[int, Optional[Path]]:
     if not os.path.exists(path):
         # Skip files that don't exist
-        print('Path {} does not exist'.format(path))
-        return 1
+        print(_format_check_path_message(path, 'does not exist'))
+        return 1, None
     if os.path.isfile(path):
         # Check if file is a archive format
         if not PackageHandler.is_archive(path):
             # If not we can't process so report and iterate
-            print('Path {} is not a file we can process.'.format(path))
-            return 2
-    return 0
+            print(_format_check_path_message(path, 'is not an archive file or directory'))
+            return 2, None
+    return 0, Path(path)
+
+def _format_check_path_message(path: Path, message: str) -> str:
+    return 'Processing terminated, path: {} {}.'.format(path, message)
 
 # def _test_case_schema_checks():
 if __name__ == '__main__':

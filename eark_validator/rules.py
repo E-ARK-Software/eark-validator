@@ -24,23 +24,24 @@
 #
 """Module to capture everything schematron validation related."""
 import os
+from typing import Dict, List
 
 from lxml import etree as ET
 
 from eark_validator.ipxml.schematron import SchematronRuleset, SVRL_NS, get_schematron_path
 from eark_validator.specifications.specification import EarkSpecifications, Specification
 from eark_validator.const import NO_PATH, NOT_FILE
-from eark_validator.model.severity import Severity
+from eark_validator.model import Severity
 
 class ValidationProfile():
     """ A complete set of Schematron rule sets that comprise a complete validation profile."""
     def __init__(self, specification: Specification):
-        self._rulesets = {}
-        self._specification = specification
-        self.is_valid = False
-        self.is_wellformed = False
-        self.results = {}
-        self.messages = []
+        self._rulesets: Dict[str, SchematronRuleset] = {}
+        self._specification: Specification = specification
+        self.is_valid: bool = False
+        self.is_wellformed: bool = False
+        self.results: Dict[str, TestReport] = {}
+        self.messages: List[str] = []
         for section in specification.sections:
             self.rulesets[section] = SchematronRuleset(get_schematron_path(specification.id, section))
 
@@ -98,10 +99,10 @@ class ValidationProfile():
 class TestResult():
     """Encapsulates an individual validation test result."""
     def __init__(self, rule_id: str, location: 'SchematronLocation', message: str, severity: Severity = Severity.Unknown):
-        self._rule_id = rule_id
-        self._severity = severity
-        self._location = location
-        self._message = message
+        self._rule_id: str = rule_id
+        self._severity: Severity = severity
+        self._location: SchematronLocation = location
+        self._message: str = message
 
     @property
     def rule_id(self) -> str:
@@ -156,10 +157,10 @@ class TestResult():
 class TestReport():
     """A report made up of validation results."""
     def __init__(self, is_valid: bool, errors: list[TestResult]=None, warnings: list[TestResult]=None, infos: list[TestResult]=None):
-        self._is_valid = is_valid
-        self._errors = errors if errors else []
-        self._warnings = warnings if warnings else []
-        self._infos = infos if infos else []
+        self._is_valid: bool = is_valid
+        self._errors: List[TestResult] = errors if errors else []
+        self._warnings: List[TestResult] = warnings if warnings else []
+        self._infos: List[TestResult] = infos if infos else []
 
     @property
     def is_valid(self) -> bool:
@@ -207,9 +208,9 @@ class TestReport():
 class SchematronLocation():
     """All details of the location of a Schematron error."""
     def __init__(self, context: str, test: str, location: str):
-        self._context = context
-        self._test = test
-        self._location = location
+        self._context: str = context
+        self._test: str = test
+        self._location: str = location
 
     @property
     def context(self) -> str:

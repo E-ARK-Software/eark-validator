@@ -28,7 +28,7 @@ import unittest
 from pathlib import Path
 
 from eark_validator import structure as STRUCT
-from eark_validator.rules import Severity
+from eark_validator.model import Severity
 from tests.utils_test import contains_rule_id
 
 EXP_NOT_WELLFORMED = 'Expecting status NotWellFormed, not {}'

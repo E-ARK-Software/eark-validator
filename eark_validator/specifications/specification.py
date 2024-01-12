@@ -23,17 +23,21 @@
 # under the License.
 #
 """Module covering information package structure validation and navigation."""
-from enum import Enum, unique
-from lxml import etree as ET
 import os
+from enum import Enum, unique
+from typing import Generator, List, Optional
 
 from importlib_resources import files
+from lxml import etree as ET
 
+from eark_validator.const import NO_PATH, NOT_FILE
+from eark_validator.ipxml.namespaces import Namespaces
 from eark_validator.ipxml.resources import profiles
 from eark_validator.ipxml.schema import METS_PROF_SCHEMA
-from eark_validator.ipxml.namespaces import Namespaces
-from eark_validator.specifications.struct_reqs import Level, REQUIREMENTS as STRUCT_REQS
-from eark_validator.const import NOT_FILE, NO_PATH
+from eark_validator.specifications.struct_reqs import \
+    REQUIREMENTS as STRUCT_REQS
+from eark_validator.specifications.struct_reqs import Level
+
 
 class Specification:
     """Stores the vital facts and figures an IP specification."""
@@ -70,7 +74,7 @@ class Specification:
         return self._date
 
     @property
-    def requirements(self):
+    def requirements(self) -> Generator[ 'Requirement', None, None]:
         """Get the specification rules."""
         for section in self.sections:
             for requirement in self._requirements[section].values():
@@ -84,7 +88,7 @@ class Specification:
             req_count += len(self._requirements[sect])
         return req_count
 
-    def get_requirement_by_id(self, id: str) -> 'Requirement':
+    def get_requirement_by_id(self, id: str) -> Optional['Requirement']:
         """Retrieve a requirement by id."""
         for sect in self.sections:
             req = self.get_requirement_by_sect(id, sect)
@@ -92,14 +96,14 @@ class Specification:
                 return req
         return None
 
-    def get_requirement_by_sect(self, id: str, section: str) -> 'Requirement':
+    def get_requirement_by_sect(self, id: str, section: str) -> Optional['Requirement']:
         """Retrieve a requirement by id."""
         sect = self._requirements[section]
         if sect:
             return sect.get(id)
         return None
 
-    def section_requirements(self, section: str=None) -> list['Requirement']:
+    def section_requirements(self, section: str=None) -> List['Requirement']:
         """Get the specification requirements, by section if offered."""
         requirements = []
         if section:
@@ -324,7 +328,7 @@ class EarkSpecifications(Enum):
         return 'https://eark{}.dilcis.eu/profile/{}.xml'.format(self.name.lower(), self.value)
 
     @classmethod
-    def from_id(cls, id: str) -> 'EarkSpecifications':
+    def from_id(cls, id: str) -> Optional['EarkSpecifications']:
         """Get the enum from the value."""
         for spec in cls:
             if spec.id == id or spec.value == id or spec.profile == id:
