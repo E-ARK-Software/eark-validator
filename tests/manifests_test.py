@@ -37,7 +37,7 @@ from eark_validator.infopacks.manifest import (
     Checksummer,
     Manifest
 )
-from eark_validator.model import ChecksumAlg
+from eark_validator.model import ChecksumAlg, Checksum
 
 
 METS = 'METS.xml'
@@ -97,7 +97,9 @@ class ChecksumTest(unittest.TestCase):
         alg = Checksummer(ChecksumAlg.from_string('SHA1'))
         digest = alg.hash_file(PERSON_PATH)
         self.assertEqual(digest.algorithm.name, 'SHA1', 'Expected SHA1 digest id, not {}'.format(digest.algorithm.name))
-        self.assertEqual(digest.value, 'ED294AAFF253F66E4F1C839B732A43F36BA91677', 'SHA1 digest {} does not match'.format(digest.value))
+        self.assertNotEqual(digest.value, 'ed294aaff253f66e4f1c839b732a43f36ba91677', 'SHA1 digest {} does not match'.format(digest.value))
+        self.assertEqual(Checksum(algorithm=ChecksumAlg.SHA1, value='ed294aaff253f66e4f1c839b732a43f36ba91677'), digest, 'Digest {} does not match'.format(digest.value))
+        self.assertEqual(Checksum.model_validate({'algorithm': ChecksumAlg.SHA1, 'value': 'ed294aaff253f66e4f1c839b732a43f36ba91677'}, strict=True), digest, 'SHA1 digest {} does not match'.format(digest.value))
 
     def test_sha256(self):
         """Test SHA256 calculation by HashAlgorithms."""

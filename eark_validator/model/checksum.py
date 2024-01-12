@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pydantic import BaseModel, Field
+from typing import Annotated
+from pydantic import BaseModel, Field, StringConstraints
 
 from enum import Enum
 import hashlib
@@ -41,4 +42,4 @@ class ChecksumAlg(str, Enum):
 
 class Checksum(BaseModel):
     algorithm: ChecksumAlg = ChecksumAlg.SHA1
-    value: str = Field(default='', to_upper=True)
+    value: Annotated[ str, StringConstraints(to_upper=True) ] = ''

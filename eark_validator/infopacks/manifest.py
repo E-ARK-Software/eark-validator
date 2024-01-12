@@ -23,8 +23,6 @@
 # under the License.
 #
 """Information Package manifests."""
-from enum import Enum, unique
-import hashlib
 import os
 
 import lxml.etree as ET
@@ -34,8 +32,8 @@ from eark_validator.const import NO_PATH, NOT_DIR, NOT_FILE
 from eark_validator.model import Checksum, ChecksumAlg
 
 class Checksummer:
-    def __init__(self, algorithm: ChecksumAlg):
-        self._algorithm = algorithm
+    def __init__(self, algorithm: ChecksumAlg | str):
+        self._algorithm: ChecksumAlg = algorithm if isinstance(algorithm, ChecksumAlg) else ChecksumAlg.from_string(algorithm)
 
     @property
     def algorithm(self) -> ChecksumAlg:
@@ -51,7 +49,7 @@ class Checksummer:
         with open(path, 'rb') as file:
             for chunk in iter(lambda: file.read(4096), b''):
                 implemenation.update(chunk)
-        return Checksum(algorithm=self._algorithm, value=implemenation.hexdigest().upper())
+        return Checksum.model_validate({'algorithm': self._algorithm, 'value': implemenation.hexdigest()}, strict=True)
 
     @classmethod
     def from_mets_element(cls, element: ET.Element) -> 'Checksum':
@@ -59,7 +57,7 @@ class Checksummer:
         # Get the child flocat element and grab the href attribute.
         algorithm = ChecksumAlg.from_string(element.attrib['CHECKSUMTYPE'])
         value = element.attrib['CHECKSUM']
-        return Checksum(algorithm=algorithm, value=value.upper())
+        return Checksum.model_validate({'algorithm': algorithm, 'value': value}, strict=True)
 
     @classmethod
     def from_file(cls, path: str, algorithm: 'ChecksumAlg') -> 'Checksum':
@@ -125,15 +123,16 @@ class FileItem:
         return cls(path, size, checksum, mime)
 
     @classmethod
-    def from_file_path(cls, path: str, mime:str=None, checksum_algorithm:ChecksumAlg=None) -> 'FileItem':
+    def from_file_path(cls, path: str, mime:str=None, checksum_algorithm:ChecksumAlg | str=None) -> 'FileItem':
         """Create a FileItem from a file path."""
         if (not os.path.exists(path)):
             raise FileNotFoundError(NO_PATH.format(path))
         if (not os.path.isfile(path)):
             raise ValueError('Path {} is not a file.'.format(path))
+        algorithm = checksum_algorithm if isinstance(checksum_algorithm, ChecksumAlg) else ChecksumAlg.from_string(checksum_algorithm)
         size = os.path.getsize(path)
         mimetype = mime or 'application/octet-stream'
-        checksum = Checksummer.from_file(path, checksum_algorithm) if checksum_algorithm else None
+        checksum = Checksummer.from_file(path, algorithm) if checksum_algorithm else None
         return cls(path, size, checksum, mimetype)
 
 class Manifest:
