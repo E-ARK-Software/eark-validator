@@ -25,7 +25,7 @@
       <assert id="CSIP91" role="WARN" test="@ADMID">When there is administrative metadata and the amdSec is present, all administrative metadata MUST be referenced via the administrative sections different identifiers.</assert>
       <assert id="CSIP92" role="WARN" test="@DMDID">When there are descriptive metadata and one or more dmdSec is present, all descriptive metadata MUST be referenced via the descriptive section identifiers.</assert>
     </rule>
-    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Documentation']">
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Documentation']">
       <assert id="CSIP94" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
       <assert id="CSIP96" role="ERROR" test="mets:fptr">All file groups containing documentation described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
     </rule>
