@@ -20,7 +20,7 @@
       <assert id="CSIP97" role="WARN" test="mets:div[@LABEL = 'Schemas']">The schemas referenced in the file section file groups are described in the structural map within a single sub-division.</assert>
       <assert id="CSIP101" role="WARN" test="mets:div[@LABEL = 'Representations']">When no representations are present the content referenced in the file section file group with @USE attribute value “Representations” is described in the structural map as a single sub division.</assert>
     </rule>
-    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Metadata']">
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Metadata']">
       <assert id="CSIP89" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
       <assert id="CSIP91" role="WARN" test="@ADMID">When there is administrative metadata and the amdSec is present, all administrative metadata MUST be referenced via the administrative sections different identifiers.</assert>
       <assert id="CSIP92" role="WARN" test="@DMDID">When there are descriptive metadata and one or more dmdSec is present, all descriptive metadata MUST be referenced via the descriptive section identifiers.</assert>
