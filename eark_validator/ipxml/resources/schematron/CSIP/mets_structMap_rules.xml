@@ -34,7 +34,7 @@
     </rule>
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Schemas']">
       <assert id="CSIP98" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
-      <assert id="CSIP100" role="ERROR" test="mets:fptr">All file groups containing documentation described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
+      <assert id="CSIP100" role="ERROR" test="mets:fptr">All file groups containing schemas described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
     </rule>
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Schemas']/fptr">
       <assert id="CSIP118" role="ERROR" test="@FILEID">The pointer to the identifier for the “Schema” file group.</assert>
