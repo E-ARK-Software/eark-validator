@@ -49,9 +49,9 @@
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Representations']/mets:div">
       <assert id="CSIP106" role="ERROR" test="@ID">Mandatory, xml:id identifier must be unique within the package.</assert>
       <assert id="CSIP107" role="ERROR" test="@LABEL">The package’s representation division div element @LABEL attribute value must be the path to the representation level METS document.</assert>
-      <assert id="CSIP109" role="ERROR" test="mptr">The division div of the specific representation includes one occurrence of the METS pointer mptr element, pointing to the appropriate representation METS file.</assert>
+      <assert id="CSIP109" role="ERROR" test="mets:mptr">The division div of the specific representation includes one occurrence of the METS pointer mptr element, pointing to the appropriate representation METS file.</assert>
     </rule>
-    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Representations']/mptr">
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Representations']/mets:mptr">
       <assert id="CSIP108" role="ERROR" test="@xlink:title">The file group containing the files described in the package are referenced via the relevant file group identifier.</assert>
       <assert id="CSIP110" role="ERROR" test="@xlink:href">MUST point to the actual location of the resource. We recommend recording a URL type filepath within this attribute.</assert>
       <assert id="CSIP111" role="ERROR" test="@xlink:type = 'simple'">Attribute used with the value “simple”. Value list is maintained by the xlink standard.</assert>
