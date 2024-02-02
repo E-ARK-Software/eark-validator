@@ -24,12 +24,21 @@
 #
 """Information Package manifests."""
 import os
+from pathlib import Path
 
 import lxml.etree as ET
+from eark_validator.mets import MetsFiles
+from eark_validator.model.metadata import FileEntry
 
-from eark_validator.ipxml.schema import Namespaces
+from eark_validator.utils import get_path
 from eark_validator.const import NO_PATH, NOT_DIR, NOT_FILE
-from eark_validator.model import Checksum, ChecksumAlg
+from eark_validator.model import (
+    Checksum,
+    ChecksumAlg,
+    Manifest,
+    ManifestEntry
+    )
+from eark_validator.model.manifest import SourceType
 
 class Checksummer:
     def __init__(self, algorithm: ChecksumAlg | str):
@@ -40,10 +49,10 @@ class Checksummer:
         """Get the algorithm."""
         return self._algorithm
 
-    def hash_file(self, path: str) -> 'Checksum':
-        if (not os.path.exists(path)):
+    def hash_file(self, path: Path) -> 'Checksum':
+        if (not path.exists()):
             raise FileNotFoundError(NO_PATH.format(path))
-        if (not os.path.isfile(path)):
+        if (not path.is_file()):
             raise ValueError(NOT_FILE.format(path))
         implemenation = ChecksumAlg.get_implementation(self._algorithm)
         with open(path, 'rb') as file:
@@ -52,139 +61,54 @@ class Checksummer:
         return Checksum.model_validate({'algorithm': self._algorithm, 'value': implemenation.hexdigest()}, strict=True)
 
     @classmethod
-    def from_mets_element(cls, element: ET.Element) -> 'Checksum':
-        """Create a Checksum from an etree element."""
-        # Get the child flocat element and grab the href attribute.
-        algorithm = ChecksumAlg.from_string(element.attrib['CHECKSUMTYPE'])
-        value = element.attrib['CHECKSUM']
-        return Checksum.model_validate({'algorithm': algorithm, 'value': value}, strict=True)
-
-    @classmethod
-    def from_file(cls, path: str, algorithm: 'ChecksumAlg') -> 'Checksum':
+    def from_file(cls, path: Path, algorithm: 'ChecksumAlg') -> 'Checksum':
         """Create a Checksum from an etree element."""
         # Get the child flocat element and grab the href attribute.
         return Checksummer(algorithm).hash_file(path)
 
-class FileItem:
-    def __init__(self, path: str, size: int, checksum: Checksum, mime: str):
-        self._path = path
-        self._size = size
-        self._checksum = checksum
-        self._mime = mime
-
-    @property
-    def path(self) -> str:
-        """Get the path."""
-        return self._path
-
-    @property
-    def name(self) -> str:
-        """Get the name."""
-        return os.path.basename(self._path)
-
-    @property
-    def size(self) -> int:
-        """Get the size."""
-        return self._size
-
-    @property
-    def checksum(self) -> Checksum:
-        """Get the checksum value."""
-        return self._checksum
-
-    @property
-    def mime(self) -> str:
-        """Get the mime type."""
-        return self._mime
-
-    @classmethod
-    def path_from_file_element(cls, element: ET.Element) -> str:
-        return element.find(Namespaces.METS.qualify('FLocat'), namespaces=element.nsmap).attrib[Namespaces.XLINK.qualify('href')] if hasattr(element, 'nsmap') else element.find('FLocat').attrib['href']
-
-    @classmethod
-    def path_from_mdref_element(cls, element: ET.Element) -> 'FileItem':
-        """Create a FileItem from a METS:mdRef etree element."""
-        # Get the child flocat element and grab the href attribute.
-        return element.attrib[Namespaces.XLINK.qualify('href')] if hasattr(element, 'nsmap') else element.find('FLocat').attrib['href']
-
-    @classmethod
-    def from_element(cls, element: ET.Element) -> 'FileItem':
-        """Create a FileItem from an etree element."""
-        path = ''
-        if element.tag in [Namespaces.METS.qualify('file'), 'file']:
-            path = cls.path_from_file_element(element)
-        elif element.tag in [Namespaces.METS.qualify('mdRef'), 'mdRef']:
-            path = cls.path_from_mdref_element(element)
-        else:
-            raise ValueError('Element {} is not a METS:file or METS:mdRef element.'.format(element.tag))
-        size = int(element.attrib['SIZE'])
-        mime = element.attrib['MIMETYPE']
-        checksum = Checksummer.from_mets_element(element)
-        return cls(path, size, checksum, mime)
-
-    @classmethod
-    def from_file_path(cls, path: str, mime:str=None, checksum_algorithm:ChecksumAlg | str=None) -> 'FileItem':
+class ManifestEntries:
+    @staticmethod
+    def from_file_path(path: Path, checksum_algorithm: ChecksumAlg | str=None) -> ManifestEntry:
         """Create a FileItem from a file path."""
         if (not os.path.exists(path)):
             raise FileNotFoundError(NO_PATH.format(path))
         if (not os.path.isfile(path)):
             raise ValueError('Path {} is not a file.'.format(path))
         algorithm = checksum_algorithm if isinstance(checksum_algorithm, ChecksumAlg) else ChecksumAlg.from_string(checksum_algorithm)
-        size = os.path.getsize(path)
-        mimetype = mime or 'application/octet-stream'
-        checksum = Checksummer.from_file(path, algorithm) if checksum_algorithm else None
-        return cls(path, size, checksum, mimetype)
+        checksums = [ Checksummer.from_file(path, algorithm) ] if checksum_algorithm else []
+        return ManifestEntry.model_validate({
+            'path': path,
+            'size': os.path.getsize(path),
+            'checksums': checksums
+            })
 
-class Manifest:
-    def __init__(self, root_path: str, file_items: dict[str, FileItem] or list[FileItem] = None):
-        if (not os.path.exists(root_path)):
-            raise FileNotFoundError(NO_PATH.format(root_path))
-        if (not os.path.isdir(root_path)):
-            raise ValueError(NOT_DIR.format(root_path))
-        self._root_path = root_path
-        self._file_items = file_items if isinstance(file_items, dict) else self._list_to_dict(root_path, file_items)
+    @staticmethod
+    def from_file_entry(entry: FileEntry) -> ManifestEntry:
+        """Create a FileItem from a FileEntry."""
+        return ManifestEntry.model_validate({
+            'path': entry.path,
+            'size': entry.size,
+            'checksums': [ entry.checksum ]
+            })
 
-    @property
-    def root_path(self) -> str:
-        """Get the root path."""
-        return self._root_path
-
-    @property
-    def file_count(self) -> int:
-        """Get the number of files."""
-        return len(self._file_items)
-
-    @property
-    def size(self) -> int:
-        """Get the total file size in bytes."""
-        return sum([item.size for item in self._file_items.values()])
-
-    @property
-    def items(self) -> dict[str, FileItem]:
-        """Get the file items."""
-        return self._file_items
-
-    def get_item(self, path: str) -> FileItem or None:
-        """Get a file item by path."""
-        search_path = self._relative_path(self._root_path, path)
-        return self._file_items.get(search_path)
-
-    def check_integrity(self) -> tuple[bool, list[str]]:
+class Manifests:
+    @classmethod
+    def validate_manifest(cls, path: Path, manifest: Manifest) -> tuple[bool, list[str]]:
         """Check the integrity of the manifest."""
         is_valid = True
         issues = []
-        for item in self._file_items.values():
-            abs_path = os.path.join(self._root_path, item.path)
-            if (not os.path.isfile(abs_path)):
+        for entry in manifest.entries:
+            abs_path = Path(os.path.join(path, entry.path))
+            if not abs_path.is_file():
                 is_valid = False
-                issues.append('File {} is missing.'.format(item.path))
+                issues.append('File {} is missing.'.format(entry.path))
                 continue
-            if (item.size != os.path.getsize(abs_path)):
-                issues.append('File {} manifest size {}, filesystem size {}.'.format(item.path, item.size, os.path.getsize(abs_path)))
+            if (entry.size != os.path.getsize(abs_path)):
+                issues.append('File {} manifest size {}, filesystem size {}.'.format(entry.path, entry.size, os.path.getsize(abs_path)))
                 is_valid = False
-            calced_checksum = Checksummer.from_file(abs_path, item.checksum.algorithm)
-            if not item.checksum == calced_checksum:
-                issues.append('File {} manifest checksum {}, calculated checksum {}.'.format(item.path, item.checksum, calced_checksum))
+            calced_checksum = Checksummer.from_file(abs_path, entry.checksum.algorithm)
+            if not entry.checksum == calced_checksum:
+                issues.append('File {} manifest checksum {}, calculated checksum {}.'.format(entry.path, entry.checksum, calced_checksum))
                 is_valid = False
         return is_valid, issues
 
@@ -192,27 +116,41 @@ class Manifest:
     def _relative_path(root_path: str, path: str) -> str:
         return path if not os.path.isabs(path) else os.path.relpath(path, root_path)
 
-    @classmethod
-    def from_directory(cls, root_path: str, checksum_algorithm: ChecksumAlg=None) -> 'Manifest':
-        if (not os.path.exists(root_path)):
-            raise FileNotFoundError(NO_PATH.format(root_path))
-        if (not os.path.isdir(root_path)):
-            raise ValueError(NOT_DIR.format(root_path))
-        items = []
-        for subdir, dirs, files in os.walk(root_path):
+    @staticmethod
+    def from_source(source: Path | str, checksum_algorithm: ChecksumAlg=None) -> Manifest:
+        path = get_path(source, True)
+        if (path.is_file()):
+            return Manifests.from_mets_file(path)
+        elif (path.is_dir()):
+            return Manifests.from_directory(path, checksum_algorithm=checksum_algorithm)
+        else:
+            raise ValueError('Path {} is neither a file nor a directory.'.format(source))
+
+    @staticmethod
+    def from_directory(source: Path | str, checksum_algorithm: ChecksumAlg=None) -> Manifest:
+        path = get_path(source, True)
+        if (not path.is_dir()):
+            raise ValueError(NOT_DIR.format(source))
+        entries = []
+        for subdir, dirs, files in os.walk(source):
             for file in files:
-                file_path = os.path.join(subdir, file)
-                items.append(FileItem.from_file_path(file_path, checksum_algorithm=checksum_algorithm))
-        return cls(root_path, items)
+                file_path = Path(os.path.join(subdir, file))
+                entries.append(ManifestEntries.from_file_path(file_path, checksum_algorithm=checksum_algorithm))
+        return Manifest.model_validate({
+            'source': SourceType.PACKAGE,
+            'summary': None,
+            'entries': entries
+            })
 
-    @classmethod
-    def from_file_items(cls, root_path: str, file_items: dict[str, FileItem] or list[FileItem]) -> 'Manifest':
-        if (not os.path.exists(root_path)):
-            raise FileNotFoundError(NO_PATH.format(root_path))
-        if (not os.path.isdir(root_path)):
-            raise ValueError(NOT_DIR.format(root_path))
-        return cls(root_path, file_items)
-
-    @classmethod
-    def _list_to_dict(cls, root_path: str, file_items: list[FileItem]) -> dict[str, FileItem]:
-        return {cls._relative_path(root_path, item.path): FileItem(cls._relative_path(root_path, item.path), item.size, item.checksum, item.mime) for item in file_items}
+    @staticmethod
+    def from_mets_file(source: Path | str) -> Manifest:
+        path: Path = get_path(source, True)
+        if (not path.is_file()):
+            raise ValueError(NOT_FILE.format(source))
+        mets_file = MetsFiles.from_file(path)
+        entries: list[ManifestEntry] = list(map(ManifestEntries.from_file_entry, mets_file.file_references))
+        return Manifest.model_validate({
+            'source': SourceType.METS,
+            'summary': None,
+            'entries': entries
+            })

@@ -131,12 +131,12 @@ class StructureChecker():
                 results.append(test_result_from_id(12, location))
             if not tests.has_metadata():
                 results.append(test_result_from_id(13, location))
-        return StructResults(status=self.get_status(results), messages=results)
+        return StructResults.model_validate({ 'status': self.get_status(results), 'messages': results })
 
     def get_representations(self) -> List[Representation]:
         reps: List[Representation] = []
         for rep in self.representations.keys():
-            reps.append(Representation(name=rep))
+            reps.append(Representation.model_validate({ 'name': rep }))
         return reps
 
     def get_root_results(self) -> List[TestResult]:
@@ -204,13 +204,18 @@ def test_result_from_id(requirement_id, location, message=None) -> TestResult:
     req = REQUIREMENTS[requirement_id]
     test_msg = message if message else req['message']
     """Return a TestResult instance created from the requirment ID and location."""
-    return TestResult(rule_id=req['id'], location=str(location), message=test_msg, severity=Severity.from_level(req['level']))
+    return TestResult.model_validate({
+        'rule_id': req['id'],
+        'location': str(location),
+        'message': test_msg,
+        'severity': Severity.from_level(req['level'])
+        })
 
 def get_multi_root_results(name) -> StructResults:
-    return StructResults(status=StructureStatus.NotWellFormed, messages=[ test_result_from_id(1, name) ])
+    return StructResults.model_validate({ 'status': StructureStatus.NotWellFormed, 'messages': [ test_result_from_id(1, name) ] })
 
 def get_bad_path_results(path) -> StructResults:
-    return StructResults(status=StructureStatus.NotWellFormed, messages=[ test_result_from_id(1, path) ])
+    return StructResults.model_validate({ 'status': StructureStatus.NotWellFormed, 'messages': [ test_result_from_id(1, path) ] })
 
 def validate(to_validate) -> Tuple[bool, StructResults]:
     try:

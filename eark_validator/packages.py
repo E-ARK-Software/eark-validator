@@ -39,7 +39,7 @@ def validate(to_validate: Path, check_metadata: bool=True) -> ValidationReport:
     to_validate as a folder. The method does not validate archive files."""
     _, struct_results = structure.validate(to_validate)
     package = _get_info_pack(name=os.path.basename(to_validate))
-    return ValidationReport(uid=uuid.uuid4(), structure=struct_results)
+    return ValidationReport.model_validate({'structure': struct_results})
 
 class PackageValidator():
     """Class for performing full package validation."""
@@ -78,11 +78,11 @@ class PackageValidator():
 
 def _report_from_unpack_except(name: str, package_path: Path) -> ValidationReport:
     struct_results = structure.get_multi_root_results(package_path)
-    return ValidationReport(structure=struct_results)
+    return ValidationReport.model_validate({ 'structure': struct_results })
 
 def _report_from_bad_path(name: str, package_path: Path) -> ValidationReport:
     struct_results = structure.get_bad_path_results(package_path)
-    return ValidationReport(structure=struct_results)
+    return ValidationReport.model_validate({ 'structure': struct_results })
 
 def _get_info_pack(name: str, profile=None) -> PackageDetails:
-    return PackageDetails(name=name)
+    return PackageDetails.model_validate({ 'name': name })

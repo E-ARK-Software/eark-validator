@@ -30,7 +30,7 @@ E-ARK : Information Package Validation
 """
 
 from enum import Enum, unique
-from typing import List
+from typing import List, Optional
 import uuid
 
 from pydantic import BaseModel
@@ -56,7 +56,7 @@ class Severity(str, Enum):
     Error = 'Error'
 
     @classmethod
-    def from_id(cls, id: str) -> 'Severity':
+    def from_id(cls, id: str) -> Optional['Severity']:
         """Get the enum from the value."""
         for severity in cls:
             if severity.name == id or severity.value == id:

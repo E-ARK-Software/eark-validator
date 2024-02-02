@@ -50,13 +50,13 @@ class StatusValuesTest(unittest.TestCase):
         self.assertRaises(ValueError, StructResults, status=TestStatus.Illegal)
 
 class ArchiveHandlerTest(unittest.TestCase):
-    empty_path = os.path.join(os.path.dirname(__file__), 'resources', 'empty.file')
-    min_tar_path = os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
-                                'minimal_IP_with_schemas.tar')
-    min_zip_path = os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
-                                'minimal_IP_with_schemas.zip')
-    min_targz_path = os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
-                                  'minimal_IP_with_schemas.tar.gz')
+    empty_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'empty.file'))
+    min_tar_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
+                                'minimal_IP_with_schemas.tar'))
+    min_zip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
+                                'minimal_IP_with_schemas.zip'))
+    min_targz_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
+                                  'minimal_IP_with_schemas.tar.gz'))
 
     def test_sha1(self):
         sha1 = Checksummer.from_file(self.empty_path, 'SHA-1').value

@@ -23,7 +23,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from enum import Enum, unique
 from pathlib import Path
 from typing import Annotated, List, Optional
 
@@ -31,33 +30,19 @@ from pydantic import BaseModel, StringConstraints
 
 from .checksum import Checksum
 
-class ManifestEntry(BaseModel):
+class FileEntry(BaseModel):
     path : Path | str
     size : int = 0
-    checksums : List[Checksum] = []
+    checksum : Checksum
+    mimetype : Annotated[ str, StringConstraints(to_lower=True) ] = 'application/octet-stream'
 
-class ManifestSummary(BaseModel):
-    file_count: int = 0
-    total_size: int = 0
-
-@unique
-class SourceType(str, Enum):
-    """Enum covering information package validation statuses."""
-    UNKNOWN = 'UNKNOWN'
-    # Information level, possibly not best practise
-    METS = 'METS'
-    # Non-fatal issue that should be corrected
-    PACKAGE = 'PACKAGE'
-
-class Manifest(BaseModel):
-    source: SourceType = SourceType.UNKNOWN
-    summary: Optional[ManifestSummary]
-    entries: List[ManifestEntry] = []
-
-    @property
-    def file_count(self) -> int:
-        return len(self.entries)
-
-    @property
-    def total_size(self) -> int:
-        return sum([entry.size for entry in self.entries])
+class MetsFile(BaseModel):
+    default_ns: str
+    oaispackagetype: str
+    objid: str
+    label: str
+    type: str
+    othertype: str
+    contentinformationtype: str
+    profile: str
+    file_entries: List[FileEntry] = []

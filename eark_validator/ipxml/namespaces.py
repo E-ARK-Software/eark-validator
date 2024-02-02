@@ -29,7 +29,7 @@ E-ARK : Information package validation
 from enum import Enum, unique
 
 @unique
-class Namespaces(Enum):
+class Namespaces(str, Enum):
     METS = 'http://www.loc.gov/METS/'
     CSIP = 'https://DILCIS.eu/XML/METS/CSIPExtensionMETS'
     SIP = 'https://DILCIS.eu/XML/METS/SIPExtensionMETS'

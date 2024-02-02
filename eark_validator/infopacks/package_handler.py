@@ -77,7 +77,7 @@ class PackageHandler():
         return children[0].absolute()
 
     @staticmethod
-    def _unpack(to_unpack: Path, destination: Path):
+    def _unpack(to_unpack: Path, destination: Path) -> None:
         if zipfile.is_zipfile(to_unpack):
             with zipfile.ZipFile(to_unpack) as zip_ip:
                 zip_ip.extractall(path=destination)

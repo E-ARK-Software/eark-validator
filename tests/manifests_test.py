@@ -25,26 +25,30 @@
 """Module containing tests covering the manifest class."""
 from enum import Enum
 import os
+from pathlib import Path
 import unittest
 from importlib_resources import files
 import xml.etree.ElementTree as ET
+
+from eark_validator.model.manifest import ManifestEntry
 
 import tests.resources.xml as XML
 import tests.resources.ips.unpacked as UNPACKED
 
 from eark_validator.infopacks.manifest import (
-    FileItem,
     Checksummer,
-    Manifest
+    ManifestEntries,
+    Manifests
 )
+from eark_validator.mets import _parse_file_entry
 from eark_validator.model import ChecksumAlg, Checksum
 
 
 METS = 'METS.xml'
 PERSON = 'person.xml'
-DIR_PATH = str(files(XML))
-PERSON_PATH = os.path.join(DIR_PATH, PERSON)
-MISSING_PATH = os.path.join(DIR_PATH, 'missing.xml')
+DIR_PATH = Path(str(files(XML)))
+PERSON_PATH = Path(os.path.join(DIR_PATH, PERSON))
+MISSING_PATH = Path(os.path.join(DIR_PATH, 'missing.xml'))
 FILE_XML = """
     <file ID="ID-A73FA446-1DC7-499A-BE1E-15B7AE09B3B3" MIMETYPE="application/ipxml" SIZE="3554" CREATED="2021-11-17T16:56:44.180Z" CHECKSUM="F37E90511B5DDE2E9C60378A0F0A0A1CF07145C8F12651E0E19731892C608DA7" CHECKSUMTYPE="SHA-256">
         <FLocat type="simple" href="representations/rep1/METS.xml" LOCTYPE="URL"/>
@@ -84,6 +88,23 @@ class ChecksumTest(unittest.TestCase):
         """Test that a missing algorithm returns None."""
         with self.assertRaises(ValueError):
             ChecksumAlg.get_implementation(FakeEnum.FAKE)
+
+class ChecksummerTest(unittest.TestCase):
+    def test_from_alg(self):
+        """Test that a checksum algorithm is returned."""
+        alg = ChecksumAlg.from_string('MD5')
+        summer = Checksummer(alg)
+        self.assertEqual(summer.algorithm, alg)
+
+    def test_from_string_name(self):
+        """Test that a checksum algorithm is returned."""
+        summer = Checksummer('SHA1')
+        self.assertEqual(summer.algorithm, ChecksumAlg.SHA1)
+
+    def test_from_string_value(self):
+        """Test that a checksum algorithm is returned."""
+        summer = Checksummer('SHA-1')
+        self.assertEqual(summer.algorithm, ChecksumAlg.SHA1)
 
     def test_md5(self):
         """Test MD5 calculation by HashAlgorithms."""
@@ -132,98 +153,49 @@ class ChecksumTest(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             alg.hash_file(MISSING_PATH)
 
-    def test_from_xml(self):
-        element = ET.fromstring(FILE_XML)
-        checksum = Checksummer(ChecksumAlg.SHA256).from_mets_element(element)
-        self.assertEqual(checksum.algorithm, ChecksumAlg.SHA256)
-        self.assertEqual(checksum.value, 'F37E90511B5DDE2E9C60378A0F0A0A1CF07145C8F12651E0E19731892C608DA7')
-
-class FileItemTest(unittest.TestCase):
-    def test_from_path(self):
-        item = FileItem.from_file_path(PERSON_PATH)
-        self.assertEqual(item.path, PERSON_PATH)
-        self.assertEqual(item.name, PERSON)
-        self.assertEqual(item.size, 75)
-        self.assertEqual(item.mime, 'application/octet-stream')
-        self.assertIsNone(item.checksum)
-
-    def test_from_path_with_mime(self):
-        item = FileItem.from_file_path(PERSON_PATH, mime='text/ipxml')
-        self.assertEqual(item.path, PERSON_PATH)
-        self.assertEqual(item.name, PERSON)
-        self.assertEqual(item.size, 75)
-        self.assertEqual(item.mime, 'text/ipxml')
-        self.assertIsNone(item.checksum)
-
-    def test_from_path_with_checksum(self):
-        item = FileItem.from_file_path(PERSON_PATH, checksum_algorithm='MD5')
-        self.assertEqual(item.path, PERSON_PATH)
-        self.assertEqual(item.name, PERSON)
-        self.assertEqual(item.size, 75)
-        self.assertIsNotNone(item.checksum)
-        self.assertEqual(item.checksum.algorithm.name, 'MD5', 'Expected MD5 digest id, not {}'.format(item.checksum.algorithm.name))
-        self.assertEqual(item.checksum.value, '9958111AF1284696D07EC9D2E70D2517', 'MD5 digest {} does not match'.format(item.checksum.value))
-
-    def test_dir_path(self):
-        with self.assertRaises(ValueError):
-            FileItem.from_file_path(DIR_PATH)
-
-    def test_file_not_found(self):
+class ManifestEntryTest(unittest.TestCase):
+    def test_from_missing_path(self):
         with self.assertRaises(FileNotFoundError):
-            FileItem.from_file_path(MISSING_PATH)
+            ManifestEntries.from_file_path(MISSING_PATH)
 
-    def test_from_xml(self):
-        element = ET.fromstring(FILE_XML)
-        file_item = FileItem.from_element(element)
-        self.assertEqual(file_item.path, 'representations/rep1/METS.xml')
-        self.assertEqual(file_item.name, METS)
-        self.assertEqual(file_item.size, 3554)
-        self.assertEqual(file_item.checksum.algorithm, ChecksumAlg.SHA256)
-        self.assertEqual(file_item.checksum.value, 'F37E90511B5DDE2E9C60378A0F0A0A1CF07145C8F12651E0E19731892C608DA7')
+    def test_from_dir_path(self):
+        with self.assertRaises(ValueError):
+            ManifestEntries.from_file_path(DIR_PATH)
+
+    def test_from_file(self):
+        item = ManifestEntries.from_file_path(PERSON_PATH, 'SHA256')
+        self.assertEqual(item.checksums[0].algorithm.value, 'SHA-256', 'Expected SHA-256 digest value not {}'.format(item.checksums[0].algorithm.value))
+        self.assertEqual(item.checksums[0].value, 'C944AF078A5AC0BAC02E423D663CF6AD2EFBF94F92343D547D32907D13D44683', 'SHA256 digest {} does not match'.format(item.checksums[0].value))
+
+    def test_from_file_entry(self):
+        entry: ManifestEntry = ManifestEntries.from_file_entry(_parse_file_entry(ET.fromstring(FILE_XML)))
+        self.assertEqual(entry.checksums[0].algorithm, ChecksumAlg.SHA256)
+        self.assertEqual(entry.checksums[0].value, 'F37E90511B5DDE2E9C60378A0F0A0A1CF07145C8F12651E0E19731892C608DA7')
+        self.assertEqual(entry.path, 'representations/rep1/METS.xml')
+        self.assertEqual(entry.size, 3554)
 
 class ManifestTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls._manifest = Manifest.from_directory(str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')), 'MD5')
-
-    def test_root_dir(self):
-        self.assertEqual(self._manifest.root_path, str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')))
+        cls._manifest = Manifests.from_directory(str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')), 'MD5')
 
     def test_items(self):
-        self.assertEqual(len(self._manifest.items), self._manifest.file_count)
+        self.assertEqual(len(self._manifest.entries), self._manifest.file_count)
 
     def test_no_dir(self):
         missing = str(files(UNPACKED).joinpath('missing'))
         with self.assertRaises(FileNotFoundError):
-            Manifest(missing, [])
-        with self.assertRaises(FileNotFoundError):
-            Manifest.from_directory(missing)
-        with self.assertRaises(FileNotFoundError):
-            Manifest.from_file_items(missing, [])
+            Manifests.from_directory(missing)
 
     def test_file_path(self):
         file_path = str(files(UNPACKED).joinpath('single_file').joinpath('empty.file'))
         with self.assertRaises(ValueError):
-            Manifest(file_path, [])
+            Manifests.from_directory(file_path)
         with self.assertRaises(ValueError):
-            Manifest.from_directory(file_path)
-        with self.assertRaises(ValueError):
-            Manifest.from_file_items(file_path, [])
+            Manifests.from_mets_file(file_path)
 
     def test_manifest_filecount(self):
         self.assertEqual(self._manifest.file_count, 23)
 
     def test_manifest_size(self):
-        self.assertEqual(self._manifest.size, 306216)
-
-    def test_manifest_get_rel_file(self):
-        mets_file = self._manifest.get_item(METS)
-        self.assertIsNotNone(mets_file, 'METS.xml not found in via relative path')
-        mets_file = self._manifest.get_item('representations/rep1/data/RODA-in.png')
-        self.assertIsNotNone(mets_file, 'representations/rep1/data/RODA-in.png not found in via relative path')
-
-    def test_manifest_get_abs_file(self):
-        mets_file = self._manifest.get_item(os.path.join(str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')), METS))
-        self.assertIsNotNone(mets_file, 'METS.xml not found using absolute path')
-        mets_file = self._manifest.get_item(os.path.join(str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')), 'representations/rep1/data/RODA-in.png'))
-        self.assertIsNotNone(mets_file, 'representations/rep1/data/RODA-in.png not found using absolute path')
+        self.assertEqual(self._manifest.total_size, 306216)
