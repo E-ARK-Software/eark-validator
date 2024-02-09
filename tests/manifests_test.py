@@ -26,10 +26,12 @@
 from enum import Enum
 import os
 from pathlib import Path
+import tempfile
 import unittest
 from importlib_resources import files
 import xml.etree.ElementTree as ET
 
+from eark_validator.model.manifest import Manifest, SourceType
 from eark_validator.model.manifest import ManifestEntry
 
 import tests.resources.xml as XML
@@ -38,7 +40,8 @@ import tests.resources.ips.unpacked as UNPACKED
 from eark_validator.infopacks.manifest import (
     Checksummer,
     ManifestEntries,
-    Manifests
+    Manifests,
+    _resolve_manifest_root
 )
 from eark_validator.mets import _parse_file_entry
 from eark_validator.model import ChecksumAlg, Checksum
@@ -156,14 +159,14 @@ class ChecksummerTest(unittest.TestCase):
 class ManifestEntryTest(unittest.TestCase):
     def test_from_missing_path(self):
         with self.assertRaises(FileNotFoundError):
-            ManifestEntries.from_file_path(MISSING_PATH)
+            ManifestEntries.from_file_path(Path('/none'), MISSING_PATH)
 
     def test_from_dir_path(self):
         with self.assertRaises(ValueError):
-            ManifestEntries.from_file_path(DIR_PATH)
+            ManifestEntries.from_file_path(DIR_PATH, DIR_PATH)
 
     def test_from_file(self):
-        item = ManifestEntries.from_file_path(PERSON_PATH, 'SHA256')
+        item = ManifestEntries.from_file_path(PERSON_PATH, PERSON_PATH, 'SHA256')
         self.assertEqual(item.checksums[0].algorithm.value, 'SHA-256', 'Expected SHA-256 digest value not {}'.format(item.checksums[0].algorithm.value))
         self.assertEqual(item.checksums[0].value, 'C944AF078A5AC0BAC02E423D663CF6AD2EFBF94F92343D547D32907D13D44683', 'SHA256 digest {} does not match'.format(item.checksums[0].value))
 
@@ -177,10 +180,21 @@ class ManifestEntryTest(unittest.TestCase):
 class ManifestTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls._manifest = Manifests.from_directory(str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')), 'MD5')
+        cls._manifest = Manifests.from_directory(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031'), 'MD5')
+
+    def setUp(self):
+        self._test_dir = tempfile.TemporaryDirectory()
+        self._temp_man_pickle = os.path.join(self._test_dir.name, 'manifest.pickle')
+
+    def tearDown(self):
+        self._test_dir.cleanup()
 
     def test_items(self):
         self.assertEqual(len(self._manifest.entries), self._manifest.file_count)
+
+    def test_validate_manifest(self):
+        is_valid, _ = Manifests.validate_manifest(self._manifest)
+        self.assertTrue(is_valid)
 
     def test_no_dir(self):
         missing = str(files(UNPACKED).joinpath('missing'))
@@ -199,3 +213,49 @@ class ManifestTest(unittest.TestCase):
 
     def test_manifest_size(self):
         self.assertEqual(self._manifest.total_size, 306216)
+
+    def test_from_missing_source(self):
+        missing = str(files(UNPACKED).joinpath('missing'))
+        with self.assertRaises(FileNotFoundError):
+            Manifests.from_source(missing, 'MD5')
+
+    def test_from_package_source(self):
+        manifest = Manifests.from_source(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031'), 'MD5')
+        self.assertEqual(manifest.source, SourceType.PACKAGE)
+        is_valid, _ = Manifests.validate_manifest(manifest)
+        self.assertTrue(is_valid)
+
+    def test_from_mets_source(self):
+        manifest = Manifests.from_source(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031').joinpath(METS), 'MD5')
+        self.assertEqual(manifest.source, SourceType.METS)
+        is_valid, _ = Manifests.validate_manifest(manifest)
+        self.assertTrue(is_valid)
+
+    def test_from_missing_mets_file(self):
+        with self.assertRaises(FileNotFoundError):
+            Manifests.from_mets_file(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031').joinpath('missing_mets.xml'))
+
+    def test_from_dir_mets_file(self):
+        with self.assertRaises(ValueError):
+            Manifests.from_mets_file(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031'))
+
+    def test_to_file(self):
+        Manifests.to_file(self._manifest, self._temp_man_pickle)
+        self.assertTrue(os.path.exists(self._temp_man_pickle))
+
+    def test_from_file(self):
+        Manifests.to_file(self._manifest, self._temp_man_pickle)
+        manifest: Manifest = Manifests.from_file(self._temp_man_pickle)
+        is_valid, _ = Manifests.validate_manifest(manifest, files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031'))
+        self.assertTrue(is_valid)
+        is_valid, errors = Manifests.validate_manifest(manifest, files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031-bad'))
+        self.assertFalse(is_valid)
+        self.assertEqual(len(errors), 3)
+
+    def test_resolve_manifest_bad_source(self):
+        manifest = Manifest.model_validate({
+            'root': Path(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')),
+            'source': SourceType.UNKNOWN
+            })
+        with self.assertRaises(ValueError):
+            _resolve_manifest_root(manifest)

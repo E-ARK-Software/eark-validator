@@ -38,7 +38,7 @@ from eark_validator.const import NOT_FILE, NOT_VALID_FILE
 
 class MetsFiles():
     @staticmethod
-    def from_file(mets_file: Path | str):
+    def from_file(mets_file: Path | str) -> MetsFile:
         path: Path = get_path(mets_file, True)
         if (not path.is_file()):
             raise ValueError(NOT_FILE.format(mets_file))
@@ -62,7 +62,7 @@ class MetsFiles():
                         profile = element.get('PROFILE', '')
                     elif element.tag == Namespaces.METS.qualify('metsHdr'):
                         oaispackagetype = element.get(Namespaces.CSIP.qualify('OAISPACKAGETYPE'), '')
-                    elif element.tag == Namespaces.METS.qualify('file') | element.tag == Namespaces.METS.qualify('mdRef'):
+                    elif (element.tag == Namespaces.METS.qualify('file')) or (element.tag == Namespaces.METS.qualify('mdRef')):
                         entries.append(_parse_file_entry(element))
         except etree.XMLSyntaxError:
             raise ValueError(NOT_VALID_FILE.format(mets_file, 'XML'))

@@ -37,7 +37,7 @@ class FileEntry(BaseModel):
     mimetype : Annotated[ str, StringConstraints(to_lower=True) ] = 'application/octet-stream'
 
 class MetsFile(BaseModel):
-    default_ns: str
+    namespaces: dict[str, str] = {}
     oaispackagetype: str
     objid: str
     label: str
