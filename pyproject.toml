@@ -47,7 +47,7 @@ testpaths = [
 ]
 
 [tool.setuptools.package-data]
-"eark_validator" = ["*.*", "cli/resources/*.*", "ipxml/resources/schema/*.*", "ipxml/resources/profiles/*.*"]
+"eark_validator" = ["ipxml/resources/profiles/*.xml", "ipxml/resources/schema/*.xsd"]
 
 [tool.setuptools-git-versioning]
 enabled = true
