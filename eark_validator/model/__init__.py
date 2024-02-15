@@ -32,11 +32,11 @@ from .checksum import Checksum, ChecksumAlg
 from .manifest import Manifest, ManifestEntry, SourceType
 from .validation_report import ValidationReport
 from .package_details import PackageDetails
-from .representation import Representation
+from .package_details import Representation
 from .validation_report import (
         Level,
         Severity,
         StructureStatus,
         StructResults,
-        TestResult
+        Result
 )

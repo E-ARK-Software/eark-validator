@@ -30,6 +30,7 @@ import os.path
 from pathlib import Path
 import sys
 from typing import Optional, Tuple
+import importlib.metadata
 
 import argparse
 
@@ -37,11 +38,11 @@ from eark_validator.model import ValidationReport
 import eark_validator.packages as PACKAGES
 from eark_validator.infopacks.package_handler import PackageHandler
 
-__version__ = '0.1.0'
+__version__ = importlib.metadata.version('eark_validator')
 
 defaults = {
-    'description': """E-ARK Information Package validation (ip-check).
-ip-check is a command-line tool to analyse and validate the structure and
+    'description': """E-ARK Information Package validation (eark-validator).
+eark-validator is a command-line tool to analyse and validate the structure and
 metadata against the E-ARK Information Package specifications.
 It is designed for simple integration into automated work-flows.""",
     'epilog': """
@@ -53,7 +54,7 @@ Maintainer: Carl Wilson (OPF), 2020-2024"""
 }
 
 # Create PARSER
-PARSER = argparse.ArgumentParser(prog='ip-check', description=defaults['description'], epilog=defaults['epilog'])
+PARSER = argparse.ArgumentParser(prog='eark-validator', description=defaults['description'], epilog=defaults['epilog'])
 
 def parse_command_line():
     """Parse command line arguments."""
@@ -114,8 +115,8 @@ def _validate_ip(path: str) -> Tuple[int, Optional[ValidationReport]]:
     report = PACKAGES.PackageValidator(checked_path).validation_report
     print('Path {}, struct result is: {}'.format(checked_path,
                                                  report.structure.status.value))
-    for message in report.structure.messages:
-        print(message.model_dump_json())
+    # for message in report.structure.messages:
+    print(report.model_dump_json())
 
     return ret_stat, report
 

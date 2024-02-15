@@ -15,17 +15,18 @@ maintainers = [
 license = {file = "LICENSE"}
 description = "E-ARK Python Information Package Validation"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "lxml==4.9.3",
+    "lxml==5.1.0",
     "importlib_resources==5.12.0",
     "pydantic==2.5.3",
 ]
+
 [project.optional-dependencies]
 testing = [
     "pre-commit",
@@ -34,18 +35,24 @@ testing = [
     "pytest-cov",
     'pytest-runner',
 ]
+
 [project.urls]
 "Homepage" = "https://www.e-ark-foundation.eu/e-ark-software-py-e-ark-ip-validator/"
 "Issues" = "https://github.com/E-ARK-Software/eark-validator/issues"
 "Repository" = "https://github.com/E-ARK-Software/eark-validator.git"
+
 [project.scripts]
-ip-check = "eark_validator.cli.app:main"
+eark-validator = "eark_validator.cli.app:main"
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-ra -q"
 testpaths = [
     "tests",
 ]
+
+[tool.setuptools]
+packages = ["eark_validator", "eark_validator.cli", "eark_validator.infopacks", "eark_validator.ipxml", "eark_validator.model", "eark_validator.specifications" ]
 
 [tool.setuptools-git-versioning]
 enabled = true

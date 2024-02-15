@@ -23,14 +23,17 @@
 # under the License.
 #
 
+import os
+from pathlib import Path
 import unittest
 
 from importlib_resources import files
+from eark_validator.model.package_details import InformationPackage
 
 import tests.resources.xml as XML
 import tests.resources.ips.unpacked as UNPACKED
 
-from eark_validator.infopacks.information_package import PackageDetails
+from eark_validator.infopacks.information_package import InformationPackages
 from eark_validator.ipxml.schema import LOCAL_SCHEMA, get_local_schema
 
 METS_XML = 'METS.xml'
@@ -38,44 +41,53 @@ METS_XML = 'METS.xml'
 class PackageDetailsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls._mets_file = str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031').joinpath(METS_XML))
+        cls._mets_file = Path(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031').joinpath(METS_XML))
 
     def test_not_exists(self):
         with self.assertRaises(FileNotFoundError):
-            PackageDetails.from_mets_file('not-exists.xml')
+            InformationPackages.details_from_mets_file(Path('not-exists.xml'))
 
     def test_isdir(self):
         with self.assertRaises(ValueError):
-            PackageDetails.from_mets_file(str(files(XML)))
+            InformationPackages.details_from_mets_file(Path(files(XML)))
 
-    """Tests for Schematron validation rules."""
-    def test_objid(self):
-        parser = PackageDetails.from_mets_file(self._mets_file)
-        self.assertEqual(parser.objid, '733dc055-34be-4260-85c7-5549a7083031')
+    def test_bad_xml(self):
+        with self.assertRaises(ValueError):
+            InformationPackages.details_from_mets_file(Path(files(XML).joinpath('METS-no-hdr.xml')))
 
     def test_label(self):
-        parser = PackageDetails.from_mets_file(self._mets_file)
-        self.assertEqual(parser.label, '')
-
-    def  test_type(self):
-        parser = PackageDetails.from_mets_file(self._mets_file)
-        self.assertEqual(parser.type, 'Other')
+        package_details = InformationPackages.details_from_mets_file(self._mets_file)
+        self.assertEqual(package_details.label, '')
 
     def test_othertype(self):
-        parser = PackageDetails.from_mets_file(self._mets_file)
-        self.assertEqual(parser.othertype, 'type')
+        package_details = InformationPackages.details_from_mets_file(self._mets_file)
+        self.assertEqual(package_details.othertype, 'type')
 
     def test_contentinformationtype(self):
-        parser = PackageDetails.from_mets_file(self._mets_file)
-        self.assertEqual(parser.contentinformationtype, 'MIXED')
-
-    def test_profile(self):
-        parser = PackageDetails.from_mets_file(self._mets_file)
-        self.assertEqual(parser.profile, 'NOT_DEFINED')
+        package_details = InformationPackages.details_from_mets_file(self._mets_file)
+        self.assertEqual(package_details.contentinformationtype, 'MIXED')
 
     def test_oaispackagetype(self):
-        parser = PackageDetails.from_mets_file(self._mets_file)
-        self.assertEqual(parser.oaispackagetype, 'AIP')
+        package_details = InformationPackages.details_from_mets_file(self._mets_file)
+        self.assertEqual(package_details.oaispackagetype, 'AIP')
+
+class InformationPackageTest(unittest.TestCase):
+    def test_from_path_not_exists(self):
+        with self.assertRaises(FileNotFoundError):
+            InformationPackages.from_path(Path('not-exists'))
+
+    def test_from_path_empty_dir(self):
+        with self.assertRaises(ValueError):
+            InformationPackages.from_path(Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'bad',
+                               'empty')))
+
+    def test_from_path_not_archive(self):
+        with self.assertRaises(ValueError):
+            InformationPackages.from_path(Path(os.path.join(os.path.dirname(__file__), 'resources', 'empty.file')))
+
+    def test_from_path_dir(self):
+        ip: InformationPackage = InformationPackages.from_path(Path(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')))
+        self.assertEqual(ip.name, '733dc055-34be-4260-85c7-5549a7083031')
 
 class SchemaTest(unittest.TestCase):
     def test_schema(self):
