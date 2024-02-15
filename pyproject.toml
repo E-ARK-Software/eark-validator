@@ -56,7 +56,5 @@ packages = ["eark_validator", "eark_validator.cli", "eark_validator.infopacks", 
 
 [tool.setuptools-git-versioning]
 enabled = true
-version_file = "VERSION"
-count_commits_from_version_file = true
 dev_template = "{tag}.dev{env:GITHUB_RUN_NUMBER:{ccount}}"
 dirty_template = "{tag}.dev{env:GITHUB_RUN_NUMBER:{ccount}}+git.{sha}.dirty"
