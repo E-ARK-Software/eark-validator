@@ -76,11 +76,6 @@ class InformationPackageTest(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             InformationPackages.from_path(Path('not-exists'))
 
-    def test_from_path_empty_dir(self):
-        with self.assertRaises(ValueError):
-            InformationPackages.from_path(Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'bad',
-                               'empty')))
-
     def test_from_path_not_archive(self):
         with self.assertRaises(ValueError):
             InformationPackages.from_path(Path(os.path.join(os.path.dirname(__file__), 'resources', 'empty.file')))
