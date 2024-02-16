@@ -8,9 +8,9 @@
       <assert id="CSIP18" role="ERROR" test="@ID">Mandatory, identifier must be unique within the package.</assert>
       <assert id="CSIP19" role="ERROR" test="@CREATED">Mandatory, creation date of the descriptive metadata in this section.</assert>
       <assert id="CSIP20" role="WARN" test="@STATUS">SHOULD be used to indicated the status of the package.</assert>
-      <assert id="CSIP21" role="WARN" test="mets:mdref">SHOULD provide a reference to the descriptive metadata file located in the “metadata” section of the IP..</assert>
+      <assert id="CSIP21" role="WARN" test="mets:mdRef">SHOULD provide a reference to the descriptive metadata file located in the “metadata” section of the IP..</assert>
     </rule>
-    <rule context="/mets:mets/mets:dmdSec/mets:mdref">
+    <rule context="/mets:mets/mets:dmdSec/mets:mdRef">
       <assert id="CSIP22" role="ERROR" test="@LOCTYPE = 'URL'">The locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
       <assert id="CSIP23" role="ERROR" test="@xlink:type = 'simple'">Attribute used with the value “simple”. Value list is maintained by the xlink standard.</assert>
       <assert id="CSIP24" role="ERROR" test="@xlink:href">The actual location of the resource. This specification recommends recording a URL type filepath in this attribute.</assert>
