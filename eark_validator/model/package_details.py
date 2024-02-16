@@ -26,5 +26,14 @@
 #
 """
 E-ARK : Information Package Validation
-        Information Package unit test data
+        Information Package Package Details type
 """
+from typing import List
+
+from pydantic import BaseModel
+
+from eark_validator.model.checksum import Checksum
+
+class PackageDetails(BaseModel):
+    name: str = 'unknown'
+    checksums: List[Checksum] = []
