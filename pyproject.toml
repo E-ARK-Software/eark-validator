@@ -54,6 +54,9 @@ testpaths = [
 [tool.setuptools]
 packages = ["eark_validator", "eark_validator.cli", "eark_validator.infopacks", "eark_validator.ipxml", "eark_validator.model", "eark_validator.specifications" ]
 
+[tool.setuptools.package-data]
+"eark_validator" = ["ipxml/resources/profiles/*.xml", "ipxml/resources/schema/*.xsd"]
+
 [tool.setuptools-git-versioning]
 enabled = true
 dev_template = "{tag}.dev{env:GITHUB_RUN_NUMBER:{ccount}}"
