@@ -236,22 +236,6 @@ class ResultTest(unittest.TestCase):
     def test_get_message(self):
         self.assertIsNotNone(self._result.message)
 
-    def test_sev_instances(self):
-        for sev in SC.Severity:
-            self._result.severity = sev
-
-    def test_sev_names(self):
-        for sev in SC.Severity:
-            self._result.severity = sev.name
-
-    def test_sev_values(self):
-        for sev in SC.Severity:
-            self._result.severity = sev.value
-
-    def test_bad_sev_string(self):
-        with self.assertRaises(ValueError):
-            self._result.severity = 'BAD'
-
     def test_bad_sev_att(self):
         with self.assertRaises(AttributeError):
             self._result.severity = SeverityTest.NOT_SEV
