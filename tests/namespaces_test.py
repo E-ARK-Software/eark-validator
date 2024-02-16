@@ -33,9 +33,19 @@ class MetsValidatorTest(unittest.TestCase):
         for namespace in NS.Namespaces:
             self.assertEqual(namespace, NS.Namespaces.from_prefix(namespace.prefix))
 
+    def test_from_bad_prefix(self):
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_prefix('bad'))
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_prefix(''))
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_prefix(None))
+
     def test_from_id(self):
         for namespace in NS.Namespaces:
             self.assertEqual(namespace, NS.Namespaces.from_id(namespace.id))
+
+    def test_from_bad_id(self):
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_id('bad'))
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_id(''))
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_id(None))
 
     def test_qualify(self):
         for namespace in NS.Namespaces:

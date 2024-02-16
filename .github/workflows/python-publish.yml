@@ -20,6 +20,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4.1.1
+      with:
+        fetch-depth: 0
     - name: Set up Python
       uses: actions/setup-python@v4.7.1
       with:
@@ -27,6 +29,24 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install ".[testing]"
+    - name: Install python package
+      run: |
+        pip install --editable ".[testing]"
+    - name: Static Pylint code QA
+      run: |
+        pylint --errors-only eark_validator
+    - name: Run pre-commit tests
+      run: pre-commit run --all-files --verbose
+    - name: Test with pytest
+      run: |
+        pytest
+    - name: Test setuptools-git-versioning versioning
+      run: |
+        python -m pip install setuptools_git_versioning
+        python -m setuptools_git_versioning
+    - name: Install build utils
+      run: |
         pip install build
     - name: Build package
       run: python -m build

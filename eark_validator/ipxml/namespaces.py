@@ -29,7 +29,7 @@ E-ARK : Information package validation
 from enum import Enum, unique
 
 @unique
-class Namespaces(Enum):
+class Namespaces(str, Enum):
     METS = 'http://www.loc.gov/METS/'
     CSIP = 'https://DILCIS.eu/XML/METS/CSIPExtensionMETS'
     SIP = 'https://DILCIS.eu/XML/METS/SIPExtensionMETS'
@@ -68,8 +68,9 @@ class Namespaces(Enum):
 
     @classmethod
     def from_prefix(cls, prefix: str) -> 'Namespaces':
+        search: str = prefix.lower() if prefix else ''
         for namespace in cls:
-            if namespace.prefix == prefix.lower():
+            if namespace.prefix == search:
                 return namespace
         return cls.METS
 

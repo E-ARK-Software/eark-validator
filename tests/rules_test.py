@@ -22,6 +22,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from typing import List
 import unittest
 
 from enum import Enum
@@ -29,6 +30,7 @@ from enum import Enum
 from importlib_resources import files
 
 from eark_validator import rules as SC
+from eark_validator.model.validation_report import Severity, Result
 from eark_validator.specifications.specification import EarkSpecifications
 import tests.resources.schematron as SCHEMATRON
 import tests.resources.xml as XML
@@ -108,10 +110,10 @@ class ValidationRulesTest(unittest.TestCase):
         self.assertFalse(result)
 
     def test_mets_root_dmd(self):
-        result, _, warnings = _full_validation(METS_ROOT_RULES, METS_VALID)
+        results = _full_validation(METS_ROOT_RULES, METS_VALID)
         found_csip17 = False
-        for warning in warnings:
-            if warning.rule_id == 'CSIP17':
+        for result in results:
+            if result.rule_id == 'CSIP17':
                 found_csip17 = True
         self.assertTrue(found_csip17)
         self.assertTrue(result)
@@ -215,7 +217,7 @@ class ValidationProfileTest(unittest.TestCase):
         profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
         result = profile.get_result('metsHdr')
         self.assertTrue(profile.is_valid)
-        self.assertEqual(len(result.warnings), 1)
+        self.assertEqual(len(list(filter(lambda a: a.severity == Severity.Warning, result))), 1)
 
     def test_get_bad_key(self):
         profile = SC.ValidationProfile.from_specification('CSIP')
@@ -231,7 +233,7 @@ class ResultTest(unittest.TestCase):
     def setUpClass(cls):
         profile = SC.ValidationProfile.from_specification('CSIP')
         profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
-        cls._result = profile.get_result('metsHdr').warnings[0]
+        cls._result = profile.get_result('metsHdr')[0]
 
     def test_get_message(self):
         self.assertIsNotNone(self._result.message)
@@ -243,19 +245,18 @@ class ResultTest(unittest.TestCase):
 def _test_validation(name, to_validate):
     rules = SC.SchematronRuleset(SC.get_schematron_path('CSIP', name))
     rules.validate(str(files(XML).joinpath(to_validate)))
-    for failure in SC.TestReport.from_validation_report(rules._schematron.validation_report).errors:
-        print(failure)
-    for warning in SC.TestReport.from_validation_report(rules._schematron.validation_report).warnings:
-        print(warning)
-    report = SC.TestReport.from_validation_report(rules._schematron.validation_report)
-    return report.is_valid, len(report.errors), len(report.warnings), len(report.infos)
+    results: List[Result] = SC.TestResults.from_validation_report(rules._schematron.validation_report)
+    errors = warnings = infos = 0
+    for result in results:
+        if result.severity == SC.Severity.Error:
+            errors += 1
+        elif result.severity == SC.Severity.Warning:
+            warnings += 1
+        elif result.severity == SC.Severity.Information:
+            infos += 1
+    return errors < 1, errors, warnings, infos
 
 def _full_validation(name, to_validate):
     rules = SC.SchematronRuleset(SC.get_schematron_path('CSIP', name))
     rules.validate(str(files(XML).joinpath(to_validate)))
-    for failure in SC.TestReport.from_validation_report(rules._schematron.validation_report).errors:
-        print(failure)
-    for warning in SC.TestReport.from_validation_report(rules._schematron.validation_report).warnings:
-        print(warning)
-    report = SC.TestReport.from_validation_report(rules._schematron.validation_report)
-    return report.is_valid, report.errors, report.warnings
+    return SC.TestResults.from_validation_report(rules._schematron.validation_report)

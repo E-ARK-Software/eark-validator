@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # flake8: noqa
-# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -28,12 +27,26 @@
 E-ARK : Information Package Validation
         Information Package Package Details type
 """
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
-from eark_validator.model.checksum import Checksum
+from .checksum import Checksum
+from .metadata import MetsFile
 
 class PackageDetails(BaseModel):
-    name: str = 'unknown'
+    label: str = ''
+    oaispackagetype: str = ''
+    othertype: str = ''
+    contentinformationtype: str = ''
     checksums: List[Checksum] = []
+
+class Representation(BaseModel):
+    mets: Optional[MetsFile] = None
+    name: Optional[str] = ''
+
+class InformationPackage(BaseModel):
+    name: str = ''
+    mets: Optional[MetsFile] = None
+    package: Optional[PackageDetails] = None
+    representations: List[Representation] = []

@@ -26,13 +26,14 @@
 import os
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
+from eark_validator.model.validation_report import Location
 
 from eark_validator.specifications.struct_reqs import REQUIREMENTS
 from eark_validator.infopacks.package_handler import PackageHandler, PackageError
 from eark_validator.model import (
     StructResults,
     StructureStatus,
-    TestResult,
+    Result,
     Severity,
     Representation
 )
@@ -120,45 +121,46 @@ class StructureChecker():
                 self.representations[entry] = StructureParser(Path(os.path.join(_reps, entry)))
 
     def get_test_results(self) -> StructResults:
-        results: List[TestResult] = self.get_root_results()
+        results: List[Result] = self.get_root_results()
         results = results + self.get_package_results()
 
         for name, tests in self.representations.items():
-            location = 'Representation {}'.format(name)
+            location = Location.model_validate({ 'context': str(name), 'description': 'representation' })
             if not tests.has_data():
                 results.append(test_result_from_id(11, location))
             if not tests.has_mets():
                 results.append(test_result_from_id(12, location))
             if not tests.has_metadata():
                 results.append(test_result_from_id(13, location))
-        return StructResults(status=self.get_status(results), messages=results)
+        return StructResults.model_validate({ 'status': self.get_status(results), 'messages': results })
 
     def get_representations(self) -> List[Representation]:
         reps: List[Representation] = []
         for rep in self.representations.keys():
-            reps.append(Representation(name=rep))
+            reps.append(Representation.model_validate({ 'name': rep }))
         return reps
 
-    def get_root_results(self) -> List[TestResult]:
-        results: List[TestResult] = []
+    def get_root_results(self) -> List[Result]:
+        results: List[Result] = []
+        location: Location = Location.model_validate({ 'context': 'root', 'description': self.name })
         if not self.parser.is_archive:
-            results.append(test_result_from_id(3, self.name))
+            results.append(test_result_from_id(3, location))
         if not self.parser.has_mets():
-            results.append(test_result_from_id(4, self.name))
+            results.append(test_result_from_id(4, location))
         if not self.parser.has_metadata():
-            results.append(test_result_from_id(5, self.name))
+            results.append(test_result_from_id(5, location))
         if not self.parser.has_preservation_md():
-            results.append(test_result_from_id(6, self.name))
+            results.append(test_result_from_id(6, location))
         if not self.parser.has_descriptive_md():
-            results.append(test_result_from_id(7, self.name))
+            results.append(test_result_from_id(7, location))
         if not self.parser.has_other_md():
-            results.append(test_result_from_id(8, self.name))
+            results.append(test_result_from_id(8, location))
         if not self.parser.has_representations():
-            results.append(test_result_from_id(9, self.name))
+            results.append(test_result_from_id(9, location))
         return results
 
-    def get_package_results(self) -> List[TestResult]:
-        results: List[TestResult] = []
+    def get_package_results(self) -> List[Result]:
+        results: List[Result] = []
         if not self.parser.has_schemas():
             result = self._get_schema_results()
             if result:
@@ -169,20 +171,20 @@ class StructureChecker():
                 results.append(result)
         return results
 
-    def _get_schema_results(self) -> Optional[TestResult]:
+    def _get_schema_results(self) -> Optional[Result]:
         for tests in self.representations.values():
             if tests.has_schemas():
                 return None
-        return test_result_from_id(15, self.name)
+        return test_result_from_id(15, Location.model_validate({ 'context': 'root', 'description': self.name }))
 
-    def _get_dox_results(self) -> Optional[TestResult]:
+    def _get_dox_results(self) -> Optional[Result]:
         for tests in self.representations.values():
             if tests.has_documentation():
                 return None
-        return test_result_from_id(16, self.name)
+        return test_result_from_id(16, Location.model_validate({ 'context': 'root', 'description': self.name }))
 
     @classmethod
-    def get_status(cls, results: List[TestResult]) -> StructureStatus:
+    def get_status(cls, results: List[Result]) -> StructureStatus:
         for result in results:
             if result.severity == Severity.Error:
                 return StructureStatus.NotWellFormed
@@ -200,17 +202,22 @@ def _folders_and_files(dir_to_scan: Path) -> Tuple[Set[str], Set[str]]:
                 folders.add(entry)
     return folders, files
 
-def test_result_from_id(requirement_id, location, message=None) -> TestResult:
+def test_result_from_id(requirement_id, location, message=None) -> Result:
     req = REQUIREMENTS[requirement_id]
     test_msg = message if message else req['message']
     """Return a TestResult instance created from the requirment ID and location."""
-    return TestResult(rule_id=req['id'], location=str(location), message=test_msg, severity=Severity.from_level(req['level']))
+    return Result.model_validate({
+        'rule_id': req['id'],
+        'location': location,
+        'message': test_msg,
+        'severity': Severity.from_level(req['level'])
+        })
 
 def get_multi_root_results(name) -> StructResults:
-    return StructResults(status=StructureStatus.NotWellFormed, messages=[ test_result_from_id(1, name) ])
+    return StructResults.model_validate({ 'status': StructureStatus.NotWellFormed, 'messages': [ test_result_from_id(1, Location.model_validate({ 'context': 'root', 'description': str(name) })) ] })
 
 def get_bad_path_results(path) -> StructResults:
-    return StructResults(status=StructureStatus.NotWellFormed, messages=[ test_result_from_id(1, path) ])
+    return StructResults.model_validate({ 'status': StructureStatus.NotWellFormed, 'messages': [ test_result_from_id(1, Location.model_validate({ 'context': 'root', 'description': str(path) })) ] })
 
 def validate(to_validate) -> Tuple[bool, StructResults]:
     try:

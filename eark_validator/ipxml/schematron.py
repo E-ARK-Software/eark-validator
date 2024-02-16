@@ -62,10 +62,17 @@ class SchematronRuleset():
         return self._schematron
 
     def get_assertions(self) -> Generator[ ET.Element, None, None]:
-        """Generator that returns the rules one at a time."""
+        """Generator that returns the assertion rules one at a time."""
         xml_rules = ET.XML(bytes(self.schematron.schematron))
         for ele in xml_rules.iter():
             if ele.tag == SCHEMATRON_NS + 'assert':
+                yield ele
+
+    def get_reports(self) -> Generator[ ET.Element, None, None]:
+        """Generator that returns the report rules one at a time."""
+        xml_rules = ET.XML(bytes(self.schematron.schematron))
+        for ele in xml_rules.iter():
+            if ele.tag == SCHEMATRON_NS + 'report':
                 yield ele
 
     def validate(self, to_validate: str) -> ET.Element:

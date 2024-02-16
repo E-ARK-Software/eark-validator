@@ -34,8 +34,7 @@ from eark_validator.const import NO_PATH, NOT_FILE
 from eark_validator.ipxml.namespaces import Namespaces
 from eark_validator.ipxml.resources import profiles
 from eark_validator.ipxml.schema import METS_PROF_SCHEMA
-from eark_validator.specifications.struct_reqs import \
-    REQUIREMENTS as STRUCT_REQS
+from eark_validator.specifications.struct_reqs import REQUIREMENTS
 from eark_validator.specifications.struct_reqs import Level
 
 
@@ -265,7 +264,7 @@ class Specification:
         @classmethod
         def from_rule_no(cls, rule_no: int) -> 'Specification.StructuralRequirement':
             """Create an StructuralRequirement from a numerical rule id and a sub_message."""
-            item = STRUCT_REQS.get(rule_no)
+            item = REQUIREMENTS.get(rule_no)
             return cls.from_dict_item(item)
 
         @classmethod
@@ -282,8 +281,8 @@ class Specification:
         @staticmethod
         def _get_struct_reqs() -> list['Specification.StructuralRequirement']:
             reqs = []
-            for req_num in STRUCT_REQS:
-                req = STRUCT_REQS.get(req_num)
+            for req_num in REQUIREMENTS:
+                req = REQUIREMENTS.get(req_num)
                 reqs.append(Specification.StructuralRequirement(req.get('id'),
                                                                 level=req.get('level'),
                                                                 message=req.get('message')))
