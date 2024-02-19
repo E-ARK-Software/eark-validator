@@ -109,8 +109,10 @@
       <div ID="ID-Structmap_Div_ID_Metadata" LABEL="Metadata">
       </div>
       <div ID="ID-Structmap_Div_ID_Documentation" LABEL="Documentation">
+        <fptr FILEID="ID-minimal_with_schemas_fileGrp_documentation"/>
       </div>
       <div ID="ID-Structmap_Div_ID_Schemas" LABEL="Schemas" CONTENTIDS="minimal_with_schemas_fileGrp_schemas">
+        <fptr FILEID="ID-minimal_with_schemas_fileGrp_schemas"/>
       </div>
     </div>
 
