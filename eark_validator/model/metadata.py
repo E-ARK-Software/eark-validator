@@ -23,20 +23,26 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-"""
-E-ARK : Information Package Validation
-        Information Package API model types
-"""
-# import models into model package
-from .checksum import Checksum, ChecksumAlg
-from .manifest import Manifest, ManifestEntry, SourceType
-from .validation_report import ValidationReport
-from .package_details import PackageDetails
-from .package_details import Representation
-from .validation_report import (
-        Level,
-        Severity,
-        StructureStatus,
-        StructResults,
-        Result
-)
+from pathlib import Path
+from typing import Annotated, List
+
+from pydantic import BaseModel, StringConstraints
+
+from .checksum import Checksum
+
+class FileEntry(BaseModel):
+    path : Path | str
+    size : int = 0
+    checksum : Checksum
+    mimetype : Annotated[ str, StringConstraints(to_lower=True) ] = 'application/octet-stream'
+
+class MetsRoot(BaseModel):
+    namespaces: dict[str, str] = {}
+    objid: str = ''
+    label: str= ''
+    type: str = ''
+    profile: str = ''
+
+class MetsFile(BaseModel):
+    root: MetsRoot = MetsRoot()
+    file_entries: List[FileEntry] = []

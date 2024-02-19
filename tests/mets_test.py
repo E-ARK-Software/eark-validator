@@ -26,6 +26,7 @@
 import unittest
 
 from importlib_resources import files
+from eark_validator.infopacks.manifest import Manifests
 
 import tests.resources.xml as XML
 import tests.resources.ips.unpacked as UNPACKED
@@ -67,9 +68,6 @@ class MetsValidatorTest(unittest.TestCase):
         self.assertGreater(len(validator.file_references), 0)
         self.assertGreater(len(validator.representation_mets), 0)
         self.assertEqual(validator.get_mets_path('rep1'), 'representations/rep1/METS.xml')
-        is_complete, issues = validator.get_manifest().check_integrity()
-        self.assertTrue(is_complete)
-        self.assertEqual(len(issues), 0)
 
     def test_bad_manifest(self):
         validator = MetsValidator(str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031-bad')))
@@ -78,9 +76,6 @@ class MetsValidatorTest(unittest.TestCase):
         self.assertEqual(len(validator.validation_errors), 0)
         self.assertEqual(len(validator.representations), 1)
         self.assertGreater(len(validator.file_references), 0)
-        is_complete, issues = validator.get_manifest().check_integrity()
-        self.assertFalse(is_complete)
-        self.assertEqual(len(issues), 27)
 
 class SchemaTest(unittest.TestCase):
     def test_schema(self):

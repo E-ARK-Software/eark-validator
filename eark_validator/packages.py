@@ -29,17 +29,35 @@ import os
 from pathlib import Path
 import uuid
 
+from eark_validator import rules as SC
 from eark_validator import structure
+from eark_validator.infopacks.information_package import InformationPackages
 from eark_validator.infopacks.package_handler import PackageHandler
+from eark_validator.mets import MetsValidator
 from eark_validator.model import ValidationReport
 from eark_validator.model import PackageDetails
+from eark_validator.model.package_details import InformationPackage
+from eark_validator.model.validation_report import MetatdataResults
 
 def validate(to_validate: Path, check_metadata: bool=True) -> ValidationReport:
     """Returns the validation report that results from validating the path
     to_validate as a folder. The method does not validate archive files."""
-    _, struct_results = structure.validate(to_validate)
-    package = _get_info_pack(name=os.path.basename(to_validate))
-    return ValidationReport(uid=uuid.uuid4(), structure=struct_results)
+    is_struct_valid, struct_results = structure.validate(to_validate)
+    if not is_struct_valid:
+        return ValidationReport.model_validate({'structure': struct_results})
+    validator = MetsValidator(str(to_validate))
+    validator.validate_mets('METS.xml')
+    if (not validator.is_valid):
+        metadata: MetatdataResults = MetatdataResults.model_validate({ 'schema_results': validator.validation_errors })
+        return ValidationReport.model_validate({'structure': struct_results, 'metadata': metadata})
+    package: InformationPackage = InformationPackages.from_path(to_validate)
+    package_type = package.package.oaispackagetype if package.package.oaispackagetype else 'CSIP'
+    package_type = 'CSIP' if package_type == 'AIP' else package_type
+    profile = SC.ValidationProfile.from_specification(package_type)
+    profile.validate(to_validate.joinpath('METS.xml'))
+    results = profile.get_all_results()
+    metadata: MetatdataResults = MetatdataResults.model_validate({'schema_results': validator.validation_errors, 'schematron_results': results})
+    return ValidationReport.model_validate({'structure': struct_results, 'package': package, 'metadata': metadata})
 
 class PackageValidator():
     """Class for performing full package validation."""
@@ -48,9 +66,11 @@ class PackageValidator():
         self._path : Path = package_path
         self._name: str = os.path.basename(package_path)
         self._report: ValidationReport = None
-        if os.path.isdir(package_path) or PackageHandler.is_archive(package_path):
+        if os.path.isdir(package_path):
             # If a directory or archive get the path to process
             self._to_proc = self._path.absolute()
+        elif PackageHandler.is_archive(package_path):
+            self._to_proc = self._package_handler.prepare_package(package_path)
         elif self._name == 'METS.xml':
             mets_path = Path(package_path)
             self._to_proc = mets_path.parent.absolute()
@@ -78,11 +98,11 @@ class PackageValidator():
 
 def _report_from_unpack_except(name: str, package_path: Path) -> ValidationReport:
     struct_results = structure.get_multi_root_results(package_path)
-    return ValidationReport(structure=struct_results)
+    return ValidationReport.model_validate({ 'structure': struct_results })
 
 def _report_from_bad_path(name: str, package_path: Path) -> ValidationReport:
     struct_results = structure.get_bad_path_results(package_path)
-    return ValidationReport(structure=struct_results)
+    return ValidationReport.model_validate({ 'structure': struct_results })
 
 def _get_info_pack(name: str, profile=None) -> PackageDetails:
-    return PackageDetails(name=name)
+    return PackageDetails.model_validate({ 'name': name })

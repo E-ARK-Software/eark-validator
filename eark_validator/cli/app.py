@@ -26,33 +26,35 @@
 E-ARK : Information package validation
         Command line validation application
 """
-import argparse
 import os.path
 from pathlib import Path
 import sys
 from typing import Optional, Tuple
-from eark_validator.model import StructResults
+import importlib.metadata
 
+import argparse
+
+from eark_validator.model import ValidationReport
 import eark_validator.packages as PACKAGES
 from eark_validator.infopacks.package_handler import PackageHandler
 
-__version__ = '0.1.0'
+__version__ = importlib.metadata.version('eark_validator')
 
 defaults = {
-    'description': """E-ARK Information Package validation (ip-check).
-ip-check is a command-line tool to analyse and validate the structure and
+    'description': """E-ARK Information Package validation (eark-validator).
+eark-validator is a command-line tool to analyse and validate the structure and
 metadata against the E-ARK Information Package specifications.
 It is designed for simple integration into automated work-flows.""",
     'epilog': """
 DILCIS Board (http://dilcis.eu)
 See LICENSE for license information.
-GitHub: https://github.com/E-ARK-Software/py-rest-ip-validator
-Author: Carl Wilson (OPF), 2020-2023
-Maintainer: Carl Wilson (OPF), 2020-2023"""
+GitHub: https://github.com/E-ARK-Software/eark-validator
+Author: Carl Wilson (OPF), 2020-2024
+Maintainer: Carl Wilson (OPF), 2020-2024"""
 }
 
 # Create PARSER
-PARSER = argparse.ArgumentParser(description=defaults['description'], epilog=defaults['epilog'])
+PARSER = argparse.ArgumentParser(prog='eark-validator', description=defaults['description'], epilog=defaults['epilog'])
 
 def parse_command_line():
     """Parse command line arguments."""
@@ -60,18 +62,23 @@ def parse_command_line():
     PARSER.add_argument('-r', '--recurse',
                         action='store_true',
                         dest='inputRecursiveFlag',
-                        default=True,
+                        default=False,
                         help='When analysing an information package recurse into representations.')
     PARSER.add_argument('-c', '--checksum',
                         action='store_true',
                         dest='inputChecksumFlag',
                         default=False,
-                        help='Calculate and verify file checksums in packages.')
+                        help='Calculate and verify package checksums.')
+    PARSER.add_argument('-m', '--manifest',
+                        action='store_true',
+                        dest='inputManifestFlag',
+                        default=False,
+                        help='Display package manifest information.')
     PARSER.add_argument('-v', '--verbose',
                         action='store_true',
                         dest='outputVerboseFlag',
                         default=False,
-                        help='report results in verbose format')
+                        help='Verbose reporting for selected output options.')
     PARSER.add_argument('--version',
                         action='version',
                         version=__version__)
@@ -101,17 +108,17 @@ def main():
         _exit = _loop_exit if (_loop_exit > 0) else _exit
     sys.exit(_exit)
 
-def _validate_ip(path: str) -> Tuple[int, Optional[StructResults]]:
+def _validate_ip(path: str) -> Tuple[int, Optional[ValidationReport]]:
     ret_stat, checked_path = _check_path(path)
     if ret_stat > 0:
         return ret_stat, None
     report = PACKAGES.PackageValidator(checked_path).validation_report
     print('Path {}, struct result is: {}'.format(checked_path,
                                                  report.structure.status.value))
-    for message in report.structure.messages:
-        print(message.model_dump_json())
+    # for message in report.structure.messages:
+    print(report.model_dump_json())
 
-    return ret_stat, report.structure
+    return ret_stat, report
 
 def _check_path(path: str) -> Tuple[int, Optional[Path]]:
     if not os.path.exists(path):

@@ -29,6 +29,7 @@ from typing import Dict, List
 from lxml import etree as ET
 
 from eark_validator.ipxml.schematron import SchematronRuleset, SVRL_NS, get_schematron_path
+from eark_validator.model.validation_report import Location, Result
 from eark_validator.specifications.specification import EarkSpecifications, Specification
 from eark_validator.const import NO_PATH, NOT_FILE
 from eark_validator.model import Severity
@@ -40,7 +41,7 @@ class ValidationProfile():
         self._specification: Specification = specification
         self.is_valid: bool = False
         self.is_wellformed: bool = False
-        self.results: Dict[str, TestReport] = {}
+        self.results: Dict[str, List[Result]] = {}
         self.messages: List[str] = []
         for section in specification.sections:
             self.rulesets[section] = SchematronRuleset(get_schematron_path(specification.id, section))
@@ -67,20 +68,27 @@ class ValidationProfile():
         self.messages = []
         for section in self.rulesets.keys():
             try:
-                self.results[section] = TestReport.from_validation_report(self.rulesets[section].validate(to_validate))
+                self.results[section] = TestResults.from_validation_report(self.rulesets[section].validate(to_validate))
+                if len(list(filter(lambda a: a.severity == Severity.Error, self.results[section]))) > 0:
+                    self.is_valid = False
             except ET.XMLSyntaxError as parse_err:
                 self.is_wellformed = False
                 self.is_valid = False
                 self.messages.append('File {} is not valid XML. {}'.format(to_validate, parse_err.msg))
                 return
-            if not self.results[section].is_valid:
-                self.is_valid = False
 
-    def get_results(self) -> dict[str, 'TestReport']:
+    def get_results(self) -> dict[str,  List[Result]]:
         """Return the full set of results."""
         return self.results
 
-    def get_result(self, name: str) -> 'TestReport':
+    def get_all_results(self) -> List[Result]:
+        """Return the full set of results."""
+        results: List[Result] = []
+        for (name, results) in self.results.items():
+            results.extend(results)
+        return results
+
+    def get_result(self, name: str) ->  List[Result]:
         """Return only the results for element name."""
         return self.results.get(name)
 
@@ -96,136 +104,34 @@ class ValidationProfile():
         return cls(specification)
 
 
-class TestResult():
-    """Encapsulates an individual validation test result."""
-    def __init__(self, rule_id: str, location: 'SchematronLocation', message: str, severity: Severity = Severity.Unknown):
-        self._rule_id: str = rule_id
-        self._severity: Severity = severity
-        self._location: SchematronLocation = location
-        self._message: str = message
-
-    @property
-    def rule_id(self) -> str:
-        """Get the rule_id."""
-        return self._rule_id
-
-    @property
-    def severity(self) -> Severity:
-        """Get the severity."""
-        return self._severity
-
-    @severity.setter
-    def severity(self, value: Severity) -> None:
-        if not isinstance(value, Severity):
-            value = Severity.from_id(value)
-        if value not in list(Severity):
-            raise ValueError('Illegal severity value')
-        self._severity = value
-
-    @property
-    def location(self) -> 'SchematronLocation':
-        """Get the location location."""
-        return self._location
-
-    @property
-    def message(self) -> str:
-        """Get the message."""
-        return self._message
-
-    def __str__(self) -> str:
-        return str(self.rule_id) + ' ' + str(self.severity) + ' ' + str(self.location)
-
-    def to_json(self) -> dict:
-        """Output the error message in JSON form."""
-        return {'rule_id' : self.rule_id, 'severity' : str(self.severity.name),
-                'test' : self.location.test, 'location' : self.location.location,
-                'message' : self.message}
-
-    @classmethod
-    def from_element(cls, rule: ET.Element, failed_assert: ET.Element) -> 'TestResult':
+class TestResults():
+    @staticmethod
+    def from_element(rule: ET.Element, failed_assert: ET.Element) -> Result:
         """Create a Test result from an element."""
         context = rule.get('context')
         rule_id = failed_assert.get('id')
         test = failed_assert.get('test')
-        severity = Severity.from_id(failed_assert.get('role', Severity.Unknown))
+        severity = Severity.from_role(failed_assert.get('role', Severity.Error))
         location = failed_assert.get('location')
         message = failed_assert.find(SVRL_NS + 'text').text
-        schmtrn_loc = SchematronLocation(context, test, location)
-        return cls(rule_id, schmtrn_loc, message, severity)
+        location = Location.model_validate({
+            'context':context,
+            'test':test,
+            'description': location
+        })
+        return Result.model_validate({
+            'rule_id': rule_id, 'location':location, 'message':message, 'severity':severity
+        })
 
-
-class TestReport():
-    """A report made up of validation results."""
-    def __init__(self, is_valid: bool, errors: list[TestResult]=None, warnings: list[TestResult]=None, infos: list[TestResult]=None):
-        self._is_valid: bool = is_valid
-        self._errors: List[TestResult] = errors if errors else []
-        self._warnings: List[TestResult] = warnings if warnings else []
-        self._infos: List[TestResult] = infos if infos else []
-
-    @property
-    def is_valid(self) -> bool:
-        """Get the is_valid result."""
-        return self._is_valid
-
-    @property
-    def errors(self) -> list[TestResult]:
-        """Get the failures."""
-        return self._errors
-
-    @property
-    def warnings(self) -> list[TestResult]:
-        """Get the warnings."""
-        return self._warnings
-
-    @property
-    def infos(self) -> list[TestResult]:
-        """Get the warnings."""
-        return self._infos
-
-    @classmethod
-    def from_validation_report(cls, ruleset: ET.Element) -> 'TestReport':
+    @staticmethod
+    def from_validation_report(ruleset: ET.Element) -> List[Result]:
         """Get the report from the last validation."""
         xml_report = ET.XML(bytes(ruleset))
-        failures = []
-        warnings = []
-        infos = []
-        is_valid = True
         rule = None
+        results: List[Result] = []
         for ele in xml_report.iter():
             if ele.tag == SVRL_NS + 'fired-rule':
                 rule = ele
             elif (ele.tag == SVRL_NS + 'failed-assert') or (ele.tag == SVRL_NS + 'successful-report'):
-                if ele.get('role') == 'INFO':
-                    infos.append(TestResult.from_element(rule, ele))
-                elif ele.get('role') == 'WARN':
-                    warnings.append(TestResult.from_element(rule, ele))
-                else:
-                    is_valid = False
-                    failures.append(TestResult.from_element(rule, ele))
-        return TestReport(is_valid, failures, warnings, infos)
-
-
-class SchematronLocation():
-    """All details of the location of a Schematron error."""
-    def __init__(self, context: str, test: str, location: str):
-        self._context: str = context
-        self._test: str = test
-        self._location: str = location
-
-    @property
-    def context(self) -> str:
-        """Get the context of the location."""
-        return self._context
-
-    @property
-    def test(self) -> str:
-        """Get the location test."""
-        return self._test
-
-    @property
-    def location(self) -> str:
-        """Get the location location."""
-        return self._location
-
-    def __str__(self) -> str:
-        return str(self.context) + ' ' + str(self.test) + ' ' + str(self.location)
+                    results.append(TestResults.from_element(rule, ele))
+        return results
