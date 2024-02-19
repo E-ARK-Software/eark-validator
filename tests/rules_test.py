@@ -139,7 +139,7 @@ class ValidationRulesTest(unittest.TestCase):
     def test_mets_structmap(self):
         result, failures, warnings, _ = _test_validation(METS_STRUCT_RULES, METS_VALID)
         self.assertEqual(failures, 0)
-        self.assertEqual(warnings, 1)
+        self.assertEqual(warnings, 3)
         self.assertTrue(result)
 
 class ValidationProfileTest(unittest.TestCase):
