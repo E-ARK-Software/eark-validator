@@ -51,7 +51,8 @@ class SourceType(str, Enum):
 
 class Manifest(BaseModel):
     source: SourceType = SourceType.UNKNOWN
-    summary: Optional[ManifestSummary]
+    root: Path
+    summary: Optional[ManifestSummary] = None
     entries: List[ManifestEntry] = []
 
     @property

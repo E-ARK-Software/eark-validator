@@ -68,8 +68,9 @@ class Namespaces(str, Enum):
 
     @classmethod
     def from_prefix(cls, prefix: str) -> 'Namespaces':
+        search: str = prefix.lower() if prefix else ''
         for namespace in cls:
-            if namespace.prefix == prefix.lower():
+            if namespace.prefix == search:
                 return namespace
         return cls.METS
 

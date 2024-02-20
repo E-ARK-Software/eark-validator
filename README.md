@@ -11,10 +11,10 @@ website of the Digital Information LifeCycle Interoperability Standards Board (D
 
 ### Pre-requisites
 
+Python 3.10 or later is required to run the E-ARK Python Information Package Validator.
+
 You must be running either a Debian/Ubuntu Linux distribution or Windows Subsystem for Linux on Windows to follow these commands.
-
 If you are running a different Linux distribution you must change the apt commands to your package manager.
-
 For getting Windows Subsystem for Linux up and running, please follow the guide further down and then come back to this step.
 
 ### Getting up and running with the E-ARK Python Information Package Validator
@@ -88,7 +88,7 @@ pip install -U pip
 pip install .
 ```
 
-You are now able to run the application "ip-check". It will validate an Information Package for you.
+You are now able to run the application "eark-validator". It will validate an Information Package for you.
 
 
 #### Testing a valid package.
@@ -111,10 +111,10 @@ Delete the .zip-file you just downloaded:
 rm mets-xml_metsHdr_agent_TYPE_exist.zip
 ```
 
-Run the ip-check:
+Run the eark-validator:
 
 ```shell
-ip-check mets-xml_metsHdr_agent_TYPE_exist/
+eark-validator mets-xml_metsHdr_agent_TYPE_exist/
 ```
 
 Result:
@@ -146,7 +146,7 @@ user@machine:~$ tree input
 
 If you do not have Linux and have not previously used WSL please perform the following steps. You must either be logged in as Administrator on the machine or as a user with Administrator rights on the machine.
 
-Start er command prompt (cmd.exe) and then enter the following command:
+Start a command prompt (cmd.exe) and then enter the following command:
 
 ```shell
 wsl --install

@@ -20,38 +20,38 @@
       <assert id="CSIP97" role="WARN" test="mets:div[@LABEL = 'Schemas']">The schemas referenced in the file section file groups are described in the structural map within a single sub-division.</assert>
       <assert id="CSIP101" role="WARN" test="mets:div[@LABEL = 'Representations']">When no representations are present the content referenced in the file section file group with @USE attribute value “Representations” is described in the structural map as a single sub division.</assert>
     </rule>
-    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Metadata']">
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Metadata']">
       <assert id="CSIP89" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
       <assert id="CSIP91" role="WARN" test="@ADMID">When there is administrative metadata and the amdSec is present, all administrative metadata MUST be referenced via the administrative sections different identifiers.</assert>
       <assert id="CSIP92" role="WARN" test="@DMDID">When there are descriptive metadata and one or more dmdSec is present, all descriptive metadata MUST be referenced via the descriptive section identifiers.</assert>
     </rule>
-    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Documentation']">
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Documentation']">
       <assert id="CSIP94" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
       <assert id="CSIP96" role="ERROR" test="mets:fptr">All file groups containing documentation described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
     </rule>
-    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Documentation']/fptr">
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Documentation']/mets:fptr">
       <assert id="CSIP116" role="ERROR" test="@FILEID">A reference, by ID, to the “Documentation” file group.</assert>
     </rule>
-    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Schemas']">
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Schemas']">
       <assert id="CSIP98" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
-      <assert id="CSIP100" role="ERROR" test="mets:fptr">All file groups containing documentation described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
+      <assert id="CSIP100" role="ERROR" test="mets:fptr">All file groups containing schemas described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
     </rule>
-    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Schemas']/fptr">
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Schemas']/mets:fptr">
       <assert id="CSIP118" role="ERROR" test="@FILEID">The pointer to the identifier for the “Schema” file group.</assert>
     </rule>
-    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Representations']">
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Representations']">
       <assert id="CSIP102" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
       <assert id="CSIP104" role="ERROR" test="mets:fptr">All file groups containing documentation described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
     </rule>
-    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Representations']/fptr">
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Representations']/mets:fptr">
       <assert id="CSIP119" role="ERROR" test="@FILEID">The pointer to the identifier for the Representations file group.</assert>
     </rule>
-    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div[@LABEL = 'Representations']/mets:div">
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Representations']/mets:div">
       <assert id="CSIP106" role="ERROR" test="@ID">Mandatory, xml:id identifier must be unique within the package.</assert>
       <assert id="CSIP107" role="ERROR" test="@LABEL">The package’s representation division div element @LABEL attribute value must be the path to the representation level METS document.</assert>
-      <assert id="CSIP109" role="ERROR" test="mptr">The division div of the specific representation includes one occurrence of the METS pointer mptr element, pointing to the appropriate representation METS file.</assert>
+      <assert id="CSIP109" role="ERROR" test="mets:mptr">The division div of the specific representation includes one occurrence of the METS pointer mptr element, pointing to the appropriate representation METS file.</assert>
     </rule>
-    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Representations']/mptr">
+    <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Representations']/mets:mptr">
       <assert id="CSIP108" role="ERROR" test="@xlink:title">The file group containing the files described in the package are referenced via the relevant file group identifier.</assert>
       <assert id="CSIP110" role="ERROR" test="@xlink:href">MUST point to the actual location of the resource. We recommend recording a URL type filepath within this attribute.</assert>
       <assert id="CSIP111" role="ERROR" test="@xlink:type = 'simple'">Attribute used with the value “simple”. Value list is maintained by the xlink standard.</assert>

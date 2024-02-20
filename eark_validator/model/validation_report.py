@@ -35,6 +35,8 @@ import uuid
 
 from pydantic import BaseModel
 
+from eark_validator.model.package_details import InformationPackage
+
 @unique
 class Level(str, Enum):
     """Enum covering information package validation statuses."""
@@ -64,6 +66,15 @@ class Severity(str, Enum):
         return None
 
     @classmethod
+    def from_role(cls, role: str) -> Optional['Severity']:
+        """Get the enum from the value."""
+        search = role.lower()
+        for severity in cls:
+            if severity.value.lower().startswith(search):
+                return severity
+        return None
+
+    @classmethod
     def from_level(cls, level: Level) -> 'Severity':
         """Return the correct test result severity from a Level instance."""
         if level is Level.MUST:
@@ -72,10 +83,16 @@ class Severity(str, Enum):
             return Severity.Warning
         return Severity.Information
 
-class TestResult(BaseModel):
+class Location(BaseModel):
+    """All details of the location of an error."""
+    context: str = ''
+    test: str = ''
+    description: str = ''
+
+class Result(BaseModel):
     rule_id: str | None
-    severity: Severity | None
-    location: str | None
+    severity: Severity = Severity.Unknown
+    location: Location | None
     message: str | None
 
 @unique
@@ -88,21 +105,27 @@ class StructureStatus(str, Enum):
     WellFormed = 'Well Formed'
 
 class StructResults(BaseModel):
-    status: StructureStatus
-    messages: List[TestResult]
+    status: StructureStatus = StructureStatus.Unknown
+    messages: List[Result] = []
 
     @property
-    def errors(self) -> List[TestResult]:
+    def errors(self) -> List[Result]:
         return [m for m in self.messages if m.severity == Severity.Error]
 
     @property
-    def warnings(self) -> List[TestResult]:
+    def warnings(self) -> List[Result]:
         return [m for m in self.messages if m.severity == Severity.Warning]
 
     @property
-    def infos(self) -> List[TestResult]:
+    def infos(self) -> List[Result]:
         return [m for m in self.messages if m.severity == Severity.Information]
+
+class MetatdataResults(BaseModel):
+    schema_results: List[Result] = []
+    schematron_results: List[Result] = []
 
 class ValidationReport(BaseModel):
     uid: uuid.UUID = uuid.uuid4()
-    structure: StructResults | None
+    structure: Optional[StructResults] = None
+    metadata: Optional[MetatdataResults] = None
+    package: Optional[InformationPackage] = None
