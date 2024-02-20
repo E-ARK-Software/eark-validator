@@ -28,7 +28,7 @@ EPILOG = """
 E-ARK (https://e-ark4all.eu/)
 Open Preservation Foundation (http://www.openpreservation.org)
 See LICENSE for license information.
-Author: Carl Wilson (OPF), 2016-17
+Author: Carl Wilson (OPF), 2016-24
 This work was funded by the European commission project funded
 as grant number LC-01390244 CEF-TC-2019-3 E-ARK3 under
 CONNECTING EUROPE FACILITY (CEF) - TELECOMMUNICATIONS SECTOR

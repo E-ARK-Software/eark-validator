@@ -36,15 +36,7 @@ import uuid
 from pydantic import BaseModel
 
 from eark_validator.model.package_details import InformationPackage
-
-@unique
-class Level(str, Enum):
-    """Enum covering information package validation statuses."""
-    MAY = 'MAY'
-    # Package has basic parse / structure problems and can't be validated
-    SHOULD = 'SHOULD'
-    # Package structure is OK
-    MUST = 'MUST'
+from eark_validator.model.specifications import Level
 
 @unique
 class Severity(str, Enum):
