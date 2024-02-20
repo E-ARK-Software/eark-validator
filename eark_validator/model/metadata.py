@@ -24,7 +24,7 @@
 # under the License.
 #
 from pathlib import Path
-from typing import Annotated, List, Optional
+from typing import Annotated, List
 
 from pydantic import BaseModel, StringConstraints
 
@@ -36,13 +36,13 @@ class FileEntry(BaseModel):
     checksum : Checksum
     mimetype : Annotated[ str, StringConstraints(to_lower=True) ] = 'application/octet-stream'
 
-class MetsFile(BaseModel):
+class MetsRoot(BaseModel):
     namespaces: dict[str, str] = {}
-    oaispackagetype: str
-    objid: str
-    label: str
-    type: str
-    othertype: str
-    contentinformationtype: str
-    profile: str
+    objid: str = ''
+    label: str= ''
+    type: str = ''
+    profile: str = ''
+
+class MetsFile(BaseModel):
+    root: MetsRoot = MetsRoot()
     file_entries: List[FileEntry] = []

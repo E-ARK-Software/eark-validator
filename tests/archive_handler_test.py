@@ -29,7 +29,7 @@ import os
 import unittest
 
 from eark_validator.infopacks.manifest import Checksummer
-from eark_validator.infopacks.package_handler import PackageHandler
+from eark_validator.infopacks.package_handler import PackageError, PackageHandler
 
 from eark_validator.model import StructureStatus, StructResults
 
@@ -49,14 +49,20 @@ class StatusValuesTest(unittest.TestCase):
     def test_illgl_pckg_status(self):
         self.assertRaises(ValueError, StructResults, status=TestStatus.Illegal)
 
-class ArchiveHandlerTest(unittest.TestCase):
+class PackageHandlerTest(unittest.TestCase):
+    dir_path = Path(os.path.join(os.path.dirname(__file__), 'resources'))
     empty_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'empty.file'))
+    not_exists_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'not_there.zip'))
     min_tar_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
                                 'minimal_IP_with_schemas.tar'))
     min_zip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
                                 'minimal_IP_with_schemas.zip'))
     min_targz_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
                                   'minimal_IP_with_schemas.tar.gz'))
+    multi_dir_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'bad',
+                                  'multi_dir.zip'))
+    single_file_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'bad',
+                                  'single_file.zip'))
 
     def test_sha1(self):
         sha1 = Checksummer.from_file(self.empty_path, 'SHA-1').value
@@ -74,6 +80,18 @@ class ArchiveHandlerTest(unittest.TestCase):
         handler = PackageHandler()
         self.assertRaises(ValueError, handler.unpack_package, self.empty_path)
 
+    def test_multi_dir(self):
+        handler = PackageHandler()
+        self.assertRaises(PackageError, handler.unpack_package, self.multi_dir_path)
+
+    def test_single_file(self):
+        handler = PackageHandler()
+        self.assertRaises(PackageError, handler.unpack_package, self.single_file_path)
+
+    def test_prepare_not_exists(self):
+        handler = PackageHandler()
+        self.assertRaises(ValueError, handler.prepare_package, self.not_exists_path)
+
     def test_unpack_archives(self):
         handler = PackageHandler()
         dest = Path(handler.unpack_package(self.min_tar_path))
@@ -82,6 +100,9 @@ class ArchiveHandlerTest(unittest.TestCase):
         self.assertEqual(os.path.basename(dest.parent), '54BBE654FE332B51569BAF21338BC811CAD2AF66')
         dest = Path(handler.unpack_package(self.min_targz_path))
         self.assertEqual(os.path.basename(dest.parent), 'DB2703FF464E613E9D1DC5C495E23A2E2D49B89D')
+
+    def test_is_dir_archive(self):
+        self.assertFalse(PackageHandler.is_archive(self.dir_path))
 
 if __name__ == '__main__':
     unittest.main()
