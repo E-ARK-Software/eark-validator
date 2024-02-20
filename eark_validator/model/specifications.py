@@ -79,7 +79,7 @@ class Specification(BaseModel):
         """Return the specification id."""
         return self.url.split('/')[-1].split('.')[0].split('-')[-1]
 
-    @computed_field
+    @property
     def sections(self) -> List[str]:
         """Return the sections in the specification."""
         return list(self.requirements.keys())
