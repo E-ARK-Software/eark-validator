@@ -28,10 +28,11 @@ import unittest
 from lxml import etree as ET
 
 from importlib_resources import files
+from eark_validator.model.specifications import Specification
 
-from eark_validator.specifications.specification import EarkSpecifications
-from eark_validator.specifications.specification import Specification
+from eark_validator.specifications.specification import EarkSpecifications, Specifications
 import tests.resources.xml as XML
+from eark_validator.ipxml.resources import profiles
 
 
 
@@ -39,19 +40,23 @@ class SpecificationTest(unittest.TestCase):
 
     def test_no_file(self):
         with self.assertRaises(FileNotFoundError):
-            Specification._from_xml_file(str(files('tests.resources').joinpath('nosuch.file')))
+            Specifications._from_xml_file(str(files('tests.resources').joinpath('nosuch.file')))
 
     def test_is_dir(self):
         with self.assertRaises(ValueError):
-            Specification._from_xml_file(str(files(XML)))
+            Specifications._from_xml_file(str(files(XML)))
 
     def test_no_xml(self):
         with self.assertRaises(ET.XMLSyntaxError):
-            Specification._from_xml_file(str(files('tests.resources').joinpath('empty.file')))
+            Specifications._from_xml_file(str(files('tests.resources').joinpath('empty.file')))
 
     def test_invalid_xml(self):
         with self.assertRaises(ET.XMLSyntaxError):
-            Specification._from_xml_file(str(files('tests.resources.xml').joinpath('person.xml')))
+            Specifications._from_xml_file(str(files('tests.resources.xml').joinpath('person.xml')))
+
+    def test_valid_xml(self):
+        specification: Specification = Specifications._from_xml_file(str(files(profiles).joinpath('E-ARK-CSIP' + '.xml')))
+        self.assertEqual(EarkSpecifications.CSIP.specification, specification)
 
     def test_title(self):
         spec = EarkSpecifications.CSIP.specification
@@ -103,25 +108,19 @@ class SpecificationTest(unittest.TestCase):
 
     def test_sections(self):
         spec = EarkSpecifications.CSIP.specification
-        self.assertGreater(spec.section_count, 0)
-        self.assertEqual(self._count_reqs_via_section(spec), spec.requirement_count)
+        self.assertGreater(len(spec.sections), 0)
+        self.assertEqual(self._count_reqs(spec), spec.requirement_count)
         self.assertEqual(len(spec.section_requirements()), spec.requirement_count)
         spec = EarkSpecifications.SIP.specification
-        self.assertGreater(spec.section_count, 0)
-        self.assertEqual(self._count_reqs_via_section(spec), spec.requirement_count)
+        self.assertGreater(len(spec.sections), 0)
+        self.assertEqual(self._count_reqs(spec), spec.requirement_count)
         self.assertEqual(len(spec.section_requirements()), spec.requirement_count)
         spec = EarkSpecifications.DIP.specification
-        self.assertGreater(spec.section_count, 0)
-        self.assertEqual(self._count_reqs_via_section(spec), spec.requirement_count)
+        self.assertGreater(len(spec.sections), 0)
+        self.assertEqual(self._count_reqs(spec), spec.requirement_count)
         self.assertEqual(len(spec.section_requirements()), spec.requirement_count)
 
     def _count_reqs(self, spec):
-        req_count = 0
-        for _ in spec.requirements:
-            req_count += 1
-        return req_count
-
-    def _count_reqs_via_section(self, spec):
         req_count = 0
         for section in spec.sections:
             for _ in spec.section_requirements(section):
