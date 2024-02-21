@@ -68,7 +68,7 @@ class SchematronTest(unittest.TestCase):
 
     def test_load_schematron(self):
         assert_count = 0
-        for _ in self._person_rules.get_assertions():
+        for _ in self._person_rules.assertions:
             assert_count += 1
         self.assertGreater(assert_count, 0)
 

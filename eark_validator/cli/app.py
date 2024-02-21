@@ -33,6 +33,7 @@ from typing import Optional, Tuple
 import importlib.metadata
 
 import argparse
+from rich import print
 
 from eark_validator.model import ValidationReport
 import eark_validator.packages as PACKAGES
