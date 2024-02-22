@@ -34,6 +34,7 @@ import xml.etree.ElementTree as ET
 from eark_validator.model.manifest import Manifest, SourceType
 from eark_validator.model.manifest import ManifestEntry
 
+import tests.resources as RES
 import tests.resources.xml as XML
 import tests.resources.ips.unpacked as UNPACKED
 
@@ -202,7 +203,7 @@ class ManifestTest(unittest.TestCase):
             Manifests.from_directory(missing)
 
     def test_file_path(self):
-        file_path = str(files(UNPACKED).joinpath('single_file').joinpath('empty.file'))
+        file_path = str(files(RES).joinpath('empty.file'))
         with self.assertRaises(ValueError):
             Manifests.from_directory(file_path)
         with self.assertRaises(ValueError):

@@ -77,7 +77,7 @@ class PackageValidator():
             self._name = os.path.basename(self._to_proc)
         else:
             # If not an archive we can't process
-            self._report = _report_from_bad_path(self.name, package_path)
+            self._report = _report_from_bad_path(package_path)
             return
         self._report = validate(self._to_proc, check_metadata)
 
@@ -96,13 +96,6 @@ class PackageValidator():
         """Returns the valdiation report for the package."""
         return self._report
 
-def _report_from_unpack_except(name: str, package_path: Path) -> ValidationReport:
-    struct_results = structure.get_multi_root_results(package_path)
-    return ValidationReport.model_validate({ 'structure': struct_results })
-
-def _report_from_bad_path(name: str, package_path: Path) -> ValidationReport:
+def _report_from_bad_path(package_path: Path) -> ValidationReport:
     struct_results = structure.get_bad_path_results(package_path)
     return ValidationReport.model_validate({ 'structure': struct_results })
-
-def _get_info_pack(name: str, profile=None) -> PackageDetails:
-    return PackageDetails.model_validate({ 'name': name })
