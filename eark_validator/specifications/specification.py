@@ -82,7 +82,7 @@ class Specifications:
             elif child.tag in [Namespaces.PROFILE.qualify('URI'), 'URI']:
                 profile = child.text
         # Add the structural requirements
-        struct_reqs = StructuralRequirements._get_struct_reqs()
+        struct_reqs = StructuralRequirements.get_requirements()
         # Return the Specification
         return Specification.model_validate({
             'title': title,
@@ -125,38 +125,28 @@ class Requirements():
             })
 
 class StructuralRequirements():
-    @classmethod
-    def from_rule_no(cls, rule_no: int) -> StructuralRequirement:
+    @staticmethod
+    def from_rule_no(rule_no: int) -> StructuralRequirement:
         """Create an StructuralRequirement from a numerical rule id and a sub_message."""
         item = REQUIREMENTS.get(rule_no)
-        return cls.from_dict_item(item)
+        if not item:
+            raise ValueError(f'No rule with number {rule_no}')
+        return StructuralRequirements.from_dictionary(item)
 
-    @classmethod
-    def from_dict_item(cls, item: ET.Element) -> StructuralRequirement:
+    @staticmethod
+    def from_dictionary(item: dict[str, str]) -> StructuralRequirement:
         """Create an StructuralRequirement from dictionary item and a sub_message."""
-        return cls.from_values(item.get('id'), item.get('level'),
-                                item.get('message'))
-
-    @classmethod
-    def from_values(cls, req_id: str, level: str='MUST', message:str=None) -> StructuralRequirement:
-        """Create an StructuralRequirement from values supplied."""
         return StructuralRequirement.model_validate({
-            'id': req_id,
-            'level': level,
-            'message': message
+                'id': item.get('id'),
+                'level': item.get('level'),
+                'message': item.get('message')
             })
 
     @staticmethod
-    def _get_struct_reqs() -> list[StructuralRequirement]:
+    def get_requirements() -> list[StructuralRequirement]:
         reqs = []
-        for req_num in REQUIREMENTS:
-            req = REQUIREMENTS.get(req_num)
-            reqs.append(StructuralRequirement.model_validate({
-                'id': req.get('id'),
-                'level': req.get('level'),
-                'message': req.get('message')
-                })
-            )
+        for req in REQUIREMENTS.values():
+            reqs.append(StructuralRequirement.model_validate(req))
         return reqs
 
 
@@ -180,12 +170,12 @@ class EarkSpecifications(str, Enum):
     @property
     def path(self) -> str:
         """Get the path to the specification file."""
-        self._path
+        return self._path
 
     @property
     def title(self) -> str:
         """Get the specification title."""
-        self._title
+        return self._title
 
     @property
     def specification(self) -> Specification:

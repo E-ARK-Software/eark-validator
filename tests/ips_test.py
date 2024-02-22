@@ -80,6 +80,10 @@ class InformationPackageTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             InformationPackages.from_path(Path(os.path.join(os.path.dirname(__file__), 'resources', 'empty.file')))
 
+    def test_from_path_dir_no_mets(self):
+        with self.assertRaises(ValueError):
+            InformationPackages.from_path(Path(files(UNPACKED)))
+
     def test_from_path_dir(self):
         ip: InformationPackage = InformationPackages.from_path(Path(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')))
         self.assertEqual(ip.name, '733dc055-34be-4260-85c7-5549a7083031')
