@@ -38,186 +38,292 @@ class StructValidationTests(unittest.TestCase):
     """Unit tests covering structural validation of information packages, spcifically
     unpacking archived packages and establishing that the files and folders specified
     if the CSSTRUCT are present."""
+    ip_res_root: str = os.path.join(os.path.dirname(__file__), 'resources', 'ips')
+    bad_ip_root: str = os.path.join(ip_res_root, 'bad')
 
-    def test_check_package_root_single(self):
-        """Dedicated test for package root detection errors."""
-        ip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'unpacked',
-                               'single_file'))
-        _, details = STRUCT.validate(ip_path)
-        self.assertEqual(details.status, STRUCT.StructureStatus.NotWellFormed,
-                        EXP_NOT_WELLFORMED.format(details.status))
-        val_errors = details.errors
-        err_count = 1
-        self.assertEqual(len(val_errors), err_count,
-                        EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR4',
-                                         severity=Severity.Error))
-
-    def test_check_package_root_multi_dir(self):
-        """Dedicated test for package root detection errors."""
-        ip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'unpacked',
-                               'multi_dir'))
-        _, details = STRUCT.validate(ip_path)
-        self.assertEqual(details.status, STRUCT.StructureStatus.NotWellFormed,
-                        EXP_NOT_WELLFORMED.format(details.status))
-        val_errors = details.errors
-        err_count = 1
-        self.assertEqual(len(val_errors), err_count,
-                        EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR4',
-                                         severity=Severity.Error))
-
-    def test_check_package_root_multi_file(self):
-        """Dedicated test for package root detection errors."""
-        ip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'unpacked',
-                               'multi_file'))
-        _, details = STRUCT.validate(ip_path)
-        self.assertEqual(details.status, STRUCT.StructureStatus.NotWellFormed,
-                        EXP_NOT_WELLFORMED.format(details.status))
-        val_errors = details.errors
-        err_count = 1
-        self.assertEqual(len(val_errors), err_count,
-                        EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR4',
-                                         severity=Severity.Error))
-
-    def test_check_package_root_multi_var(self):
-        """Dedicated test for package root detection errors."""
-        ip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'unpacked',
-                               'multi_var'))
-        _, details = STRUCT.validate(ip_path)
-        self.assertEqual(details.status, STRUCT.StructureStatus.NotWellFormed,
-                        EXP_NOT_WELLFORMED.format(details.status))
-        val_errors = details.errors
-        err_count = 1
-        self.assertEqual(len(val_errors), err_count,
-                        EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR4',
-                                         severity=Severity.Error))
-
-    def test_single_file_archive(self):
+    def test_str1_bad_path(self):
         """Test a package that's just a compressed single file."""
-        ip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'struct',
+        ip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'empty.file'))
+        _, details = STRUCT.validate(ip_path)
+        err_count = 1
+        self.assertEqual(len(details.errors), err_count,
+                        EXP_ERRORS.format(err_count, len(details.errors)))
+        self.assertTrue(contains_rule_id(details.errors, 'CSIPSTR1',
+                                         severity=Severity.Error))
+
+    def test_str1_package_root_single(self):
+        """Dedicated test for package root detection errors."""
+        ip_path = Path(os.path.join(self.bad_ip_root, 'single_file.zip'))
+        _, details = STRUCT.validate(ip_path)
+        self.assertEqual(details.status, STRUCT.StructureStatus.NotWellFormed,
+                        EXP_NOT_WELLFORMED.format(details.status))
+        err_count = 1
+        self.assertEqual(len(details.errors), err_count,
+                        EXP_ERRORS.format(err_count, len(details.errors)))
+        self.assertTrue(contains_rule_id(details.errors, 'CSIPSTR1',
+                                         severity=Severity.Error))
+
+    def test_str1_package_root_multi_dir(self):
+        """Dedicated test for package root detection errors."""
+        ip_path = Path(os.path.join(self.bad_ip_root, 'multi_dir'))
+        _, details = STRUCT.validate(ip_path)
+        self.assertEqual(details.status, STRUCT.StructureStatus.NotWellFormed,
+                        EXP_NOT_WELLFORMED.format(details.status))
+        err_count = 1
+        self.assertEqual(len(details.errors), err_count,
+                        EXP_ERRORS.format(err_count, len(details.errors)))
+        self.assertTrue(contains_rule_id(details.errors, 'CSIPSTR1',
+                                         severity=Severity.Error))
+
+    def test_str1_package_root_multi_file(self):
+        """Dedicated test for package root detection errors."""
+        ip_path = Path(os.path.join(self.bad_ip_root, 'multi_file.zip'))
+        _, details = STRUCT.validate(ip_path)
+        self.assertEqual(details.status, STRUCT.StructureStatus.NotWellFormed,
+                        EXP_NOT_WELLFORMED.format(details.status))
+        err_count = 1
+        self.assertEqual(len(details.errors), err_count,
+                        EXP_ERRORS.format(err_count, len(details.errors)))
+        self.assertTrue(contains_rule_id(details.errors, 'CSIPSTR1',
+                                         severity=Severity.Error))
+
+    def test_str1_package_root_multi_var(self):
+        """Dedicated test for package root detection errors."""
+        ip_path = Path(os.path.join(self.bad_ip_root, 'multi_var.zip'))
+        _, details = STRUCT.validate(ip_path)
+        self.assertEqual(details.status, STRUCT.StructureStatus.NotWellFormed,
+                        EXP_NOT_WELLFORMED.format(details.status))
+        err_count = 1
+        self.assertEqual(len(details.errors), err_count,
+                        EXP_ERRORS.format(err_count, len(details.errors)))
+        self.assertTrue(contains_rule_id(details.errors, 'CSIPSTR1',
+                                         severity=Severity.Error))
+
+    def test_str1_single_file_archive(self):
+        """Test a package that's just a compressed single file."""
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
                                'empty.zip'))
         _, details = STRUCT.validate(ip_path)
-        val_errors = details.errors
         err_count = 1
-        self.assertEqual(len(val_errors), err_count,
-                        EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR1',
+        self.assertEqual(len(details.errors), err_count,
+                        EXP_ERRORS.format(err_count, len(details.errors)))
+        self.assertTrue(contains_rule_id(details.errors, 'CSIPSTR1',
                                          severity=Severity.Error))
+
+    def test_no_messages(self):
+        """Test package with no METS.xml file"""
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
+                               'no_messages.tar.gz'))
+        is_valid, details = STRUCT.validate(ip_path)
+        self.assertTrue(is_valid)
+        self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
+                        EXP_NOT_WELLFORMED.format(details.status))
+        self.assertEqual(len(details.messages), 0)
 
     def test_minimal(self):
         """Test minimal STRUCT with schemas, the basic no errors but with warnings package."""
-        ip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
+        ip_path = Path(os.path.join(self.ip_res_root, 'minimal',
                                'minimal_IP_with_schemas.zip'))
         _, details = STRUCT.validate(ip_path)
         self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
                         EXP_WELLFORMED.format(details.status))
         val_warnings = details.warnings
-        self.assertEqual(len(val_warnings), 3,
+        self.assertEqual(len(val_warnings), 5,
                         'Expecting 2 warnings but found {}'.format(len(val_warnings)))
         self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR6',
                                          severity=Severity.Warning))
         self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR7',
                                          severity=Severity.Warning))
+        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR12',
+                                         severity=Severity.Warning))
+        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR13',
+                                         severity=Severity.Warning))
         self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR16',
                                          severity=Severity.Warning))
 
-    def test_nomets(self):
+    def test_str3_package(self):
+        """Test minimal STRUCT with schemas, the basic no errors but with warnings package."""
+        ip_path = Path(os.path.join(self.ip_res_root, 'unpacked',
+                               '733dc055-34be-4260-85c7-5549a7083031'))
+        _, details = STRUCT.validate(ip_path)
+        self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
+                        EXP_WELLFORMED.format(details.status))
+        self.assertEqual(len(details.warnings), 1,
+                        'Expecting 1 warning but found {}'.format(len(details.warnings)))
+        self.assertTrue(contains_rule_id(details.warnings, 'CSIPSTR16',
+                                         severity=Severity.Warning))
+        self.assertEqual(len(details.infos), 2,
+                        'Expecting 2 info messages but found {}'.format(len(details.infos)))
+        self.assertTrue(contains_rule_id(details.infos, 'CSIPSTR3',
+                                         severity=Severity.Information))
+
+    def test_str4_nomets(self):
         """Test package with no METS.xml file"""
-        ip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'struct',
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
                                'no_mets.tar.gz'))
         _, details = STRUCT.validate(ip_path)
         self.assertEqual(details.status, STRUCT.StructureStatus.NotWellFormed,
                         EXP_NOT_WELLFORMED.format(details.status))
-        val_errors = details.errors
         err_count = 1
-        self.assertEqual(len(val_errors), err_count,
-                        EXP_ERRORS.format(err_count, len(val_errors)))
-        self.assertTrue(contains_rule_id(val_errors, 'CSIPSTR4'))
+        self.assertEqual(len(details.messages), err_count,
+                        EXP_ERRORS.format(err_count, len(details.messages)))
+        self.assertTrue(contains_rule_id(details.messages, 'CSIPSTR4'))
 
-        val_warnings = details.warnings
-        self.assertEqual(len(val_warnings), 3,
-                        'Expecting 2 warnings but found {}'.format(len(val_warnings)))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR6',
-                                         severity=Severity.Warning))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR7',
-                                         severity=Severity.Warning))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR16',
-                                         severity=Severity.Warning))
-
-    def test_nomd(self):
+    def test_str5_nomd(self):
         # test as root
-        ip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'struct',
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
                                'no_md.tar.gz'))
         _, details = STRUCT.validate(ip_path)
         self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
                         EXP_WELLFORMED.format(details.status))
-        val_warnings = details.warnings
-        warn_count = 4
-        self.assertEqual(len(val_warnings), warn_count,
-                        EXP_ERRORS.format(warn_count, len(val_warnings)))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR5',
-                                         severity=Severity.Warning))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR6',
-                                         severity=Severity.Warning))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR7',
-                                         severity=Severity.Warning))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR16',
+        warn_count = 1
+        self.assertEqual(len(details.messages), warn_count,
+                        EXP_ERRORS.format(warn_count, len(details.warnings)))
+        self.assertTrue(contains_rule_id(details.warnings, 'CSIPSTR5',
                                          severity=Severity.Warning))
 
-    def test_noschema(self):
+    def test_str6_nopres(self):
         # test as root
-        ip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'struct',
-                               'no_schemas.tar.gz'))
-        _, details = STRUCT.validate(ip_path)
-
-        self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
-                        EXP_WELLFORMED.format(details.status))
-        val_warnings = details.warnings
-        warn_count = 4
-        self.assertEqual(len(val_warnings), warn_count,
-                        EXP_ERRORS.format(warn_count, len(val_warnings)))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR6',
-                                         severity=Severity.Warning))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR7',
-                                         severity=Severity.Warning))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR15',
-                                         severity=Severity.Warning))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR16',
-                                         severity=Severity.Warning))
-
-    def test_nodata(self):
-        # test as root
-        ip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'struct',
-                               'no_data.tar.gz'))
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
+                               'no_pres.tar.gz'))
         _, details = STRUCT.validate(ip_path)
         self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
                         EXP_WELLFORMED.format(details.status))
-        val_warnings = details.warnings
-        warn_count = 3
-        self.assertEqual(len(val_warnings), warn_count,
-                        EXP_ERRORS.format(warn_count, len(val_warnings)))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR6',
-                                         severity=Severity.Warning))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR7',
-                                         severity=Severity.Warning))
-        self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR16',
+        warn_count = 1
+        self.assertEqual(len(details.messages), warn_count,
+                        EXP_ERRORS.format(warn_count, len(details.warnings)))
+        self.assertTrue(contains_rule_id(details.warnings, 'CSIPSTR6',
                                          severity=Severity.Warning))
 
-    def test_noreps(self):
-        ip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'struct',
+    def test_str7_nodesc(self):
+        # test as root
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
+                               'no_desc.tar.gz'))
+        _, details = STRUCT.validate(ip_path)
+        self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
+                        EXP_WELLFORMED.format(details.status))
+        warn_count = 1
+        self.assertEqual(len(details.messages), warn_count,
+                        EXP_ERRORS.format(warn_count, len(details.warnings)))
+        self.assertTrue(contains_rule_id(details.warnings, 'CSIPSTR7',
+                                         severity=Severity.Warning))
+
+    def test_str8_noother(self):
+        # test as root
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
+                               'no_other.tar.gz'))
+        _, details = STRUCT.validate(ip_path)
+        self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
+                        EXP_WELLFORMED.format(details.status))
+        warn_count = 1
+        self.assertEqual(len(details.messages), warn_count,
+                        EXP_ERRORS.format(warn_count, len(details.infos)))
+        self.assertTrue(contains_rule_id(details.infos, 'CSIPSTR8',
+                                         severity=Severity.Information))
+
+    def test_str9_noreps(self):
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
                                'no_reps.tar.gz'))
         _, details = STRUCT.validate(ip_path)
         self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
                         EXP_WELLFORMED.format(details.status))
         val_warnings = details.warnings
-        err_count = 4
+        err_count = 1
         self.assertEqual(len(val_warnings), err_count,
                         EXP_ERRORS.format(err_count, len(val_warnings)))
         self.assertTrue(contains_rule_id(val_warnings, 'CSIPSTR9',
                                          severity=Severity.Warning))
-    """Unit tests covering structural validation of information packages, spcifically
-    unpacking archived packages and establishing that the files and folders specified
-    if the CSIP are present."""
+
+    def test_str10_emptyreps(self):
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
+                               'empty_reps.tar.gz'))
+        _, details = STRUCT.validate(ip_path)
+        self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
+                        EXP_WELLFORMED.format(details.status))
+        err_count = 1
+        self.assertEqual(len(details.messages), err_count,
+                        EXP_ERRORS.format(err_count, len(details.warnings)))
+        self.assertTrue(contains_rule_id(details.warnings, 'CSIPSTR10',
+                                         severity=Severity.Warning))
+
+    def test_str11_nodata(self):
+        # test as root
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
+                               'no_data.tar.gz'))
+        _, details = STRUCT.validate(ip_path)
+        self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
+                        EXP_WELLFORMED.format(details.status))
+        warn_count = 1
+        self.assertEqual(len(details.messages), warn_count,
+                        EXP_ERRORS.format(warn_count, len(details.warnings)))
+        self.assertTrue(contains_rule_id(details.warnings, 'CSIPSTR11',
+                                         severity=Severity.Warning))
+
+    def test_str12_norepmets(self):
+        # test as root
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
+                               'no_repmets.tar.gz'))
+        _, details = STRUCT.validate(ip_path)
+        self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
+                        EXP_WELLFORMED.format(details.status))
+        warn_count = 1
+        self.assertEqual(len(details.messages), warn_count,
+                        EXP_ERRORS.format(warn_count, len(details.warnings)))
+        self.assertTrue(contains_rule_id(details.warnings, 'CSIPSTR12',
+                                         severity=Severity.Warning))
+
+    def test_str13_norepmd(self):
+        # test as root
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
+                               'no_repmd.tar.gz'))
+        _, details = STRUCT.validate(ip_path)
+        self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
+                        EXP_WELLFORMED.format(details.status))
+        warn_count = 1
+        self.assertEqual(len(details.messages), warn_count,
+                        EXP_ERRORS.format(warn_count, len(details.warnings)))
+        self.assertTrue(contains_rule_id(details.warnings, 'CSIPSTR13',
+                                         severity=Severity.Warning))
+
+    def test_str15_noschema(self):
+        # test as root
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
+                               'no_schemas.tar.gz'))
+        _, details = STRUCT.validate(ip_path)
+
+        self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
+                        EXP_WELLFORMED.format(details.status))
+        warn_count = 1
+        self.assertEqual(len(details.messages), warn_count,
+                        EXP_ERRORS.format(warn_count, len(details.warnings)))
+        self.assertTrue(contains_rule_id(details.warnings, 'CSIPSTR15',
+                                         severity=Severity.Warning))
+
+    def test_str16_nodocs(self):
+        # test as root
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
+                               'no_docs.tar.gz'))
+        _, details = STRUCT.validate(ip_path)
+        self.assertEqual(details.status, STRUCT.StructureStatus.WellFormed,
+                        EXP_WELLFORMED.format(details.status))
+        warn_count = 1
+        self.assertEqual(len(details.messages), warn_count,
+                        EXP_ERRORS.format(warn_count, len(details.warnings)))
+        self.assertTrue(contains_rule_id(details.warnings, 'CSIPSTR16',
+                                         severity=Severity.Warning))
+
+    def test_get_reps(self):
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
+                               'no_messages.tar.gz'))
+        checker: STRUCT.StructureChecker = STRUCT.StructureChecker(ip_path)
+        reps_count = 1
+        self.assertEqual(len(checker.get_representations()), reps_count,
+                        EXP_ERRORS.format(reps_count, len(checker.get_representations())))
+
+    def test_get_no_reps(self):
+        ip_path = Path(os.path.join(self.ip_res_root, 'struct',
+                               'no_reps.tar.gz'))
+        checker: STRUCT.StructureChecker = STRUCT.StructureChecker(ip_path)
+        reps_count = 0
+        self.assertEqual(len(checker.get_representations()), reps_count,
+                        EXP_ERRORS.format(reps_count, len(checker.get_representations())))
