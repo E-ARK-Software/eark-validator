@@ -89,10 +89,10 @@ class ValidationProfile():
 
     def get_all_results(self) -> List[Result]:
         """Return the full set of results."""
-        results: List[Result] = []
+        results_list: List[Result] = []
         for _, results in self.results.items():
-            results.extend(results)
-        return results
+            results_list.extend(results)
+        return results_list
 
     def get_result(self, name: str) ->  List[Result]:
         """Return only the results for element name."""
