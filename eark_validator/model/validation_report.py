@@ -35,19 +35,21 @@ import uuid
 
 from pydantic import BaseModel
 
-from eark_validator.model.package_details import InformationPackage
-from eark_validator.model.specifications import Level
+from .package_details import InformationPackage
+from .specifications import Level
+from .constants import (
+    UNKNOWN, INFORMATION, WARNING, ERROR, WELLFORMED, NOTWELLFORMED)
 
 @unique
 class Severity(str, Enum):
     """Enum covering information package validation statuses."""
-    UNKNOWN = 'Unknown'
+    UNKNOWN = UNKNOWN
     # Information level, possibly not best practise
-    INFORMATION = 'Information'
+    INFORMATION = INFORMATION
     # Non-fatal issue that should be corrected
-    WARNING = 'Warning'
+    WARNING = WARNING
     # Error level message means invalid package
-    ERROR = 'Error'
+    ERROR = ERROR
 
     @classmethod
     def from_id(cls, severity_id: str) -> Optional['Severity']:
@@ -90,11 +92,11 @@ class Result(BaseModel):
 @unique
 class StructureStatus(str, Enum):
     """Enum covering information package validation statuses."""
-    UNKNOWN = 'Unknown'
+    UNKNOWN = UNKNOWN
     # Package has basic parse / structure problems and can't be validated
-    NOTWELLFORMED = 'Not Well Formed'
+    NOTWELLFORMED = NOTWELLFORMED
     # Package structure is OK
-    WELLFORMED = 'Well Formed'
+    WELLFORMED = WELLFORMED
 
 class StructResults(BaseModel):
     status: StructureStatus = StructureStatus.UNKNOWN

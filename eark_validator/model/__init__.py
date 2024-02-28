@@ -25,7 +25,7 @@
 #
 """
 E-ARK : Information Package Validation
-        Information Package API model types
+        Information Package model types and constants.
 """
 # import models into model package
 from .checksum import Checksum, ChecksumAlg
