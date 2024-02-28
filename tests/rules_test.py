@@ -28,6 +28,7 @@ import unittest
 from enum import Enum
 
 from importlib_resources import files
+from pydantic import ValidationError
 
 from eark_validator import rules as SC
 from eark_validator.model.validation_report import Severity, Result
@@ -217,7 +218,7 @@ class ValidationProfileTest(unittest.TestCase):
         profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
         result = profile.get_result('metsHdr')
         self.assertTrue(profile.is_valid)
-        self.assertEqual(len(list(filter(lambda a: a.severity == Severity.Warning, result))), 1)
+        self.assertEqual(len(list(filter(lambda a: a.severity == Severity.WARNING, result))), 1)
 
     def test_get_bad_key(self):
         profile = SC.ValidationProfile.from_specification('CSIP')
@@ -225,8 +226,8 @@ class ValidationProfileTest(unittest.TestCase):
         result = profile.get_result('badkey')
         self.assertIsNone(result)
 
-class SeverityTest(Enum):
-    NOT_SEV: 'NOT_SEV'
+class SeverityTest(str, Enum):
+    NOT_SEV = 'NOT_SEV'
 
 class ResultTest(unittest.TestCase):
     @classmethod
@@ -239,8 +240,8 @@ class ResultTest(unittest.TestCase):
         self.assertIsNotNone(self._result.message)
 
     def test_bad_sev_att(self):
-        with self.assertRaises(AttributeError):
-            self._result.severity = SeverityTest.NOT_SEV
+        with self.assertRaises(ValidationError):
+            Result.model_validate({ 'severity': SeverityTest.NOT_SEV })
 
 def _test_validation(name, to_validate):
     rules = SC.SchematronRuleset(SC.get_schematron_path('CSIP', name))
@@ -248,11 +249,11 @@ def _test_validation(name, to_validate):
     results: List[Result] = SC.TestResults.from_validation_report(rules._schematron.validation_report)
     errors = warnings = infos = 0
     for result in results:
-        if result.severity == SC.Severity.Error:
+        if result.severity == SC.Severity.ERROR:
             errors += 1
-        elif result.severity == SC.Severity.Warning:
+        elif result.severity == SC.Severity.WARNING:
             warnings += 1
-        elif result.severity == SC.Severity.Information:
+        elif result.severity == SC.Severity.INFORMATION:
             infos += 1
     return errors < 1, errors, warnings, infos
 

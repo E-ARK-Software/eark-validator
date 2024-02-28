@@ -93,8 +93,4 @@ class SchematronTest(unittest.TestCase):
         self.assertFalse(_is_list_valid(SC.TestResults.from_validation_report(self._mets_one_def_rules._schematron.validation_report)))
 
 def _is_list_valid(to_test: List[Result]) -> bool:
-    for result in to_test:
-        if result.severity == Severity.Error:
-            return False
-    return True
-    # return len(list(filter(lambda a: a == Severity.Error, to_test))) < 1
+    return len(list(filter(lambda a: a.severity == Severity.ERROR, to_test))) < 1

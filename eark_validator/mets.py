@@ -37,43 +37,64 @@ from eark_validator.model.validation_report import Location, Result
 from eark_validator.utils import get_path
 from eark_validator.const import NOT_FILE, NOT_VALID_FILE
 
+NAMESPACES : str = 'namespaces'
+OBJID: str = 'objid'
+LABEL: str = 'label'
+TYPE: str = 'type'
+PROFILE: str = 'profile'
+OTHERTYPE: str = 'OTHERTYPE'
+
+START_ELE: str = 'start'
+START_NS: str = 'start-ns'
+
+
+
+
 class MetsFiles():
     @staticmethod
     def details_from_mets_root(namespaces: dict[str,str], root_element: etree.Element) -> MetsRoot:
         return MetsRoot.model_validate({
-            'namespaces': namespaces,
-            'objid': root_element.get('OBJID', ''),
-            'label': root_element.get('LABEL', ''),
-            'type': root_element.get('TYPE', ''),
-            'profile': root_element.get('PROFILE', '')
+            NAMESPACES: namespaces,
+            OBJID: root_element.get(OBJID.upper(), ''),
+            LABEL: root_element.get(LABEL.upper(), ''),
+            TYPE: root_element.get(TYPE.upper(), ''),
+            PROFILE: root_element.get(PROFILE.upper(), '')
             })
 
     @staticmethod
     def from_file(mets_file: Path | str) -> MetsFile:
         path: Path = get_path(mets_file, True)
-        if (not path.is_file()):
+        if not path.is_file():
             raise ValueError(NOT_FILE.format(mets_file))
         ns: dict[str, str] = {}
         entries: list[FileEntry] = []
         othertype = contentinformationtype = oaispackagetype = ''
         try:
-            parsed_mets = etree.iterparse(mets_file, events=['start', 'start-ns'])
+            parsed_mets = etree.iterparse(mets_file, events=[START_ELE, START_NS])
             for event, element in parsed_mets:
-                if event == 'start-ns':
+                if event == START_NS:
                     prefix = element[0]
                     ns_uri = element[1]
                     ns[prefix] = ns_uri
                 if event == 'start':
                     if element.tag == Namespaces.METS.qualify('mets'):
                         mets_root: MetsRoot = MetsFiles.details_from_mets_root(ns, element)
-                        othertype = element.get(Namespaces.CSIP.qualify('OTHERTYPE'), '')
-                        contentinformationtype = element.get(Namespaces.CSIP.qualify('CONTENTINFORMATIONTYPE'), '')
+                        othertype = element.get(Namespaces.CSIP.qualify(OTHERTYPE), '')
+                        contentinformationtype = element.get(
+                            Namespaces.CSIP.qualify('CONTENTINFORMATIONTYPE'),
+                            ''
+                        )
                     elif element.tag == Namespaces.METS.qualify('metsHdr'):
-                        oaispackagetype = element.get(Namespaces.CSIP.qualify('OAISPACKAGETYPE'), '')
-                    elif (element.tag == Namespaces.METS.qualify('file')) or (element.tag == Namespaces.METS.qualify('mdRef')):
+                        oaispackagetype = element.get(
+                            Namespaces.CSIP.qualify('OAISPACKAGETYPE'), ''
+                        )
+                    elif element.tag in [
+                            Namespaces.METS.qualify('file'),
+                            Namespaces.METS.qualify('mdRef')
+                        ]:
                         entries.append(_parse_file_entry(element))
-        except etree.XMLSyntaxError:
-            raise ValueError(NOT_VALID_FILE.format(mets_file, 'XML'))
+        except etree.XMLSyntaxError as ex:
+            raise ValueError(NOT_VALID_FILE.format(mets_file, 'XML')) from ex
         return MetsFile.model_validate({
             'root': mets_root,
             'oaispackagetype': oaispackagetype,
@@ -131,14 +152,18 @@ class MetsValidator():
         self._package_root, mets = _handle_rel_paths(self._package_root, mets)
         try:
             parsed_mets = etree.iterparse(mets, schema=IP_SCHEMA.get('csip'))
-            for event, element in parsed_mets:
+            for _, element in parsed_mets:
                 self._process_element(element)
         except etree.XMLSyntaxError as synt_err:
             self._validation_errors.append(
                 Result.model_validate({
                     'rule_id': 'XML-1',
-                    'location': Location.model_validate({ 'context': synt_err.filename, 'test': str(synt_err.lineno), 'description': str(synt_err.offset) }),
-                    'message': 'File {} is not valid XML. {}'.format(mets, synt_err.msg),
+                    'location': Location.model_validate({
+                                        'context': synt_err.filename,
+                                        'test': str(synt_err.lineno),
+                                        'description': str(synt_err.offset)
+                                }),
+                    'message': f'File {mets} is not valid XML. {synt_err.msg}',
                     'severity': 'Error'
                     })
             )
@@ -147,17 +172,19 @@ class MetsValidator():
     def _process_element(self, element: etree.Element) -> None:
         # Define what to do with specific tags.
         if element.tag == Namespaces.METS.qualify('div') and \
-            element.attrib['LABEL'].startswith('Representations/'):
+            element.attrib['LABEL'].lower().startswith('representations/'):
             self._process_rep_div(element)
             return
-        if element.tag == Namespaces.METS.qualify('file') or element.tag == Namespaces.METS.qualify('mdRef'):
+        if element.tag in [ Namespaces.METS.qualify('file'), Namespaces.METS.qualify('mdRef') ]:
             self._file_refs.append(_parse_file_entry(element))
 
     def _process_rep_div(self, element: etree.Element) -> None:
         rep = element.attrib['LABEL'].rsplit('/', 1)[1]
         for child in element.getchildren():
             if child.tag == Namespaces.METS.qualify('mptr'):
-                self._reps_mets.update({rep:  child.attrib[Namespaces.XLINK.qualify('href')]})
+                self._reps_mets.update({
+                    rep:  child.attrib[Namespaces.XLINK.qualify('href')]
+                })
 
 def _parse_file_entry(element: etree.Element) -> FileEntry:
     """Create a FileItem from an etree element."""
@@ -169,12 +196,22 @@ def _parse_file_entry(element: etree.Element) -> FileEntry:
         })
 
 def _path_from_xml_element(element: etree.Element) -> str:
-    if element.tag in [Namespaces.METS.qualify('file'), 'file']:
-        return element.find(Namespaces.METS.qualify('FLocat'), namespaces=element.nsmap).attrib[Namespaces.XLINK.qualify('href')] if hasattr(element, 'nsmap') else element.find('FLocat').attrib['href']
-    elif element.tag in [Namespaces.METS.qualify('mdRef'), 'mdRef']:
-        return element.attrib[Namespaces.XLINK.qualify('href')] if hasattr(element, 'nsmap') else element.find('FLocat').attrib['href']
-    else:
-        raise ValueError('Element {} is not a METS:file or METS:mdRef element.'.format(element.tag))
+    loc_ele: etree.Element = element
+    if element.tag in [ Namespaces.METS.qualify('file'), 'file' ]:
+        tag: str = Namespaces.METS.qualify('FLocat') if hasattr(element, 'nsmap') else 'FLocat'
+        loc_ele = element.find(tag)
+    if element.tag in [
+        Namespaces.METS.qualify('file'),
+        'file', Namespaces.METS.qualify('mdRef'),
+        'mdRef'
+        ]:
+        return  _get_path_attrib(loc_ele)
+    raise ValueError(f'Element {element.tag} is not a METS:file or METS:mdRef element.')
+
+def _get_path_attrib(element: etree.Element) -> str:
+    """Get the path attribute from an etree element."""
+    attrib_name = Namespaces.XLINK.qualify('href') if hasattr(element, 'nsmap') else 'href'
+    return element.attrib[attrib_name]
 
 def _checksum_from_mets_element(element: etree.Element) -> Checksum:
     """Create a Checksum from an etree element."""
@@ -187,5 +224,8 @@ def _checksum_from_mets_element(element: etree.Element) -> Checksum:
 def _handle_rel_paths(rootpath: str, metspath: str) -> tuple[str, str]:
     if metspath.startswith('file:///') or os.path.isabs(metspath):
         return metspath.rsplit('/', 1)[0], metspath
-    relpath = os.path.join(rootpath, metspath[9:]) if metspath.startswith('file://./') else os.path.join(rootpath, metspath)
+    if metspath.startswith('file://./'):
+        relpath = os.path.join(rootpath, metspath[9:])
+    else:
+        relpath = os.path.join(rootpath, metspath)
     return relpath.rsplit('/', 1)[0], relpath

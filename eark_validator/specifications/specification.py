@@ -25,7 +25,7 @@
 """Module covering information package structure validation and navigation."""
 import os
 from enum import Enum, unique
-from typing import Generator, List, Optional
+from typing import Optional
 
 from importlib_resources import files
 from lxml import etree as ET
@@ -42,12 +42,12 @@ from eark_validator.specifications.struct_reqs import Level
 class Specifications:
 
     @classmethod
-    def _from_xml_file(cls, xml_file: str, add_struct: bool=False) -> Specification:
+    def _from_xml_file(cls, xml_file: str) -> Specification:
+        """Create a Specification from an XML file."""
         if not os.path.exists(xml_file):
             raise FileNotFoundError(NO_PATH.format(xml_file))
         if not os.path.isfile(xml_file):
             raise ValueError(NOT_FILE.format(xml_file))
-        """Create a Specification from an XML file."""
         tree = ET.parse(xml_file, parser=cls._parser())
         return  cls._from_xml(tree)
 
@@ -159,11 +159,10 @@ class EarkSpecifications(str, Enum):
 
     def __init__(self, value: str):
         self._path = str(files(profiles).joinpath(value + '.xml'))
-        self._specfication = Specifications._from_xml_file(self._path)
-        self._title = value
+        self._specfication = Specifications._from_xml_file(self.path)
 
     @property
-    def id(self) -> str:
+    def spec_id(self) -> str:
         """Get the specification id."""
         return self.name
 
@@ -175,7 +174,7 @@ class EarkSpecifications(str, Enum):
     @property
     def title(self) -> str:
         """Get the specification title."""
-        return self._title
+        return self.value
 
     @property
     def specification(self) -> Specification:
@@ -185,12 +184,12 @@ class EarkSpecifications(str, Enum):
     @property
     def profile(self) -> str:
         """Get the specification profile url."""
-        return 'https://eark{}.dilcis.eu/profile/{}.xml'.format(self.name.lower(), self.value)
+        return f'https://eark{self.name.lower()}.dilcis.eu/profile/{self.value}.xml'
 
     @classmethod
-    def from_id(cls, id: str) -> Optional['EarkSpecifications']:
+    def from_id(cls, spec_id: str) -> Optional['EarkSpecifications']:
         """Get the enum from the value."""
         for spec in cls:
-            if spec.id == id or spec.value == id or spec.profile == id:
+            if spec_id in [ spec.spec_id, spec.value, spec.profile ]:
                 return spec
         return None

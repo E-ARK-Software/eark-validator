@@ -32,7 +32,8 @@ import tempfile
 import zipfile
 from eark_validator.infopacks.manifest import Checksummer
 SUB_MESS_NOT_EXIST = 'Path {} does not exist'
-SUB_MESS_NOT_ARCH = 'Parameter "to_unpack": {} does not reference a file of known archive format (zip or tar).'
+SUB_MESS_NOT_ARCH = 'Parameter "to_unpack": {} does not reference' + \
+                    'a file of known archive format (zip or tar).'
 
 class PackageError(Exception):
     """Exception used to mark validation error when unpacking archive."""
@@ -70,10 +71,10 @@ class PackageHandler():
         if len(children) != 1:
             # Dir unpacks to more than a single folder
             raise PackageError('Unpacking archive yields'
-                                  '{} children.'.format(len(children)))
+                               f'{len(children)} children.')
         if not os.path.isdir(children[0]):
             raise PackageError('Unpacking archive yields'
-                                  'a single file child {}.'.format(children[0]))
+                               f'a single file child {children[0]}.')
         return children[0].absolute()
 
     @staticmethod

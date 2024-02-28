@@ -41,19 +41,19 @@ from eark_validator.model.specifications import Level
 @unique
 class Severity(str, Enum):
     """Enum covering information package validation statuses."""
-    Unknown = 'Unknown'
+    UNKNOWN = 'Unknown'
     # Information level, possibly not best practise
-    Information = 'Information'
+    INFORMATION = 'Information'
     # Non-fatal issue that should be corrected
-    Warning = 'Warning'
+    WARNING = 'Warning'
     # Error level message means invalid package
-    Error = 'Error'
+    ERROR = 'Error'
 
     @classmethod
-    def from_id(cls, id: str) -> Optional['Severity']:
+    def from_id(cls, severity_id: str) -> Optional['Severity']:
         """Get the enum from the value."""
         for severity in cls:
-            if severity.name == id or severity.value == id:
+            if severity_id in [ severity.name, severity.value ]:
                 return severity
         return None
 
@@ -64,16 +64,16 @@ class Severity(str, Enum):
         for severity in cls:
             if severity.value.lower().startswith(search):
                 return severity
-        return None
+        raise ValueError(f'No severity found for role: {role}')
 
     @classmethod
     def from_level(cls, level: Level) -> 'Severity':
         """Return the correct test result severity from a Level instance."""
         if level is Level.MUST:
-            return Severity.Error
+            return Severity.ERROR
         if level is Level.SHOULD:
-            return Severity.Warning
-        return Severity.Information
+            return Severity.WARNING
+        return Severity.INFORMATION
 
 class Location(BaseModel):
     """All details of the location of an error."""
@@ -83,34 +83,34 @@ class Location(BaseModel):
 
 class Result(BaseModel):
     rule_id: str | None
-    severity: Severity = Severity.Unknown
+    severity: Severity = Severity.UNKNOWN
     location: Location | None
     message: str | None
 
 @unique
 class StructureStatus(str, Enum):
     """Enum covering information package validation statuses."""
-    Unknown = 'Unknown'
+    UNKNOWN = 'Unknown'
     # Package has basic parse / structure problems and can't be validated
-    NotWellFormed = 'Not Well Formed'
+    NOTWELLFORMED = 'Not Well Formed'
     # Package structure is OK
-    WellFormed = 'Well Formed'
+    WELLFORMED = 'Well Formed'
 
 class StructResults(BaseModel):
-    status: StructureStatus = StructureStatus.Unknown
+    status: StructureStatus = StructureStatus.UNKNOWN
     messages: List[Result] = []
 
     @property
     def errors(self) -> List[Result]:
-        return [m for m in self.messages if m.severity == Severity.Error]
+        return [m for m in self.messages if m.severity == Severity.ERROR]
 
     @property
     def warnings(self) -> List[Result]:
-        return [m for m in self.messages if m.severity == Severity.Warning]
+        return [m for m in self.messages if m.severity == Severity.WARNING]
 
     @property
     def infos(self) -> List[Result]:
-        return [m for m in self.messages if m.severity == Severity.Information]
+        return [m for m in self.messages if m.severity == Severity.INFORMATION]
 
 class MetatdataResults(BaseModel):
     schema_results: List[Result] = []

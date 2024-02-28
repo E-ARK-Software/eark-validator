@@ -23,7 +23,6 @@
 # under the License.
 #
 """Module covering information package structure validation and navigation."""
-import os
 from pathlib import Path
 from lxml import etree
 
@@ -35,13 +34,22 @@ from eark_validator.model.package_details import InformationPackage
 from eark_validator.model.validation_report import Result
 from .package_handler import PackageHandler
 
+CONTENTINFORMATIONTYPE = 'contentinformationtype'
+QUAL_CONTENTINFORMATIONTYPE = Namespaces.CSIP.qualify(CONTENTINFORMATIONTYPE.upper())
+QUAL_OTHERTYPE = Namespaces.CSIP.qualify('OTHERTYPE')
+QUAL_OAISPACKAGETYPE = Namespaces.CSIP.qualify('OAISPACKAGETYPE')
+METS = 'mets'
+METS_FILE = 'METS.xml'
+QUAL_METS = Namespaces.METS.qualify(METS)
+QUAL_METSHDR = Namespaces.METS.qualify('metsHdr')
+
 class InformationPackages:
 
     @staticmethod
     def details_from_mets_file(mets_file: Path) -> PackageDetails:
-        if (not mets_file.exists()):
+        if not mets_file.exists():
             raise FileNotFoundError(NO_PATH.format(mets_file))
-        if (not mets_file.is_file()):
+        if not mets_file.is_file():
             raise ValueError(NOT_FILE.format(mets_file))
         ns = {}
         label = othertype = contentinformationtype = oaispackagetype = ''
@@ -52,45 +60,45 @@ class InformationPackages:
                     # Add namespace id to the dictionary
                     ns[element[1]] = element[0]
                 if event == 'start':
-                    if element.tag == Namespaces.METS.qualify('mets'):
+                    if element.tag == QUAL_METS:
                         label = element.get('LABEL', '')
-                        othertype = element.get(Namespaces.CSIP.qualify('OTHERTYPE'), '')
-                        contentinformationtype = element.get(Namespaces.CSIP.qualify('CONTENTINFORMATIONTYPE'), '')
-                        oaispackagetype = element.find(Namespaces.METS.qualify('metsHdr')).get(Namespaces.CSIP.qualify('OAISPACKAGETYPE'), '')
+                        othertype = element.get(QUAL_OTHERTYPE, '')
+                        contentinformationtype = element.get(QUAL_CONTENTINFORMATIONTYPE, '')
+                        oaispackagetype = element.find(QUAL_METSHDR).get(QUAL_OAISPACKAGETYPE, '')
                     else:
                         break
-        except (etree.XMLSyntaxError, AttributeError):
-            raise ValueError(NOT_VALID_FILE.format(mets_file, 'XML'))
+        except (etree.XMLSyntaxError, AttributeError) as ex:
+            raise ValueError(NOT_VALID_FILE.format(mets_file, 'XML')) from ex
         return PackageDetails.model_validate({
             'label': label,
             'othertype': othertype,
-            'contentinformationtype': contentinformationtype,
+            CONTENTINFORMATIONTYPE: contentinformationtype,
             'oaispackagetype': oaispackagetype
         })
 
     @staticmethod
     def from_path(package_path: Path) -> InformationPackage:
-        if (not package_path.exists()):
+        if not package_path.exists():
             raise FileNotFoundError(NO_PATH.format(package_path))
         handler: PackageHandler = PackageHandler()
         to_parse:Path = handler.prepare_package(package_path)
-        mets_path: Path = to_parse.joinpath('METS.xml')
-        if (not mets_path.is_file()):
+        mets_path: Path = to_parse.joinpath(METS_FILE)
+        if not mets_path.is_file():
             raise ValueError('No METS file found in package')
-        mets: MetsFile = MetsFiles.from_file(to_parse.joinpath('METS.xml'))
+        mets: MetsFile = MetsFiles.from_file(to_parse.joinpath(METS_FILE))
         return InformationPackage.model_validate({
             'name': to_parse.stem,
-            'mets': mets,
-            'package': InformationPackages.details_from_mets_file(to_parse.joinpath('METS.xml'))
+            METS: mets,
+            'package': InformationPackages.details_from_mets_file(to_parse.joinpath(METS_FILE))
         })
 
     @staticmethod
     def validate(package_path: Path) -> Result:
-        if (not package_path.exists()):
+        if not package_path.exists():
             raise FileNotFoundError(NO_PATH.format(package_path))
         handler: PackageHandler = PackageHandler()
         to_parse:Path = handler.prepare_package(package_path)
-        mets_path: Path = to_parse.joinpath('METS.xml')
-        if (not mets_path.is_file()):
+        mets_path: Path = to_parse.joinpath(METS_FILE)
+        if not mets_path.is_file():
             raise ValueError('No METS file found in package')
         return True

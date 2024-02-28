@@ -25,10 +25,8 @@
 """Information Package manifests."""
 import os
 import pickle
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import Optional
-
-import lxml.etree as ET
 
 from eark_validator.const import NO_PATH, NOT_DIR, NOT_FILE
 from eark_validator.mets import MetsFiles
@@ -40,23 +38,42 @@ from eark_validator.utils import get_path
 
 class Checksummer:
     def __init__(self, algorithm: ChecksumAlg | str):
-        self._algorithm: ChecksumAlg = algorithm if isinstance(algorithm, ChecksumAlg) else ChecksumAlg.from_string(algorithm)
+        if isinstance(algorithm, ChecksumAlg):
+            self._algorithm: ChecksumAlg = algorithm
+        else:
+            self._algorithm: ChecksumAlg = ChecksumAlg.from_string(algorithm)
 
     @property
     def algorithm(self) -> ChecksumAlg:
-        """Get the algorithm."""
+        """Return the checksum algorithm used by this checksummer."""
         return self._algorithm
 
     def hash_file(self, path: Path) -> 'Checksum':
-        if (not path.exists()):
+        """Calculate the checksum of a file.
+
+        Args:
+            path (Path): A path to a file to checksum.
+
+        Raises:
+            FileNotFoundError: If the path parameter is found.
+            ValueError: If the path parameter resolves to a directory.
+
+        Returns:
+            Checksum: A Checksum object containing the Hexadecimal digest of the file.
+        """
+        if not path.exists():
             raise FileNotFoundError(NO_PATH.format(path))
-        if (not path.is_file()):
+        if not path.is_file():
             raise ValueError(NOT_FILE.format(path))
         implemenation: ChecksumAlg = ChecksumAlg.get_implementation(self._algorithm)
         with open(path, 'rb') as file:
             for chunk in iter(lambda: file.read(4096), b''):
                 implemenation.update(chunk)
-        return Checksum.model_validate({'algorithm': self._algorithm, 'value': implemenation.hexdigest()}, strict=True)
+        return Checksum.model_validate({
+                'algorithm': self._algorithm,
+                'value': implemenation.hexdigest()
+                }, strict=True
+            )
 
     @classmethod
     def from_file(cls, path: Path, algorithm: 'ChecksumAlg') -> 'Checksum':
@@ -66,14 +83,18 @@ class Checksummer:
 
 class ManifestEntries:
     @staticmethod
-    def from_file_path(root: Path, entry_path: Path, checksum_algorithm: ChecksumAlg | str=None) -> ManifestEntry:
-        abs_path: Path = root.joinpath(entry_path).absolute()
+    def from_file_path(root: Path, entry_path: Path,
+                       checksum_algorithm: ChecksumAlg | str=None) -> ManifestEntry:
         """Create a FileItem from a file path."""
-        if (not os.path.exists(abs_path)):
+        abs_path: Path = root.joinpath(entry_path).absolute()
+        if not os.path.exists(abs_path):
             raise FileNotFoundError(NO_PATH.format(abs_path))
-        if (not os.path.isfile(abs_path)):
-            raise ValueError('Path {} is not a file.'.format(abs_path))
-        algorithm = checksum_algorithm if isinstance(checksum_algorithm, ChecksumAlg) else ChecksumAlg.from_string(checksum_algorithm)
+        if not os.path.isfile(abs_path):
+            raise ValueError(f'Path {abs_path} is not a file.')
+        if isinstance(checksum_algorithm, ChecksumAlg):
+            algorithm: ChecksumAlg = checksum_algorithm
+        else:
+            algorithm: ChecksumAlg = ChecksumAlg.from_string(checksum_algorithm)
         checksums = [ Checksummer.from_file(abs_path, algorithm) ] if checksum_algorithm else []
         return ManifestEntry.model_validate({
             'path': entry_path,
@@ -92,17 +113,19 @@ class ManifestEntries:
 
 class Manifests:
     @classmethod
-    def validate_manifest(cls, manifest: Manifest, alt_root: Optional[Path] = None) -> tuple[bool, list[str]]:
+    def validate_manifest(cls, manifest: Manifest,
+                          alt_root: Optional[Path] = None) -> tuple[bool, list[str]]:
         """Check the integrity of the manifest."""
         issues: list[str] = []
         root = alt_root if alt_root else _resolve_manifest_root(manifest)
         for entry in manifest.entries:
             abs_path = Path(os.path.join(root, entry.path))
             if not abs_path.is_file():
-                issues.append('File {} is missing.'.format(abs_path))
+                issues.append(f'File {abs_path} is missing.')
                 continue
-            if (entry.size != os.path.getsize(abs_path)):
-                issues.append('File {} manifest size {}, filesystem size {}.'.format(entry.path, entry.size, os.path.getsize(abs_path)))
+            if entry.size != os.path.getsize(abs_path):
+                size = os.path.getsize(abs_path)
+                issues.append(f'File {entry.path} manifest size {entry.size}, file size {size}.')
             check_issues: list[str] = _test_checksums(abs_path, entry.checksums)
             if not bool(check_issues):
                 issues.extend(check_issues)
@@ -111,12 +134,11 @@ class Manifests:
     @staticmethod
     def from_source(source: Path | str, checksum_algorithm: ChecksumAlg=None) -> Manifest:
         path = get_path(source, True)
-        if (path.is_file()):
+        if path.is_file():
             return Manifests.from_mets_file(path)
-        elif (path.is_dir()):
+        if path.is_dir():
             return Manifests.from_directory(path, checksum_algorithm=checksum_algorithm)
-        else:
-            raise ValueError('Path {} is neither a file nor a directory.'.format(source))
+        raise ValueError(f'Path {source} is neither a file nor a directory.')
 
     @staticmethod
     def to_file(manifest: Manifest, path: Path | str) -> None:
@@ -133,14 +155,17 @@ class Manifests:
     @staticmethod
     def from_directory(source: Path | str, checksum_algorithm: ChecksumAlg=None) -> Manifest:
         path = get_path(source, True)
-        if (not path.is_dir()):
+        if not path.is_dir():
             raise ValueError(NOT_DIR.format(source))
         entries = []
-        for subdir, dirs, files in os.walk(source):
+        for subdir, _, files in os.walk(source):
             for file in files:
                 root = Path(os.path.join(subdir, file))
                 entry_path = root.relative_to(path)
-                entries.append(ManifestEntries.from_file_path(path, entry_path, checksum_algorithm=checksum_algorithm))
+                entries.append(
+                    ManifestEntries.from_file_path(path,
+                                                   entry_path,
+                                                   checksum_algorithm=checksum_algorithm))
         return Manifest.model_validate({
             'root': path,
             'source': SourceType.PACKAGE,
@@ -151,10 +176,11 @@ class Manifests:
     @staticmethod
     def from_mets_file(source: Path | str) -> Manifest:
         path: Path = get_path(source, True)
-        if (not path.is_file()):
+        if not path.is_file():
             raise ValueError(NOT_FILE.format(source))
         mets_file = MetsFiles.from_file(path)
-        entries: list[ManifestEntry] = list(map(ManifestEntries.from_file_entry, mets_file.file_entries))
+        entries: list[ManifestEntry] = list(map(ManifestEntries.from_file_entry,
+                                                mets_file.file_entries))
         return Manifest.model_validate({
             'root': path,
             'source': SourceType.METS,
@@ -167,13 +193,13 @@ def _test_checksums(path: Path, checksums: list[Checksum]) -> list[str]:
     for checksum in checksums:
         calced_checksum = Checksummer(checksum.algorithm).hash_file(path)
         if not checksum == calced_checksum:
-            issues.append('File {} manifest checksum {}, calculated checksum {}.'.format(path, checksum.value, calced_checksum))
+            issues.append(f'File {path} manifest checksum {checksum.value},' +
+                          f'calculated checksum {calced_checksum}.')
     return issues
 
 def _resolve_manifest_root(manifest: Manifest) -> Path:
     if manifest.source == SourceType.PACKAGE:
         return manifest.root
-    elif manifest.source == SourceType.METS:
+    if manifest.source == SourceType.METS:
         return manifest.root.parent
-    else:
-        raise ValueError('Unknown source type {}'.format(manifest.source))
+    raise ValueError(f'Unknown source type {manifest.source}')

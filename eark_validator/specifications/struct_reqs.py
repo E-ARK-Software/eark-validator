@@ -51,9 +51,9 @@ REQUIREMENTS = {
           'level': Level.MAY,
           'message': ' '.join([
             'The Information Package MAY be contained in an archive/compressed form,',
-            'e.g. TAR or ZIP, for storage or transfer. The specific format details should be decided',
-            'by the interested parties and documented, for example in a submission agreement or',
-            'statement of access terms.'
+            'e.g. TAR or ZIP, for storage or transfer. The specific format details should be',
+            'decided by the interested parties and documented, for example in a submission',
+            'agreement or statement of access terms.'
           ])
         },
     4: {
@@ -165,8 +165,9 @@ REQUIREMENTS = {
             'We recommend including any supplementary documentation for the package',
             'or a specific representation within the package. Supplementary documentation SHOULD',
             'be placed in a sub-folder called documentation within the Information Package root',
-            'folder and/or the representation folder. Examples of documentation include representation',
-            'information and manuals for the system the data objects have been exported from.'
+            'folder and/or the representation folder. Examples of documentation include',
+            'representation information and manuals for the system the data objects have been',
+            'exported from.'
           ])
         }
 }

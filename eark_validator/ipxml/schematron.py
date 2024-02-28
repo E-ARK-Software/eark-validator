@@ -24,14 +24,15 @@
 #
 """Module to capture everything schematron validation related."""
 import os
-from importlib_resources import files
 from typing import Generator
+
+from importlib_resources import files
 
 from lxml import etree as ET
 from lxml.isoschematron import Schematron
 
-from .resources import schematron as SCHEMATRON
 from eark_validator.const import NO_PATH, NOT_FILE
+from .resources import schematron as SCHEMATRON
 
 SCHEMATRON_NS = '{http://purl.oclc.org/dsdl/schematron}'
 SVRL_NS = '{http://purl.oclc.org/dsdl/svrl}'
@@ -46,10 +47,10 @@ class SchematronRuleset():
         self._path = sch_path
         try:
             self._schematron = Schematron(file=self._path, store_schematron=True, store_report=True)
-        except ET.SchematronParseError as ex:
-            raise ValueError('Rules file is not valid XML: {}. {}'.format(sch_path, ex.error_log.last_error.message ))
-        except KeyError as ex:
-            raise ValueError('Rules file is not valid Schematron: {}. {}'.format(sch_path, ex.__doc__))
+        except (ET.SchematronParseError, KeyError) as ex:
+            ex_mess = ex.__doc__ if isinstance(ex, KeyError) else ex.error_log.last_error.message
+            subject = 'Schematron' if isinstance(ex, ET.SchematronParseError) else 'XML'
+            raise ValueError(f'Rules file is not valid {subject}: {sch_path}. {ex_mess}') from ex
 
     @property
     def path(self) -> str:
@@ -83,5 +84,5 @@ class SchematronRuleset():
         self.schematron.validate(xml_file)
         return self.schematron.validation_report
 
-def get_schematron_path(id: str, section: str) -> str:
-    return str(files(SCHEMATRON).joinpath(id).joinpath('mets_{}_rules.xml'.format(section)))
+def get_schematron_path(spec_id: str, section: str) -> str:
+    return str(files(SCHEMATRON).joinpath(spec_id).joinpath(f'mets_{section}_rules.xml'))
