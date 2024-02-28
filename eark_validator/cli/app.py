@@ -54,7 +54,9 @@ Maintainer: Carl Wilson (OPF), 2020-2024"""
 }
 
 # Create PARSER
-PARSER = argparse.ArgumentParser(prog='eark-validator', description=defaults['description'], epilog=defaults['epilog'])
+PARSER = argparse.ArgumentParser(prog='eark-validator',
+                                 description=defaults['description'],
+                                 epilog=defaults['epilog'])
 
 def parse_command_line():
     """Parse command line arguments."""
@@ -113,8 +115,7 @@ def _validate_ip(path: str) -> Tuple[int, Optional[ValidationReport]]:
     if ret_stat > 0:
         return ret_stat, None
     report = PACKAGES.PackageValidator(checked_path).validation_report
-    print('Path {}, struct result is: {}'.format(checked_path,
-                                                 report.structure.status.value))
+    print(f'Path {checked_path}, struct result is: {report.structure.status.value}')
     # for message in report.structure.messages:
     print(report.model_dump_json())
 
@@ -134,7 +135,7 @@ def _check_path(path: str) -> Tuple[int, Optional[Path]]:
     return 0, Path(path)
 
 def _format_check_path_message(path: Path, message: str) -> str:
-    return 'Processing terminated, path: {} {}.'.format(path, message)
+    return f'Processing terminated, path: {path} {message}.'
 
 # def _test_case_schema_checks():
 if __name__ == '__main__':

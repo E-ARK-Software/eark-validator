@@ -28,7 +28,6 @@ E-ARK : Information Package Validation
         Information Package Package Details type
 """
 from enum import Enum, unique
-from importlib_resources import files
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel, computed_field
@@ -47,7 +46,7 @@ class Level(str, Enum):
     def from_string(level: str) -> 'Level':
         """Convert a string to a Level."""
         for item in Level:
-            if item.value == level or item.name == level:
+            if level in [ item.value, item.name ]:
                 return item
         raise ValueError(f'No Level with value {level}')
 
@@ -87,7 +86,7 @@ class Specification(BaseModel):
     @computed_field
     def requirement_count(self) -> int:
         """Return the number of requirements."""
-        return sum([len(self.requirements[sect]) for sect in self.sections])
+        return sum(len(self.requirements[sect]) for sect in self.sections)
 
     def section_requirements(self, section: Optional[str]=None) -> List[Requirement]:
         """Get the specification requirements, by section if offered."""
@@ -99,14 +98,14 @@ class Specification(BaseModel):
                 requirements += self.requirements[sect]
         return requirements
 
-    def get_requirement_by_id(self, id: str) -> Optional[Requirement]:
+    def get_requirement_by_id(self, req_id: str) -> Optional[Requirement]:
         """Retrieve a requirement by id."""
         for sect in self.sections:
-            req = self.get_requirement_by_sect(id, sect)
+            req = self.get_requirement_by_sect(req_id, sect)
             if req:
                 return req
         return None
 
-    def get_requirement_by_sect(self, id: str, section: str) -> Optional[Requirement]:
+    def get_requirement_by_sect(self, req_id: str, section: str) -> Optional[Requirement]:
         """Retrieve a requirement by id."""
-        return next((req for req in self.requirements[section] if req.id == id), None)
+        return next((req for req in self.requirements[section] if req.id == req_id), None)

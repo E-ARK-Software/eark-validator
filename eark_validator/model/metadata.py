@@ -23,6 +23,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from enum import Enum
 from pathlib import Path
 from typing import Annotated, List
 
@@ -30,8 +31,13 @@ from pydantic import BaseModel, StringConstraints
 
 from .checksum import Checksum
 
+class EntryType(str, Enum):
+    FILE = 'file'
+    METADATA = 'metadata'
+
 class FileEntry(BaseModel):
     path : Path | str
+    type: EntryType = EntryType.FILE
     size : int = 0
     checksum : Checksum
     mimetype : Annotated[ str, StringConstraints(to_lower=True) ] = 'application/octet-stream'

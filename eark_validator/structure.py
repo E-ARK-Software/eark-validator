@@ -65,7 +65,9 @@ class StructureParser():
             self.resolved_path = self._package_handler.prepare_package(package_path)
             self.folders, self.files = _folders_and_files(self.resolved_path)
             if DIR_NAMES['META'] in self.folders:
-                self.md_folders, _ = _folders_and_files(os.path.join(self.resolved_path, DIR_NAMES['META']))
+                self.md_folders, _ = _folders_and_files(
+                    os.path.join(self.resolved_path,
+                                 DIR_NAMES['META']))
 
     def has_data(self) -> bool:
         """Returns True if the package/representation has a structure folder."""
@@ -132,14 +134,20 @@ class StructureChecker():
         results: List[Result] = self.get_root_results()
         results = results + self.get_package_results()
         for name, tests in self.representations.items():
-            location = Location.model_validate({ 'context': str(name), 'description': 'representation' })
+            location = Location.model_validate({
+                'context': str(name),
+                'description': 'representation'
+                })
             if not tests.has_data():
                 results.append(test_result_from_id(11, location))
             if not tests.has_mets():
                 results.append(test_result_from_id(12, location))
             if not tests.has_metadata():
                 results.append(test_result_from_id(13, location))
-        return StructResults.model_validate({ 'status': self.get_status(results), 'messages': results })
+        return StructResults.model_validate({
+            'status': self.get_status(results),
+            'messages': results
+            })
 
     def get_representations(self) -> List[Representation]:
         reps: List[Representation] = []
@@ -149,7 +157,10 @@ class StructureChecker():
 
     def get_root_results(self) -> List[Result]:
         results: List[Result] = []
-        location: Location = Location.model_validate({ 'context': 'root', 'description': self.name })
+        location: Location = Location.model_validate({
+            'context': 'root',
+            'description': self.name
+            })
         if not self.parser.is_archive:
             results.append(test_result_from_id(3, location))
         if not self.parser.has_mets():
@@ -157,7 +168,7 @@ class StructureChecker():
         results.extend(self._get_metadata_results(location=location))
         if not self.parser.has_representations_folder():
             results.append(test_result_from_id(9, location))
-        elif not len(self.representations) > 0:
+        elif len(self.representations) < 1:
             results.append(test_result_from_id(10, location))
         return results
 
@@ -190,20 +201,26 @@ class StructureChecker():
         for tests in self.representations.values():
             if tests.has_schemas():
                 return None
-        return test_result_from_id(15, Location.model_validate({ 'context': 'root', 'description': self.name }))
+        return test_result_from_id(15, Location.model_validate({
+            'context': 'root',
+            'description': self.name
+            }))
 
     def _get_dox_results(self) -> Optional[Result]:
         for tests in self.representations.values():
             if tests.has_documentation():
                 return None
-        return test_result_from_id(16, Location.model_validate({ 'context': 'root', 'description': self.name }))
+        return test_result_from_id(16, Location.model_validate({
+            'context': 'root',
+            'description': self.name
+            }))
 
     @classmethod
     def get_status(cls, results: List[Result]) -> StructureStatus:
         for result in results:
-            if result.severity == Severity.Error:
-                return StructureStatus.NotWellFormed
-        return StructureStatus.WellFormed
+            if result.severity == Severity.ERROR:
+                return StructureStatus.NOTWELLFORMED
+        return StructureStatus.WELLFORMED
 
 def _folders_and_files(dir_to_scan: Path) -> Tuple[Set[str], Set[str]]:
     folders: Set[str] = set()
@@ -218,9 +235,9 @@ def _folders_and_files(dir_to_scan: Path) -> Tuple[Set[str], Set[str]]:
     return folders, files
 
 def test_result_from_id(requirement_id, location, message=None) -> Result:
+    """Return a TestResult instance created from the requirment ID and location."""
     req = REQUIREMENTS[requirement_id]
     test_msg = message if message else req['message']
-    """Return a TestResult instance created from the requirment ID and location."""
     return Result.model_validate({
         'rule_id': req['id'],
         'location': location,
@@ -229,14 +246,20 @@ def test_result_from_id(requirement_id, location, message=None) -> Result:
         })
 
 def get_bad_path_results(path) -> StructResults:
-    return StructResults.model_validate({ 'status': StructureStatus.NotWellFormed, 'messages': _get_str1_result_list(path) })
+    return StructResults.model_validate({
+        'status': StructureStatus.NOTWELLFORMED,
+        'messages': _get_str1_result_list(path)
+        })
 
 def _get_str1_result_list(name: str) -> List[Result]:
-    return [ test_result_from_id(1, Location.model_validate({ 'context': 'root', 'description': str(name) })) ]
+    return [ test_result_from_id(1, Location.model_validate({
+            'context': 'root',
+            'description': str(name)
+            })) ]
 
 def validate(to_validate) -> Tuple[bool, StructResults]:
     try:
         struct_tests = StructureChecker(to_validate).get_test_results()
-        return struct_tests.status == StructureStatus.WellFormed, struct_tests
+        return struct_tests.status == StructureStatus.WELLFORMED, struct_tests
     except PackageError:
         return False, get_bad_path_results(to_validate)

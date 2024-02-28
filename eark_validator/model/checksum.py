@@ -23,16 +23,20 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
-from typing import Annotated, Optional
-from pydantic import BaseModel, Field, StringConstraints
-
-from enum import Enum
+"""
+    E-ARK : Information Package Validation Model types
+    Types for supported checksum algorithms and checksum values
+"""
+from enum import Enum, unique
 import hashlib
+from typing import Annotated, Optional
 
+from pydantic import BaseModel, StringConstraints
+
+@unique
 class ChecksumAlg(str, Enum):
     """
-    allowed enum values
+    Enumerated type for supported checksum algorithms.
     """
     MD5 = 'MD5'
     SHA1 = 'SHA-1'
@@ -42,14 +46,39 @@ class ChecksumAlg(str, Enum):
 
     @classmethod
     def from_string(cls, value: str) -> Optional['ChecksumAlg']:
+        """
+        Obtain a ChecksumAlg from a string identifier.
+
+        Args:
+            value (str): The string identifier for the algorithm.
+
+        Returns:
+            ChecksumAlg: The appropriate ChecksumAlg for the given string identifier,
+            or None if not found.
+        """
+        if isinstance(value, ChecksumAlg):
+            return value
         search_value = value.upper() if hasattr(value, 'upper') else value
         for algorithm in ChecksumAlg:
-            if (algorithm.value == search_value) or (algorithm.name == search_value) or (algorithm == value):
+            if search_value in [ algorithm.name, algorithm.value ]:
                 return algorithm
         return None
 
     @classmethod
-    def get_implementation(cls, algorithm: 'ChecksumAlg' = MD5):
+    def get_implementation(cls, algorithm: 'ChecksumAlg' = SHA1):
+        """
+        Get the appropriate hashlib implementation for the given algorithm.
+
+        Args:
+            algorithm (ChecksumAlg, optional): the enumn type for the required ChecksumAlg,
+            or a string identifier. Defaults to SHA1.
+
+        Raises:
+            ValueError: if the requested algorithm is not supported.
+
+        Returns:
+            hashlib._Hash: The hashlib implementation for the requested algorithm.
+        """
         if isinstance(algorithm, str):
             algorithm = cls.from_string(algorithm)
         if algorithm == ChecksumAlg.SHA1:
@@ -62,8 +91,13 @@ class ChecksumAlg(str, Enum):
             return hashlib.sha512()
         if algorithm == ChecksumAlg.MD5:
             return hashlib.md5()
-        raise ValueError('Algorithm {} not supported.'.format(algorithm))
+        raise ValueError(f'Algorithm {algorithm} not supported.')
 
 class Checksum(BaseModel):
+    """
+    Model type for a checksum value
+    """
     algorithm: ChecksumAlg = ChecksumAlg.SHA1
+    """The algorithm used to generate the checksum, defaults to SHA1."""
     value: Annotated[ str, StringConstraints(to_upper=True) ] = ''
+    """The checksum value as an uppercase hexadecimal string, defaults to an empty string."""

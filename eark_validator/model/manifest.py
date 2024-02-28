@@ -25,9 +25,9 @@
 #
 from enum import Enum, unique
 from pathlib import Path
-from typing import Annotated, List, Optional
+from typing import List, Optional
 
-from pydantic import BaseModel, StringConstraints
+from pydantic import BaseModel
 
 from .checksum import Checksum
 
@@ -61,4 +61,4 @@ class Manifest(BaseModel):
 
     @property
     def total_size(self) -> int:
-        return sum([entry.size for entry in self.entries])
+        return sum(entry.size for entry in self.entries)

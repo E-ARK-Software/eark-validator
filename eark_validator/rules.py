@@ -44,7 +44,8 @@ class ValidationProfile():
         self.results: Dict[str, List[Result]] = {}
         self.messages: List[str] = []
         for section in specification.sections:
-            self.rulesets[section] = SchematronRuleset(get_schematron_path(specification.id, section))
+            self.rulesets[section] = SchematronRuleset(get_schematron_path(specification.id,
+                                                                           section))
 
     @property
     def specification(self) -> Specification:
@@ -66,16 +67,21 @@ class ValidationProfile():
         self.is_valid = True
         self.results = {}
         self.messages = []
-        for section in self.rulesets.keys():
+        for section, validator in self.rulesets.items():
             try:
-                self.results[section] = TestResults.from_validation_report(self.rulesets[section].validate(to_validate))
-                if len(list(filter(lambda a: a.severity == Severity.Error, self.results[section]))) > 0:
+                self.results[section] = TestResults.from_validation_report(
+                    validator.validate(to_validate)
+                    )
+                if self._contains_errors(section):
                     self.is_valid = False
             except ET.XMLSyntaxError as parse_err:
                 self.is_wellformed = False
                 self.is_valid = False
-                self.messages.append('File {} is not valid XML. {}'.format(to_validate, parse_err.msg))
+                self.messages.append(f'File {to_validate} is not valid XML. {parse_err.msg}')
                 return
+
+    def _contains_errors(self, section: str) -> bool:
+        return len(list(filter(lambda a: a.severity == Severity.ERROR, self.results[section]))) > 0
 
     def get_results(self) -> dict[str,  List[Result]]:
         """Return the full set of results."""
@@ -84,7 +90,7 @@ class ValidationProfile():
     def get_all_results(self) -> List[Result]:
         """Return the full set of results."""
         results: List[Result] = []
-        for (name, results) in self.results.items():
+        for _, results in self.results.items():
             results.extend(results)
         return results
 
@@ -100,7 +106,7 @@ class ValidationProfile():
         if isinstance(specification, EarkSpecifications):
             specification = specification.specification
         if not isinstance(specification, Specification):
-            raise ValueError('Specification must be a Specification instance or valid specification ID.')
+            raise ValueError('Specification must be a instance or valid specification ID.')
         return cls(specification)
 
 
@@ -111,7 +117,7 @@ class TestResults():
         context = rule.get('context')
         rule_id = failed_assert.get('id')
         test = failed_assert.get('test')
-        severity = Severity.from_role(failed_assert.get('role', Severity.Error))
+        severity = Severity.from_role(failed_assert.get('role', Severity.ERROR))
         location = failed_assert.get('location')
         message = failed_assert.find(SVRL_NS + 'text').text
         location = Location.model_validate({
@@ -132,6 +138,6 @@ class TestResults():
         for ele in xml_report.iter():
             if ele.tag == SVRL_NS + 'fired-rule':
                 rule = ele
-            elif (ele.tag == SVRL_NS + 'failed-assert') or (ele.tag == SVRL_NS + 'successful-report'):
-                    results.append(TestResults.from_element(rule, ele))
+            elif ele.tag in [ SVRL_NS + 'failed-assert', SVRL_NS + 'successful-report' ]:
+                results.append(TestResults.from_element(rule, ele))
         return results

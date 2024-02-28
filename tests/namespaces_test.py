@@ -40,16 +40,16 @@ class MetsValidatorTest(unittest.TestCase):
 
     def test_from_id(self):
         for namespace in NS.Namespaces:
-            self.assertEqual(namespace, NS.Namespaces.from_id(namespace.id))
+            self.assertEqual(namespace, NS.Namespaces.from_uri(namespace.uri))
 
     def test_from_bad_id(self):
-        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_id('bad'))
-        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_id(''))
-        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_id(None))
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_uri('bad'))
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_uri(''))
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_uri(None))
 
     def test_qualify(self):
         for namespace in NS.Namespaces:
-            self.assertEqual('{{{}}}file'.format(namespace.id), namespace.qualify('file'))
+            self.assertEqual('{{{}}}file'.format(namespace.uri), namespace.qualify('file'))
 
 
 if __name__ == '__main__':
