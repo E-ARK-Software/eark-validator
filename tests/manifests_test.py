@@ -85,8 +85,8 @@ class ChecksumTest(unittest.TestCase):
 
     def test_missing_alg(self):
         """Test that a missing algorithm returns None."""
-        alg = ChecksumAlg.from_string('NOT_AN_ALGORITHM')
-        self.assertIsNone(alg)
+        with self.assertRaises(ValueError):
+            ChecksumAlg.from_string('NOT_AN_ALGORITHM')
 
     def test_missing_implementation(self):
         """Test that a missing algorithm returns None."""

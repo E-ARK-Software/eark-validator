@@ -62,7 +62,7 @@ class ChecksumAlg(str, Enum):
         for algorithm in ChecksumAlg:
             if search_value in [ algorithm.name, algorithm.value ]:
                 return algorithm
-        return None
+        raise ValueError(f'No ChecksumAlg with id: {value}')
 
     @classmethod
     def get_implementation(cls, algorithm: 'ChecksumAlg' = SHA1):

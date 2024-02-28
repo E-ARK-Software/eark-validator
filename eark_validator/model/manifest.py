@@ -30,6 +30,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from .checksum import Checksum
+from .constants import METS # pylint: disable=W0611
 
 class ManifestEntry(BaseModel):
     path : Path | str
@@ -45,7 +46,7 @@ class SourceType(str, Enum):
     """Enum covering information package validation statuses."""
     UNKNOWN = 'UNKNOWN'
     # Information level, possibly not best practise
-    METS = 'METS'
+    METS = METS.upper()
     # Non-fatal issue that should be corrected
     PACKAGE = 'PACKAGE'
 

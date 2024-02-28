@@ -48,7 +48,7 @@ class SchematronRuleset():
         try:
             self._schematron = Schematron(file=self._path, store_schematron=True, store_report=True)
         except (ET.SchematronParseError, KeyError) as ex:
-            ex_mess = ex.__doc__ if isinstance(ex, KeyError) else ex.error_log.last_error.message
+            ex_mess = ex.__doc__ if isinstance(ex, KeyError) else ex.error_log.last_error.message # pylint: disable=E1101
             subject = 'Schematron' if isinstance(ex, ET.SchematronParseError) else 'XML'
             raise ValueError(f'Rules file is not valid {subject}: {sch_path}. {ex_mess}') from ex
 
