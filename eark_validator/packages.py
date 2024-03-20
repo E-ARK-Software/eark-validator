@@ -56,13 +56,13 @@ def validate(to_validate: Path) -> ValidationReport:
             'metadata': metadata
             })
     
-    csip_profile = SC.ValidationProfile.from_specification('CSIP')
+    csip_profile = SC.ValidationProfile.from_specification_name('CSIP')
     csip_profile.validate(to_validate.joinpath(METS))
     results = csip_profile.get_all_results()
 
     package: InformationPackage = InformationPackages.from_path(to_validate)
     if package.package.oaispackagetype in ['SIP', 'DIP']:
-        profile = SC.ValidationProfile.from_specification(package.package.oaispackagetype)
+        profile = SC.ValidationProfile.from_specification_name(package.package.oaispackagetype)
         profile.validate(to_validate.joinpath(METS))
         results.extend(profile.get_all_results())
 
