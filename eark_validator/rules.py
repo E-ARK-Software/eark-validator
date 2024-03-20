@@ -99,7 +99,7 @@ class ValidationProfile():
         return self.results.get(name)
 
     @classmethod
-    def from_specification(cls, specification: Specification) -> 'ValidationProfile':
+    def from_specification_name(cls, specification: str) -> 'ValidationProfile':
         """Create a validation profile from a specification."""
         if isinstance(specification, str):
             specification = EarkSpecifications.from_id(specification)
