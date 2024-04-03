@@ -199,4 +199,4 @@ pip install --editable ".[testing]"
 
 ### Running tests
 
-You can run unit tests from the project root: `pytest ./tests/`, or generate test coverage figures by: `pytest --cov=ip_validation ./tests/`. If you want to see which parts of your code aren't tested then: `pytest --cov=ip_validation --cov-report=html ./tests/`. After this you can open the file [`<projectRoot>/htmlcov/index.html`](./htmlcov/index.html) in your browser and survey the gory details.
+You can run unit tests from the project root: `pytest ./tests/`, or generate test coverage figures by: `pytest --cov=eark_validator ./tests/`. If you want to see which parts of your code aren't tested then: `pytest --cov=eark_validator --cov-report=html ./tests/`. After this you can open the file [`<projectRoot>/htmlcov/index.html`](./htmlcov/index.html) in your browser and survey the gory details.
