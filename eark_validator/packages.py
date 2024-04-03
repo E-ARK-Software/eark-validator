@@ -56,7 +56,7 @@ def validate(to_validate: Path) -> ValidationReport:
             'structure': struct_results,
             'metadata': metadata
             })
-    
+
     csip_profile = SC.ValidationProfile.from_specification(EarkSpecifications.CSIP.specification)
     csip_profile.validate(to_validate.joinpath(METS))
     results = csip_profile.get_all_results()
