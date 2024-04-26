@@ -30,13 +30,15 @@ from lxml import etree as ET
 
 from eark_validator.ipxml.schematron import SchematronRuleset, SVRL_NS, get_schematron_path
 from eark_validator.model.validation_report import Location, Result
-from eark_validator.specifications.specification import EarkSpecifications, Specification
+from eark_validator.specifications.specification import EarkSpecification, Specification, SpecificationType, SpecificationVersion
 from eark_validator.const import NO_PATH, NOT_FILE
 from eark_validator.model import Severity
 
 class ValidationProfile():
     """ A complete set of Schematron rule sets that comprise a complete validation profile."""
-    def __init__(self, specification: Specification):
+    def __init__(self, type: SpecificationType, version: SpecificationVersion):
+        specification: Specification = EarkSpecification(type, version).specification
+
         self._rulesets: Dict[str, SchematronRuleset] = {}
         self._specification: Specification = specification
         self.is_valid: bool = False
@@ -44,8 +46,7 @@ class ValidationProfile():
         self.results: Dict[str, List[Result]] = {}
         self.messages: List[str] = []
         for section in specification.sections:
-            self.rulesets[section] = SchematronRuleset(get_schematron_path(specification.id,
-                                                                           section))
+            self.rulesets[section] = SchematronRuleset(get_schematron_path(version, specification.id, section))
 
     @property
     def specification(self) -> Specification:
@@ -97,18 +98,6 @@ class ValidationProfile():
     def get_result(self, name: str) ->  List[Result]:
         """Return only the results for element name."""
         return self.results.get(name)
-
-    @classmethod
-    def from_specification(cls, specification: str | EarkSpecifications | Specification) -> 'ValidationProfile':
-        """Create a validation profile from a specification."""
-        if isinstance(specification, str):
-            specification = EarkSpecifications.from_id(specification)
-        if isinstance(specification, EarkSpecifications):
-            specification = specification.specification
-        if not isinstance(specification, Specification):
-            raise ValueError('Specification must be a instance or valid specification ID.')
-        return cls(specification)
-
 
 class TestResults():
     @staticmethod

@@ -1,0 +1,8 @@
+<schema xmlns="http://purl.oclc.org/dsdl/schematron" >
+  <ns prefix="mets" uri="http://www.loc.gov/METS/" />
+  <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
+  <ns prefix="sip" uri="https://DILCIS.eu/XML/METS/SIPExtensionMETS"/>
+  <pattern id="METS_root_element">
+      <title>Validate METS root element.</title>
+  </pattern>
+</schema>

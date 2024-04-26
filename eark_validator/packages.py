@@ -36,54 +36,19 @@ from eark_validator.mets import MetsValidator
 from eark_validator.model import ValidationReport
 from eark_validator.model.package_details import InformationPackage
 from eark_validator.model.validation_report import MetatdataResults
-from eark_validator.specifications.specification import EarkSpecifications
+from eark_validator.specifications.specification import SpecificationType, SpecificationVersion
 
 METS: str = 'METS.xml'
-
-def validate(to_validate: Path) -> ValidationReport:
-    """Returns the validation report that results from validating the path
-    to_validate as a folder. The method does not validate archive files."""
-    is_struct_valid, struct_results = structure.validate(to_validate)
-    if not is_struct_valid:
-        return ValidationReport.model_validate({'structure': struct_results})
-    validator = MetsValidator(str(to_validate))
-    validator.validate_mets(METS)
-    if not validator.is_valid:
-        metadata: MetatdataResults = MetatdataResults.model_validate({
-            'schema_results': validator.validation_errors
-            })
-        return ValidationReport.model_validate({
-            'structure': struct_results,
-            'metadata': metadata
-            })
-
-    csip_profile = SC.ValidationProfile.from_specification(EarkSpecifications.CSIP.specification)
-    csip_profile.validate(to_validate.joinpath(METS))
-    results = csip_profile.get_all_results()
-
-    package: InformationPackage = InformationPackages.from_path(to_validate)
-    if package.package.oaispackagetype in ['SIP', 'DIP']:
-        profile = SC.ValidationProfile.from_specification(package.package.oaispackagetype)
-        profile.validate(to_validate.joinpath(METS))
-        results.extend(profile.get_all_results())
-
-    metadata: MetatdataResults = MetatdataResults.model_validate({
-        'schema_results': validator.validation_errors,
-        'schematron_results': results
-        })
-    return ValidationReport.model_validate({
-        'structure': struct_results,
-        'package': package,
-        'metadata': metadata
-        })
 
 class PackageValidator():
     """Class for performing full package validation."""
     _package_handler = PackageHandler()
-    def __init__(self, package_path: Path):
+    def __init__(self, package_path: Path, version: SpecificationVersion = SpecificationVersion.V2_1_0):
         self._path : Path = package_path
         self._name: str = os.path.basename(package_path)
         self._report: ValidationReport = None
+        self._version: SpecificationVersion = version
+
         if os.path.isdir(package_path):
             # If a directory or archive get the path to process
             self._to_proc = self._path.absolute()
@@ -97,7 +62,8 @@ class PackageValidator():
             # If not an archive we can't process
             self._report = _report_from_bad_path(package_path)
             return
-        self._report = validate(self._to_proc)
+
+        self._report = self.validate(self._version, self._to_proc)
 
     @property
     def original_path(self) -> Path:
@@ -113,6 +79,49 @@ class PackageValidator():
     def validation_report(self) -> ValidationReport:
         """Returns the valdiation report for the package."""
         return self._report
+    
+    @property
+    def version(self) -> SpecificationVersion:
+        """Returns the specifiation version used for validation."""
+        return self._version
+    
+    @classmethod
+    def validate(self, version: SpecificationVersion, to_validate: Path) -> ValidationReport:
+        """Returns the validation report that results from validating the path
+        to_validate as a folder. The method does not validate archive files."""
+        is_struct_valid, struct_results = structure.validate(to_validate)
+        if not is_struct_valid:
+            return ValidationReport.model_validate({'structure': struct_results})
+        validator = MetsValidator(str(to_validate))
+        validator.validate_mets(METS)
+        if not validator.is_valid:
+            metadata: MetatdataResults = MetatdataResults.model_validate({
+                'schema_results': validator.validation_errors
+                })
+            return ValidationReport.model_validate({
+                'structure': struct_results,
+                'metadata': metadata
+                })
+
+        csip_profile = SC.ValidationProfile(SpecificationType.CSIP, version)
+        csip_profile.validate(to_validate.joinpath(METS))
+        results = csip_profile.get_all_results()
+
+        package: InformationPackage = InformationPackages.from_path(to_validate)
+        if package.package.oaispackagetype in ['SIP', 'DIP']:
+            profile = SC.ValidationProfile(SpecificationType.from_string(package.package.oaispackagetype), version)
+            profile.validate(to_validate.joinpath(METS))
+            results.extend(profile.get_all_results())
+
+        metadata: MetatdataResults = MetatdataResults.model_validate({
+            'schema_results': validator.validation_errors,
+            'schematron_results': results
+            })
+        return ValidationReport.model_validate({
+            'structure': struct_results,
+            'package': package,
+            'metadata': metadata
+            })
 
 def _report_from_bad_path(package_path: Path) -> ValidationReport:
     struct_results = structure.get_bad_path_results(package_path)

@@ -1,0 +1,12 @@
+<schema xmlns="http://purl.oclc.org/dsdl/schematron" >
+  <ns prefix="mets" uri="http://www.loc.gov/METS/" />
+  <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
+  <ns prefix="sip" uri="https://DILCIS.eu/XML/METS/SIPExtensionMETS"/>
+  <pattern id="METS_root_element">
+      <title>Validate METS root element.</title>
+      <rule context="/mets:mets">
+        <report id="SIP1" role="INFO" test="@LABEL">Optional LABEL attribute used as short text package name.</report>
+        <assert id="SIP2" role="ERROR" test="@PROFILE = 'https://earksip.dilcis.eu/profile/E-ARK-SIP.xml' ">The PROFILE attribute MUST contain the URL of the METS profile, for a SIP: https://earksip.dilcis.eu/profile/E-ARK-SIP.xml.</assert>
+      </rule>
+  </pattern>
+</schema>

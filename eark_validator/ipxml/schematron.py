@@ -84,5 +84,5 @@ class SchematronRuleset():
         self.schematron.validate(xml_file)
         return self.schematron.validation_report
 
-def get_schematron_path(spec_id: str, section: str) -> str:
-    return str(files(SCHEMATRON).joinpath(spec_id).joinpath(f'mets_{section}_rules.xml'))
+def get_schematron_path(version: str, spec_id: str, section: str) -> str:
+    return str(files(SCHEMATRON).joinpath(version).joinpath(spec_id).joinpath(f'mets_{section}_rules.xml'))

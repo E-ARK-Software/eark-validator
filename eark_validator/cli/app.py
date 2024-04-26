@@ -37,6 +37,7 @@ import argparse
 from eark_validator.model import ValidationReport
 import eark_validator.packages as PACKAGES
 from eark_validator.infopacks.package_handler import PackageHandler
+from eark_validator.specifications.specification import SpecificationVersion
 
 __version__ = importlib.metadata.version('eark_validator')
 
@@ -81,6 +82,13 @@ def parse_command_line():
                         dest='outputVerboseFlag',
                         default=False,
                         help='Verbose reporting for selected output options.')
+    PARSER.add_argument('-s', '--specification_version',
+                        nargs='?',
+                        dest='specification_version',
+                        default=SpecificationVersion.V2_1_0,
+                        type=SpecificationVersion,
+                        choices=list(SpecificationVersion),
+                        help='Specification version used for validation. Default is %(default)s.')
     PARSER.add_argument('--version',
                         action='version',
                         version=__version__)
@@ -101,6 +109,9 @@ def main():
     # Get input from command line
     args = parse_command_line()
     # If no target files or folders specified then print usage and exit
+    print('Version: ' + args.specification_version)
+    print(type(args.specification_version))
+
     if not args.files:
         PARSER.print_help()
 
