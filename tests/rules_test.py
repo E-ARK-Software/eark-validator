@@ -172,6 +172,14 @@ class ValidationProfileTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             SC.ValidationProfile.from_specification('BAD')
 
+    def test_unimplemented_specifications(self):
+        with self.assertRaises(ValueError):
+            SC.ValidationProfile.from_specification('AIP')
+        with self.assertRaises(ValueError):
+            SC.ValidationProfile.from_specification('AIU')
+        with self.assertRaises(ValueError):
+            SC.ValidationProfile.from_specification('AIC')
+
     def test_valid(self):
         profile = SC.ValidationProfile.from_specification('CSIP')
         profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))

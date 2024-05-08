@@ -36,6 +36,7 @@ from eark_validator.mets import MetsValidator
 from eark_validator.model import ValidationReport
 from eark_validator.model.package_details import InformationPackage
 from eark_validator.model.validation_report import MetatdataResults
+from eark_validator.specifications.specification import EarkSpecifications
 
 METS: str = 'METS.xml'
 
@@ -55,12 +56,17 @@ def validate(to_validate: Path) -> ValidationReport:
             'structure': struct_results,
             'metadata': metadata
             })
+
+    csip_profile = SC.ValidationProfile.from_specification(EarkSpecifications.CSIP.specification)
+    csip_profile.validate(to_validate.joinpath(METS))
+    results = csip_profile.get_all_results()
+
     package: InformationPackage = InformationPackages.from_path(to_validate)
-    package_type = package.package.oaispackagetype if package.package.oaispackagetype else 'CSIP'
-    package_type = 'CSIP' if package_type == 'AIP' else package_type
-    profile = SC.ValidationProfile.from_specification(package_type)
-    profile.validate(to_validate.joinpath(METS))
-    results = profile.get_all_results()
+    if package.package.oaispackagetype in ['SIP', 'DIP']:
+        profile = SC.ValidationProfile.from_specification(package.package.oaispackagetype)
+        profile.validate(to_validate.joinpath(METS))
+        results.extend(profile.get_all_results())
+
     metadata: MetatdataResults = MetatdataResults.model_validate({
         'schema_results': validator.validation_errors,
         'schematron_results': results
