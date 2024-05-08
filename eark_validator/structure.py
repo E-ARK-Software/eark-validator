@@ -151,7 +151,7 @@ class StructureChecker():
 
     def get_representations(self) -> List[Representation]:
         reps: List[Representation] = []
-        for rep in self.representations.keys(): # pylint: disable=C0201
+        for rep in self.representations: # pylint: disable=C0201
             reps.append(Representation.model_validate({ 'name': rep }))
         return reps
 

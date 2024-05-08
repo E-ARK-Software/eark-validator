@@ -45,7 +45,7 @@ class ChecksumAlg(str, Enum):
     SHA512 = 'SHA-512'
 
     @classmethod
-    def from_string(cls, value: str) -> Optional['ChecksumAlg']:
+    def from_string(cls, value: str) -> 'ChecksumAlg':
         """
         Obtain a ChecksumAlg from a string identifier.
 
