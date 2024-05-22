@@ -20,9 +20,9 @@
       <assert id="CSIP39" role="ERROR" test="@MDTYPE">MUST record the type of metadata at the referenced location.</assert>
       <assert id="CSIP40" role="ERROR" test="@MIMETYPE">MUST record the MIME type of the referenced file.</assert>
       <assert id="CSIP41" role="ERROR" test="@SIZE">MUST record the size in bytes of the referenced file.</assert>
-      <assert id="CSIP42" role="ERROR" test="@CREATED">MUST record the date the referenced file was created.</assert>
+      <assert id="CSIP42" role="ERROR" test="@CREATED">MUST record the date and time the referenced file was created.</assert>
       <assert id="CSIP43" role="ERROR" test="@CHECKSUM">MUST record the checksum of the referenced file.</assert>
-      <assert id="CSIP44" role="ERROR" test="@CHECKSUMTYPE">MUST record the checksum type of the referenced file.</assert>
+      <assert id="CSIP44" role="ERROR" test="@CHECKSUMTYPE">MUST record a value from the METS-standard which identifies the algorithm used to calculate the checksum for the referenced file.</assert>
     </rule>
     <rule context="/mets:mets/mets:amdSec/mets:rightsMD">
       <assert id="CSIP46" role="ERROR" test="@ID">Mandatory, unique id for the rights metadata.</assert>
@@ -36,9 +36,9 @@
       <assert id="CSIP52" role="ERROR" test="@MDTYPE">MUST record the type of metadata at the referenced location.</assert>
       <assert id="CSIP53" role="ERROR" test="@MIMETYPE">MUST record the MIME type of the referenced file.</assert>
       <assert id="CSIP54" role="ERROR" test="@SIZE">MUST record the size in bytes of the referenced file.</assert>
-      <assert id="CSIP55" role="ERROR" test="@CREATED">MUST record the date the referenced file was created.</assert>
+      <assert id="CSIP55" role="ERROR" test="@CREATED">MUST record the date and time the referenced file was created.</assert>
       <assert id="CSIP56" role="ERROR" test="@CHECKSUM">MUST record the checksum of the referenced file.</assert>
-      <assert id="CSIP57" role="ERROR" test="@CHECKSUMTYPE">MUST record the checksum type of the referenced file.</assert>
+      <assert id="CSIP57" role="ERROR" test="@CHECKSUMTYPE">MUST record a value from the METS-standard which identifies the algorithm used to calculate the checksum for the referenced file.</assert>
     </rule>
   </pattern>
 </schema>

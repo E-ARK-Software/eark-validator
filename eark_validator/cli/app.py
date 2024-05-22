@@ -109,23 +109,20 @@ def main():
     # Get input from command line
     args = parse_command_line()
     # If no target files or folders specified then print usage and exit
-    print('Version: ' + args.specification_version)
-    print(type(args.specification_version))
-
     if not args.files:
         PARSER.print_help()
 
     # Iterate the file arguments
     for file_arg in args.files:
-        _loop_exit, _ = _validate_ip(file_arg)
+        _loop_exit, _ = _validate_ip(file_arg, args.specification_version)
         _exit = _loop_exit if (_loop_exit > 0) else _exit
     sys.exit(_exit)
 
-def _validate_ip(path: str) -> Tuple[int, Optional[ValidationReport]]:
+def _validate_ip(path: str, version: SpecificationVersion) -> Tuple[int, Optional[ValidationReport]]:
     ret_stat, checked_path = _check_path(path)
     if ret_stat > 0:
         return ret_stat, None
-    report = PACKAGES.PackageValidator(checked_path).validation_report
+    report = PACKAGES.PackageValidator(checked_path, version).validation_report
     print(f'Path {checked_path}, struct result is: {report.structure.status.value}')
     # for message in report.structure.messages:
     print(report.model_dump_json())

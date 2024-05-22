@@ -4,5 +4,8 @@
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
   <pattern id="METS_descriptive_metadata_element">
     <title>Use of the METS descriptive metadata section.</title>
+    <rule context="/mets:mets/mets:dmdSec">
+      <assert id="DIP4" role="WARN" test="@STATUS = 'CURRENT'">Indicates the status of the package using a fixed vocabulary. The status SHOULD in a DIP be set to "CURRENT".</assert>
+    </rule>
   </pattern>
 </schema>
