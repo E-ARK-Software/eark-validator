@@ -168,8 +168,7 @@ class SpecificationType(str, Enum):
         for spec in cls:
             if type in [spec.name, spec.value]:
                 return spec
-        return None
-
+        raise ValueError("{type} does not exists")
 
 class EarkSpecification:
     def __init__(self, type: SpecificationType, version: SpecificationVersion):
