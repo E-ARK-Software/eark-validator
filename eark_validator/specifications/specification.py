@@ -34,7 +34,7 @@ from eark_validator.const import NO_PATH, NOT_FILE
 from eark_validator.ipxml.namespaces import Namespaces
 from eark_validator.ipxml.resources import profiles
 from eark_validator.ipxml.schema import METS_PROF_SCHEMA
-from eark_validator.model.specifications import Requirement, Specification, StructuralRequirement
+from eark_validator.model.specifications import Requirement, Specification
 from eark_validator.specifications.struct_reqs import REQUIREMENTS
 from eark_validator.specifications.struct_reqs import Level
 
@@ -124,7 +124,7 @@ class Requirements():
 
 class StructuralRequirements():
     @staticmethod
-    def from_rule_no(rule_no: int) -> StructuralRequirement:
+    def from_rule_no(rule_no: int) -> Requirement:
         """Create an StructuralRequirement from a numerical rule id and a sub_message."""
         item = REQUIREMENTS.get(rule_no)
         if not item:
@@ -132,21 +132,20 @@ class StructuralRequirements():
         return StructuralRequirements.from_dictionary(item)
 
     @staticmethod
-    def from_dictionary(item: dict[str, str]) -> StructuralRequirement:
+    def from_dictionary(item: dict[str, str]) -> Requirement:
         """Create an StructuralRequirement from dictionary item and a sub_message."""
-        return StructuralRequirement.model_validate({
+        return Requirement.model_validate({
                 'id': item.get('id'),
                 'level': item.get('level'),
                 'message': item.get('message')
             })
 
     @staticmethod
-    def get_requirements() -> list[StructuralRequirement]:
+    def get_requirements() -> list[Requirement]:
         reqs = []
         for req in REQUIREMENTS.values():
-            reqs.append(StructuralRequirement.model_validate(req))
+            reqs.append(Requirement.model_validate(req))
         return reqs
-
 
 @unique
 class SpecificationVersion(str, Enum):

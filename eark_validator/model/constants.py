@@ -23,33 +23,20 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from enum import Enum
-from pathlib import Path
-from typing import Annotated, List
-
-from pydantic import BaseModel, StringConstraints
-
-from .checksum import Checksum
-from .constants import MIME_DEFAULT
-
-class EntryType(str, Enum):
-    FILE = 'file'
-    METADATA = 'metadata'
-
-class FileEntry(BaseModel):
-    path : Path | str
-    type: EntryType = EntryType.FILE
-    size : int = 0
-    checksum : Checksum
-    mimetype : Annotated[ str, StringConstraints(to_lower=True) ] = MIME_DEFAULT
-
-class MetsRoot(BaseModel):
-    namespaces: dict[str, str] = {}
-    objid: str = ''
-    label: str= ''
-    type: str = ''
-    profile: str = ''
-
-class MetsFile(BaseModel):
-    root: MetsRoot = MetsRoot()
-    file_entries: List[FileEntry] = []
+"""
+    E-ARK : Information Package Validation Model constants
+    Constant values for the model package
+"""
+METS = 'mets'
+METS_FILE = 'METS.xml'
+MIME_DEFAULT = 'application/octet-stream'
+MAY = 'MAY'
+SHOULD = 'SHOULD'
+MUST = 'MUST'
+UNKNOWN = 'Unknown'
+INFORMATION = 'Information'
+WARNING = 'Warning'
+ERROR = 'Error'
+NOTWELLFORMED = 'Not Well Formed'
+WELLFORMED = 'Well Formed'
+PACKAGE = 'Package'

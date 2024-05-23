@@ -28,7 +28,7 @@ import unittest
 from lxml import etree as ET
 
 from importlib_resources import files
-from eark_validator.model.specifications import Specification, StructuralRequirement
+from eark_validator.model.specifications import Specification, Requirement
 
 from eark_validator.specifications.specification import EarkSpecification, Specifications, StructuralRequirements, SpecificationType, SpecificationVersion
 import tests.resources.xml as XML
@@ -67,7 +67,7 @@ class StructuralRequirementsTest(unittest.TestCase):
             StructuralRequirements.from_rule_no('1')
 
     def test_from_rule_no(self):
-        req: StructuralRequirement = StructuralRequirements.from_rule_no(1)
+        req: Requirement = StructuralRequirements.from_rule_no(1)
         self.assertEqual(req.id, 'CSIPSTR1')
 
 class SpecificationTypeTest(unittest.TestCase):

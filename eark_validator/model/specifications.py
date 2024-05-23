@@ -32,15 +32,16 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, computed_field
 
+from .constants import MAY, SHOULD, MUST
 
 @unique
 class Level(str, Enum):
     """Enum covering information package validation statuses."""
-    MAY = 'MAY'
+    MAY = MAY
     # Package has basic parse / structure problems and can't be validated
-    SHOULD = 'SHOULD'
+    SHOULD = SHOULD
     # Package structure is OK
-    MUST = 'MUST'
+    MUST = MUST
 
     @staticmethod
     def from_string(level: str) -> 'Level':
@@ -50,19 +51,11 @@ class Level(str, Enum):
                 return item
         raise ValueError(f'No Level with value {level}')
 
-class StructuralRequirement(BaseModel):
-    """Encapsulates a structural requirement."""
-    id: str
-    level: Level = Level.MUST
-    message: Optional[str] = None
-
 class Requirement(BaseModel):
     """Encapsulates a requirement."""
     id: str
-    name: str
     level: Level = Level.MUST
-    xpath: Optional[str] = None
-    cardinality: Optional[str] = None
+    message: Optional[str] = None
 
 class Specification(BaseModel):
     """Stores the vital facts and figures an IP specification."""
@@ -70,7 +63,7 @@ class Specification(BaseModel):
     url: Optional[str] = None
     version: str
     date: str
-    structural_requirements: List[StructuralRequirement] = []
+    structural_requirements: List[Requirement] = []
     requirements: Dict[str, List[Requirement]] = {}
 
     @computed_field
