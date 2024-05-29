@@ -79,12 +79,12 @@ class PackageValidator():
     def validation_report(self) -> ValidationReport:
         """Returns the valdiation report for the package."""
         return self._report
-    
+
     @property
     def version(self) -> SpecificationVersion:
         """Returns the specifiation version used for validation."""
         return self._version
-    
+
     @classmethod
     def validate(self, version: SpecificationVersion, to_validate: Path) -> ValidationReport:
         """Returns the validation report that results from validating the path

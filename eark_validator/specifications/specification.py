@@ -151,23 +151,23 @@ class StructuralRequirements():
 class SpecificationVersion(str, Enum):
     V2_0_4 = 'V2.0.4'
     V2_1_0 = 'V2.1.0'
-    
+
     def __str__(self):
-        return self.value  
-    
+        return self.value
+
 @unique
 class SpecificationType(str, Enum):
     CSIP = 'E-ARK-CSIP'
     SIP = 'E-ARK-SIP'
     DIP = 'E-ARK-DIP'
- 
+
     @classmethod
     def from_string(cls, type: str) -> Optional['SpecificationType']:
         """Get the enum from the value."""
         for spec in cls:
             if type in [spec.name, spec.value]:
                 return spec
-        raise ValueError("{type} does not exists")
+        raise ValueError('{type} does not exists')
 
 class EarkSpecification:
     def __init__(self, type: SpecificationType, version: SpecificationVersion):
@@ -181,7 +181,7 @@ class EarkSpecification:
     def version(self) -> SpecificationVersion:
         """Get the specification version."""
         return self._version
-    
+
     @property
     def type(self) -> SpecificationType:
         """Get the specification type."""
