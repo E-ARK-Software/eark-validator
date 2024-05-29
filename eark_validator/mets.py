@@ -68,7 +68,7 @@ class MetsFiles():
             raise ValueError(NOT_FILE.format(mets_file))
         ns: dict[str, str] = {}
         entries: list[FileEntry] = []
-        othertype = contentinformationtype = oaispackagetype = ''
+        othertype = contentinformationtype = oaispackagetype = mets_root = ''
         try:
             parsed_mets = etree.iterparse(mets_file, events=[START_ELE, START_NS])
             for event, element in parsed_mets:
