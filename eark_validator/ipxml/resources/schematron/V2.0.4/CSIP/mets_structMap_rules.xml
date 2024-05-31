@@ -16,9 +16,14 @@
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div">
       <assert id="CSIP85" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
       <assert id="CSIP88" role="ERROR" test="mets:div[@LABEL = 'Metadata']">The metadata referenced in the administrative and/or descriptive metadata section is described in the structural map with one sub division.</assert>
+      <assert id="CSIP90" role="ERROR" test="mets:div[@LABEL = 'Metadata']">The metadata division div element's @LABEL attribute value must be "Metadata".</assert>
       <assert id="CSIP93" role="WARN" test="mets:div[@LABEL = 'Documentation']">The documentation referenced in the file section file groups is described in the structural map with one sub division.</assert>
+      <assert id="CSIP95" role="ERROR" test="mets:div[@LABEL = 'Documentation']">The documentation division div element in the package uses the value "Documentation" from the vocabulary as the value for the @LABEL attribute.</assert>
       <assert id="CSIP97" role="WARN" test="mets:div[@LABEL = 'Schemas']">The schemas referenced in the file section file groups are described in the structural map within a single sub-division.</assert>
+      <assert id="CSIP99" role="ERROR" test="mets:div[@LABEL = 'Schemas']">The schema division div element's @LABEL attribute has the value Schemas from the vocabulary.</assert>
       <assert id="CSIP101" role="WARN" test="mets:div[@LABEL = 'Representations']">When no representations are present the content referenced in the file section file group with @USE attribute value “Representations” is described in the structural map as a single sub division.</assert>
+      <assert id="CSIP103" role="ERROR" test="mets:div[@LABEL = 'Representations']">The package's content division div element must have the @LABEL attribute value "Representations", taken from the vocabulary.</assert>
+      <assert id="CSIP105" role="WARN" test="mets:div[@LABEL = 'Representations']/mets:div">When a package consists of multiple representations, each described by a representation level METS.xml document, there should be a discrete representation div element for each representation.</assert>
     </rule>
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Metadata']">
       <assert id="CSIP89" role="ERROR" test="@ID">An xml:id identifier must be unique within the package.</assert>
