@@ -49,18 +49,16 @@ class Specifications:
         if not os.path.isfile(xml_file):
             raise ValueError(NOT_FILE.format(xml_file))
         tree = ET.parse(xml_file, parser=cls._parser())
-        return  cls._from_xml(tree)
+        return cls._from_xml(tree)
 
     @classmethod
     def _parser(cls) -> ET.XMLParser:
         """Create a parser for the specification."""
-        parser = ET.XMLParser(schema=METS_PROF_SCHEMA, resolve_entities=False, no_network=True)
-        return parser
+        return ET.XMLParser(schema=METS_PROF_SCHEMA, resolve_entities=False, no_network=True)
 
     @classmethod
     def _from_xml(cls, tree: ET.ElementTree) -> Specification:
-        spec = cls.from_element(tree.getroot())
-        return spec
+        return cls.from_element(tree.getroot())
 
     @classmethod
     def from_element(cls, spec_ele: ET.Element) -> Specification:
@@ -150,20 +148,44 @@ class StructuralRequirements():
         return reqs
 
 @unique
-class EarkSpecifications(str, Enum):
-    """Enumeration of E-ARK specifications."""
+class SpecificationVersion(str, Enum):
+    V2_0_4 = 'V2.0.4'
+    V2_1_0 = 'V2.1.0'
+
+    def __str__(self):
+        return self.value
+
+@unique
+class SpecificationType(str, Enum):
     CSIP = 'E-ARK-CSIP'
     SIP = 'E-ARK-SIP'
     DIP = 'E-ARK-DIP'
 
-    def __init__(self, value: str):
-        self._path = str(files(profiles).joinpath(value + '.xml'))
+    @classmethod
+    def from_string(cls, type: str) -> Optional['SpecificationType']:
+        """Get the enum from the value."""
+        for spec in cls:
+            if type in [spec.name, spec.value]:
+                return spec
+        raise ValueError('{type} does not exists')
+
+class EarkSpecification:
+    def __init__(self, type: SpecificationType, version: SpecificationVersion):
+        self._type: SpecificationType = type
+        self._version: SpecificationVersion = version
+
+        self._path = str(files(profiles).joinpath(version).joinpath(type + '.xml'))
         self._specfication = Specifications._from_xml_file(self.path)
 
     @property
-    def spec_id(self) -> str:
-        """Get the specification id."""
-        return self.name
+    def version(self) -> SpecificationVersion:
+        """Get the specification version."""
+        return self._version
+
+    @property
+    def type(self) -> SpecificationType:
+        """Get the specification type."""
+        return self._type
 
     @property
     def path(self) -> str:
@@ -171,24 +193,6 @@ class EarkSpecifications(str, Enum):
         return self._path
 
     @property
-    def title(self) -> str:
-        """Get the specification title."""
-        return self.value
-
-    @property
     def specification(self) -> Specification:
         """Get the specification."""
         return self._specfication
-
-    @property
-    def profile(self) -> str:
-        """Get the specification profile url."""
-        return f'https://eark{self.name.lower()}.dilcis.eu/profile/{self.value}.xml'
-
-    @classmethod
-    def from_id(cls, spec_id: str) -> Optional['EarkSpecifications']:
-        """Get the enum from the value."""
-        for spec in cls:
-            if spec_id in [ spec.spec_id, spec.value, spec.profile ]:
-                return spec
-        return None

@@ -1,0 +1,15 @@
+<schema xmlns="http://purl.oclc.org/dsdl/schematron">
+  <ns prefix="mets" uri="http://www.loc.gov/METS/" />
+  <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
+  <ns prefix="sip" uri="https://DILCIS.eu/XML/METS/SIPExtensionMETS"/>
+  <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
+  <pattern id="METS_file_element">
+    <title>Use of the METS file section.</title>
+    <rule context="/mets:mets/mets:fileSec/mets:fileGrp/mets:file">
+      <report id="CSIP73" role="INFO" test="@sip:FILEFORMATNAME">A file element has an FILEFORMATNAME attribute.</report>
+      <report id="CSIP74" role="INFO" test="@sip:FILEFORMATVERSION">A file element has an FILEFORMATVERSION attribute.</report>
+      <report id="CSIP75" role="INFO" test="@sip:FILEFORMATREGISTRY">A file element has an FILEFORMATREGISTRY attribute.</report>
+      <report id="CSIP76" role="INFO" test="@sip:FILEFORMATKEY">A file element has an FILEFORMATKEY attribute.</report>
+    </rule>
+  </pattern>
+</schema>

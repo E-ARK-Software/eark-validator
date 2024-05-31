@@ -1,0 +1,12 @@
+<schema xmlns="http://purl.oclc.org/dsdl/schematron" >
+  <ns prefix="mets" uri="http://www.loc.gov/METS/" />
+  <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
+  <ns prefix="sip" uri="https://DILCIS.eu/XML/METS/SIPExtensionMETS"/>
+  <pattern id="METS_root_element">
+      <title>Validate METS root element.</title>
+      <rule context="/mets:mets">
+        <assert id="DIP1" role="ERROR" test="@OBJID">The mets/@OBJID attribute is mandatory, its value is a string identifier for the METS document. Note that the value of the `mets/@OBJID attribute` for the DIP is expected to be different from the SIP and AIP to reflect the creation of a new package.</assert>
+        <assert id="DIP2" role="ERROR" test="starts-with(@PROFILE, 'https://earkdip.dilcis.eu/profile/E-ARK-DIP'">The mets/@PROFILE attribute MUST contain the URL of the METS profile that the information package conforms with.</assert>
+      </rule>
+  </pattern>
+</schema>

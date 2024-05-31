@@ -32,7 +32,7 @@ from pydantic import ValidationError
 
 from eark_validator import rules as SC
 from eark_validator.model.validation_report import Severity, Result
-from eark_validator.specifications.specification import EarkSpecifications
+from eark_validator.specifications.specification import SpecificationType, SpecificationVersion
 import tests.resources.schematron as SCHEMATRON
 import tests.resources.xml as XML
 
@@ -145,91 +145,82 @@ class ValidationRulesTest(unittest.TestCase):
 
 class ValidationProfileTest(unittest.TestCase):
     def test_load_by_str(self):
-        profile = SC.ValidationProfile.from_specification('CSIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('CSIP'), SpecificationVersion.V2_0_4)
         self.assertEqual(profile.specification.url, CSIP_PROF)
-        profile = SC.ValidationProfile.from_specification('SIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('SIP'), SpecificationVersion.V2_0_4)
         self.assertEqual(profile.specification.url, SIP_PROF)
-        profile = SC.ValidationProfile.from_specification('DIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('DIP'), SpecificationVersion.V2_0_4)
         self.assertEqual(profile.specification.url, DIP_PROF)
 
     def test_load_by_eark_spec(self):
-        profile = SC.ValidationProfile.from_specification(EarkSpecifications.CSIP)
+        profile = SC.ValidationProfile(SpecificationType.CSIP, SpecificationVersion.V2_0_4)
         self.assertEqual(profile.specification.url, CSIP_PROF)
-        profile = SC.ValidationProfile.from_specification(EarkSpecifications.SIP)
+        profile = SC.ValidationProfile(SpecificationType.SIP, SpecificationVersion.V2_0_4)
         self.assertEqual(profile.specification.url, SIP_PROF)
-        profile = SC.ValidationProfile.from_specification(EarkSpecifications.DIP)
-        self.assertEqual(profile.specification.url, DIP_PROF)
-
-    def test_load_by_spec(self):
-        profile = SC.ValidationProfile.from_specification(EarkSpecifications.CSIP.specification)
-        self.assertEqual(profile.specification.url, CSIP_PROF)
-        profile = SC.ValidationProfile.from_specification(EarkSpecifications.SIP.specification)
-        self.assertEqual(profile.specification.url, SIP_PROF)
-        profile = SC.ValidationProfile.from_specification(EarkSpecifications.DIP.specification)
+        profile = SC.ValidationProfile(SpecificationType.DIP, SpecificationVersion.V2_0_4)
         self.assertEqual(profile.specification.url, DIP_PROF)
 
     def test_bad_value(self):
         with self.assertRaises(ValueError):
-            SC.ValidationProfile.from_specification('BAD')
-
+            SC.ValidationProfile(SpecificationType.from_string('BAD'), SpecificationVersion.V2_0_4)
     def test_unimplemented_specifications(self):
         with self.assertRaises(ValueError):
-            SC.ValidationProfile.from_specification('AIP')
+            SC.ValidationProfile(SpecificationType.from_string('AIP'), SpecificationVersion.V2_0_4)
         with self.assertRaises(ValueError):
-            SC.ValidationProfile.from_specification('AIU')
+            SC.ValidationProfile(SpecificationType.from_string('AIU'), SpecificationVersion.V2_0_4)
         with self.assertRaises(ValueError):
-            SC.ValidationProfile.from_specification('AIC')
+            SC.ValidationProfile(SpecificationType.from_string('AIC'), SpecificationVersion.V2_0_4)
 
     def test_valid(self):
-        profile = SC.ValidationProfile.from_specification('CSIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('CSIP'), SpecificationVersion.V2_0_4)
         profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
         self.assertTrue(profile.is_valid)
 
     def test_invalid(self):
-        profile = SC.ValidationProfile.from_specification('CSIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('CSIP'), SpecificationVersion.V2_0_4)
         profile.validate(str(files(TEST_RES_XML).joinpath('METS-no-hdr.xml')))
         self.assertFalse(profile.is_valid)
 
     def test_validate_file_not_found(self):
-        profile = SC.ValidationProfile.from_specification('CSIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('CSIP'), SpecificationVersion.V2_0_4)
         with self.assertRaises(FileNotFoundError):
             profile.validate(str(files(SCHEMATRON).joinpath('not-found.xml')))
 
     def test_validate_dir_value_err(self):
-        profile = SC.ValidationProfile.from_specification('CSIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('CSIP'), SpecificationVersion.V2_0_4)
         with self.assertRaises(ValueError):
             profile.validate(str(files(SCHEMATRON)))
 
     def test_validate_empty_file(self):
-        profile = SC.ValidationProfile.from_specification('CSIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('CSIP'), SpecificationVersion.V2_0_4)
         profile.validate(str(files(TEST_RES).joinpath('empty.file')))
         self.assertFalse(profile.is_valid)
 
     def test_validate_not_mets(self):
-        profile = SC.ValidationProfile.from_specification('CSIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('CSIP'), SpecificationVersion.V2_0_4)
         profile.validate(str(files(TEST_RES_XML).joinpath('person.xml')))
         self.assertFalse(profile.is_valid)
 
     def test_validate_json(self):
-        profile = SC.ValidationProfile.from_specification('CSIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('CSIP'), SpecificationVersion.V2_0_4)
         profile.validate(str(files(TEST_RES).joinpath('aip.json')))
         self.assertFalse(profile.is_valid)
 
     def test_get_results(self):
-        profile = SC.ValidationProfile.from_specification('CSIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('CSIP'), SpecificationVersion.V2_0_4)
         profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
         self.assertTrue(profile.is_valid)
         self.assertEqual(len(profile.get_results()), 8)
 
     def test_get_result(self):
-        profile = SC.ValidationProfile.from_specification('CSIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('CSIP'), SpecificationVersion.V2_0_4)
         profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
         result = profile.get_result('metsHdr')
         self.assertTrue(profile.is_valid)
         self.assertEqual(len(list(filter(lambda a: a.severity == Severity.WARNING, result))), 1)
 
     def test_get_bad_key(self):
-        profile = SC.ValidationProfile.from_specification('CSIP')
+        profile = SC.ValidationProfile(SpecificationType.from_string('CSIP'), SpecificationVersion.V2_0_4)
         profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
         result = profile.get_result('badkey')
         self.assertIsNone(result)
@@ -240,7 +231,7 @@ class SeverityTest(str, Enum):
 class ResultTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        profile = SC.ValidationProfile.from_specification('CSIP')
+        profile = SC.ValidationProfile(SpecificationType.CSIP, SpecificationVersion.V2_0_4)
         profile.validate(str(files(TEST_RES_XML).joinpath(METS_VALID)))
         cls._result = profile.get_result('metsHdr')[0]
 
@@ -252,7 +243,7 @@ class ResultTest(unittest.TestCase):
             Result.model_validate({ 'severity': SeverityTest.NOT_SEV })
 
 def _test_validation(name, to_validate):
-    rules = SC.SchematronRuleset(SC.get_schematron_path('CSIP', name))
+    rules = SC.SchematronRuleset(SC.get_schematron_path(SpecificationVersion.V2_0_4, 'CSIP', name))
     rules.validate(str(files(XML).joinpath(to_validate)))
     results: List[Result] = SC.TestResults.from_validation_report(rules._schematron.validation_report)
     errors = warnings = infos = 0
@@ -266,6 +257,6 @@ def _test_validation(name, to_validate):
     return errors < 1, errors, warnings, infos
 
 def _full_validation(name, to_validate):
-    rules = SC.SchematronRuleset(SC.get_schematron_path('CSIP', name))
+    rules = SC.SchematronRuleset(SC.get_schematron_path(SpecificationVersion.V2_0_4, 'CSIP', name))
     rules.validate(str(files(XML).joinpath(to_validate)))
     return SC.TestResults.from_validation_report(rules._schematron.validation_report)
