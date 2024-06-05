@@ -114,6 +114,9 @@
       <div ID="ID-Structmap_Div_ID_Schemas" LABEL="Schemas" CONTENTIDS="minimal_with_schemas_fileGrp_schemas">
         <fptr FILEID="ID-minimal_with_schemas_fileGrp_schemas"/>
       </div>
+      <div ID="ID-Structmap_Div_ID_Representations" LABEL="Representations">
+        <fptr FILEID="ID-minimal_with_schemas_fileGrp_representations"/>
+      </div>
     </div>
 
   </structMap>
