@@ -26,6 +26,7 @@
 E-ARK : Information package validation
         Command line validation application
 """
+import json
 import os.path
 from pathlib import Path
 import sys
@@ -82,6 +83,11 @@ def parse_command_line():
                         dest='outputVerboseFlag',
                         default=False,
                         help='Verbose reporting for selected output options.')
+    PARSER.add_argument('--schema',
+                        action='store_true',
+                        dest='output_schema',
+                        default=False,
+                        help='Request display of the JSON schema of the output report.')
     PARSER.add_argument('-s', '--specification_version',
                         nargs='?',
                         dest='specification_version',
@@ -109,8 +115,12 @@ def main():
     # Get input from command line
     args = parse_command_line()
     # If no target files or folders specified then print usage and exit
-    if not args.files:
+    if _is_show_help(args):
         PARSER.print_help()
+
+    if args.output_schema:
+        print(json.dumps(ValidationReport.model_json_schema(), indent=2))
+        sys.exit(0)
 
     # Iterate the file arguments
     for file_arg in args.files:
@@ -144,6 +154,9 @@ def _check_path(path: str) -> Tuple[int, Optional[Path]]:
 
 def _format_check_path_message(path: Path, message: str) -> str:
     return f'Processing terminated, path: {path} {message}.'
+
+def _is_show_help(args) -> bool:
+    return not args.files and not args.output_schema
 
 # def _test_case_schema_checks():
 if __name__ == '__main__':
