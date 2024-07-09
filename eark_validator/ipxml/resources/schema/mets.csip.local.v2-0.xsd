@@ -4,5 +4,4 @@
 	<xsd:import namespace="http://www.w3.org/1999/xhtml" schemaLocation="./xhtml1-strict.xsd"/>
 	<xsd:import namespace="http://www.w3.org/1999/xlink" schemaLocation="./xlink.xsd"/>
     <xsd:import namespace="http://www.loc.gov/METS/" schemaLocation="./mets.xsd"/>
-    <xsd:import namespace="https://DILCIS.eu/XML/METS/CSIPExtensionMETS" schemaLocation="./DILCISExtensionMETS.xsd"/>
 </xsd:schema>
