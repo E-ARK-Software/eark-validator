@@ -42,7 +42,7 @@ class SchematronTests():
     __vocabulary_definitions = {'@TYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyContentCategory.xml',
                 '@csip:CONTENTINFORMATIONTYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyContentInformationType.xml',
                 '@csip:OAISPACKAGETYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyOAISPackageType.xml'}
-    
+
     tests = {}
 
     def __init__(self):
@@ -57,8 +57,8 @@ class SchematronTests():
                 continue
 
             start = line.find('>') + 1
-            end = line.find('<', start) 
-        
+            end = line.find('<', start)
+
             vocabulary_item = line[start:end]
             vocabulary_tests.append(f"({attribute} = '{vocabulary_item}')")
 
@@ -79,7 +79,7 @@ class SchematronRuleset():
                 schematron_data = schematron_file.read()
                 for test_name, test_value in schematron_tests.tests.items():
                     schematron_data = schematron_data.replace(test_name, test_value)
-                    
+
                 tree = ET.XML(schematron_data)
                 self._schematron = Schematron(etree=tree, store_schematron=True, store_report=True)
         except (ET.SchematronParseError, ET.XMLSyntaxError) as ex:
