@@ -189,7 +189,7 @@ def _parse_file_entry(element: etree.Element) -> FileEntry:
         'path': _path_from_xml_element(element),
         'size': int(element.attrib['SIZE']),
         'checksum': _checksum_from_mets_element(element),
-        'mimetype': element.attrib.get('MIMETYPE') or ""
+        'mimetype': element.attrib.get('MIMETYPE') or ''
         })
 
 def _path_from_xml_element(element: etree.Element) -> str:
@@ -208,7 +208,7 @@ def _path_from_xml_element(element: etree.Element) -> str:
 def _get_path_attrib(element: etree.Element) -> str:
     """Get the path attribute from an etree element."""
     attrib_name = Namespaces.XLINK.qualify('href') if hasattr(element, 'nsmap') else 'href'
-    return element.attrib.get(attrib_name) or ""
+    return element.attrib.get(attrib_name) or ''
 
 def _checksum_from_mets_element(element: etree.Element) -> Checksum:
     """Create a Checksum from an etree element."""
