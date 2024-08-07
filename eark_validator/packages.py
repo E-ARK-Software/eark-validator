@@ -94,14 +94,6 @@ class PackageValidator():
             return ValidationReport.model_validate({'structure': struct_results})
         validator = MetsValidator(str(to_validate))
         validator.validate_mets(METS)
-        if not validator.is_valid:
-            metadata: MetatdataResults = MetatdataResults.model_validate({
-                'schema_results': validator.validation_errors
-                })
-            return ValidationReport.model_validate({
-                'structure': struct_results,
-                'metadata': metadata
-                })
 
         csip_profile = SC.ValidationProfile(SpecificationType.CSIP, version)
         csip_profile.validate(to_validate.joinpath(METS))
