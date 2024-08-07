@@ -24,5 +24,5 @@
 #
 """
 E-ARK : Information Package Validation
-        Information Package XML schematron
+        Information Package vocabularies
 """

@@ -10,7 +10,7 @@
     </rule>
     <rule context="/mets:mets/mets:amdSec/mets:digiprovMD">
       <assert id="CSIP33" role="ERROR" test="@ID">Mandatory, unique id for the digital provenance.</assert>
-      <assert id="CSIP34" role="WARN" test="@STATUS">Should be used to indicate the status of the package.</assert>
+      <assert id="CSIP34" role="ERROR" test="not(@STATUS) or (@STATUS_vocabulary_test)">Should be used to indicate the status of the package.</assert>
       <assert id="CSIP35" role="WARN" test="mets:mdRef">Should provide a reference to the digital provenance metadata file stored in the “metadata” section of the IP.</assert>
     </rule>
     <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef">
