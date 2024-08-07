@@ -189,7 +189,7 @@ def _parse_file_entry(element: etree.Element) -> FileEntry:
         'path': _path_from_xml_element(element),
         'size': int(element.attrib['SIZE']),
         'checksum': _checksum_from_mets_element(element),
-        'mimetype': element.attrib['MIMETYPE']
+        'mimetype': element.attrib.get('MIMETYPE') or ""
         })
 
 def _path_from_xml_element(element: etree.Element) -> str:
