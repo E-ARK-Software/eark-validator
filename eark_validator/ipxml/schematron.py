@@ -52,7 +52,7 @@ class SchematronTests():
     def __init__(self):
         for attribute, vocabulary_uri in self.__vocabulary_definitions.items():
             self.tests[attribute + '_vocabulary_test'] = self.__create_vocabulary_test(attribute, vocabulary_uri)
-        
+
         self.tests['@MIMETYPE_IANA_test'] = self.___create_IANA_test()
 
     def __create_vocabulary_test(self, attribute: str, vocabulary_uri: str) -> str:
@@ -69,12 +69,12 @@ class SchematronTests():
             vocabulary_tests.append(f"({attribute} = '{vocabulary_item}')")
 
         return ' or '.join(vocabulary_tests)
-    
+
     def ___create_IANA_test(self) -> str:
         mime_tests = []
         with open(str(files(vocabularies).joinpath('IANA.txt')), 'r') as iana:
             for mime_type in iana:
-                mime_type = mime_type.rstrip("\n")
+                mime_type = mime_type.rstrip('\n')
                 mime_tests.append(f"(@MIMETYPE = '{mime_type}')")
 
         return ' or '.join(mime_tests)
