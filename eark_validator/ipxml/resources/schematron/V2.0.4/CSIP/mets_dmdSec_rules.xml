@@ -7,7 +7,7 @@
     <rule context="/mets:mets/mets:dmdSec">
       <assert id="CSIP18" role="ERROR" test="@ID">Mandatory, identifier must be unique within the package.</assert>
       <assert id="CSIP19" role="ERROR" test="@CREATED">Mandatory, creation date of the descriptive metadata in this section.</assert>
-      <assert id="CSIP20" role="WARN" test="@STATUS">SHOULD be used to indicated the status of the package.</assert>
+      <assert id="CSIP20" role="ERROR" test="not(@STATUS) or (@STATUS_vocabulary_test)">SHOULD be used to indicated the status of the package.</assert>
       <assert id="CSIP21" role="WARN" test="mets:mdRef">SHOULD provide a reference to the descriptive metadata file located in the “metadata” section of the IP..</assert>
     </rule>
     <rule context="/mets:mets/mets:dmdSec/mets:mdRef">

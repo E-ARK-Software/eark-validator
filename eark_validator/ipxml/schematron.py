@@ -39,7 +39,8 @@ SCHEMATRON_NS = '{http://purl.oclc.org/dsdl/schematron}'
 SVRL_NS = '{http://purl.oclc.org/dsdl/svrl}'
 
 class SchematronTests():
-    __vocabulary_definitions = {'@TYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyContentCategory.xml',
+    __vocabulary_definitions = {
+        '@TYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyContentCategory.xml',
                 '@csip:CONTENTINFORMATIONTYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyContentInformationType.xml',
                 '@csip:OAISPACKAGETYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyOAISPackageType.xml'}
 
