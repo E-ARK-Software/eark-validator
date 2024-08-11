@@ -33,7 +33,7 @@ from enum import Enum, unique
 from typing import List, Optional
 import uuid
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .package_details import InformationPackage
 from .specifications import Level
@@ -84,14 +84,14 @@ class Location(BaseModel):
     description: str = ''
 
 class Result(BaseModel):
-    rule_id: str | None
+    rule_id: Optional[str] = Field(default=None, alias='ruleId')
     severity: Severity = Severity.UNKNOWN
     location: Location | None
     message: str | None
 
 @unique
 class StructureStatus(str, Enum):
-    """Enum covering information package validation statuses."""
+    """Enum for information package structure status values."""
     UNKNOWN = UNKNOWN
     # Package has basic parse / structure problems and can't be validated
     NOTWELLFORMED = NOTWELLFORMED
