@@ -6,15 +6,15 @@
     <rule context="/mets:mets/mets:metsHdr">
       <assert id="CSIP7" role="ERROR" test="@CREATEDATE">The metsHdr element MUST have a CREATEDATE attribute.</assert>
       <assert id="CSIP8" role="WARN" test="@LASTMODDATE">The metsHdr element SHOULD have a LASTMODDATE attribute.</assert>
-      <assert id="CSIP9" role="ERROR" test="@csip:OAISPACKAGETYPE">The metsHdr element MUST have a csip:OAISPACKAGETYPE attribute.</assert>
+      <assert id="CSIP9" role="ERROR" test="@csip:OAISPACKAGETYPE_vocabulary_test">The metsHdr element MUST have a csip:OAISPACKAGETYPE attribute.</assert>
       <assert id="CSIP10" role="ERROR" test="mets:agent">The metsHdr element MUST contain an agent element that records the software used to create the package.</assert>
       <assert id="CSIP11" role="ERROR" test="count(mets:agent[@ROLE = 'CREATOR']) > 0">The agent element MUST have a ROLE attribute with the value "CREATOR".</assert>
     </rule>
     <rule context="/mets:mets/mets:metsHdr/mets:agent[@ROLE = 'CREATOR']">
       <assert id="CSIP12" role="ERROR" test="@TYPE = 'OTHER'">The agent element MUST have a TYPE attribute with the value "OTHER".</assert>
       <assert id="CSIP13" role="ERROR" test="@OTHERTYPE = 'SOFTWARE'">The agent element MUST have a OTHERTYPE attribute with the value "SOFTWARE".</assert>
-      <assert id="CSIP14" role="ERROR" test="mets:name">The agent element MUST have a child name element that records the name of the software tool used to create the IP.</assert>
-      <assert id="CSIP15" role="ERROR" test="mets:note">The agent element MUST have a child note element that records the version of the tool used to create the IP.</assert>
+      <assert id="CSIP14" role="ERROR" test="count(mets:name) = 1 and mets:name != ''">The agent element MUST have a child name element that records the name of the software tool used to create the IP.</assert>
+      <assert id="CSIP15" role="ERROR" test="count(mets:note) = 1 and mets:note != ''">The agent element MUST have a child note element that records the version of the tool used to create the IP.</assert>
       <assert id="CSIP16" role="ERROR" test="mets:note[@csip:NOTETYPE='SOFTWARE VERSION']">The mandatory agent element’s note child has a @csip:NOTETYPE attribute with a fixed value of “SOFTWARE VERSION”.</assert>
     </rule>
   </pattern>

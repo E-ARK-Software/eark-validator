@@ -72,8 +72,8 @@ class ValidationRulesTest(unittest.TestCase):
 
     def test_mets_root_other_type(self):
         result, failures, _, _ = _test_validation(METS_ROOT_RULES, 'METS-other-type.xml')
-        self.assertEqual(failures, 0)
-        self.assertTrue(result)
+        self.assertEqual(failures, 1)
+        self.assertFalse(result)
 
     def test_mets_root_no_profile(self):
         result, failures, _, _ = _test_validation(METS_ROOT_RULES, 'METS-no-profile.xml')
