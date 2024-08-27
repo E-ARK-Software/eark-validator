@@ -10,7 +10,8 @@
     </rule>
     <rule context="/mets:mets/mets:amdSec/mets:digiprovMD">
       <assert id="CSIP33" role="ERROR" test="@ID">Mandatory, unique id for the digital provenance.</assert>
-      <assert id="CSIP34" role="WARN" test="@STATUS">Should be used to indicate the status of the package.</assert>
+      <assert id="CSIP34_1" role="WARN" test="@STATUS">SHOULD be used to indicated the status of the package.</assert>
+      <assert id="CSIP34_2" role="ERROR" test="not(@STATUS) or (@STATUS_vocabulary_test)">SHOULD be used to indicated the status of the package.</assert>
       <assert id="CSIP35" role="WARN" test="mets:mdRef">Should provide a reference to the digital provenance metadata file stored in the “metadata” section of the IP.</assert>
     </rule>
     <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef">
@@ -18,7 +19,7 @@
       <assert id="CSIP37" role="ERROR" test="@xlink:type = 'simple'">Attribute MUST be used with the value “simple”. Value list is maintained by the xlink standard.</assert>
       <assert id="CSIP38" role="ERROR" test="@xlink:href">MUST record the actual location of the resource. This specification recommends recording a URL type filepath within this attribute.</assert>
       <assert id="CSIP39" role="ERROR" test="@MDTYPE">MUST record the type of metadata at the referenced location.</assert>
-      <assert id="CSIP40" role="ERROR" test="@MIMETYPE">MUST record the MIME type of the referenced file.</assert>
+      <assert id="CSIP40" role="ERROR" test="@MIMETYPE_IANA_test">MUST record the MIME type of the referenced file.</assert>
       <assert id="CSIP41" role="ERROR" test="@SIZE">MUST record the size in bytes of the referenced file.</assert>
       <assert id="CSIP42" role="ERROR" test="@CREATED">MUST record the date the referenced file was created.</assert>
       <assert id="CSIP43" role="ERROR" test="@CHECKSUM">MUST record the checksum of the referenced file.</assert>
@@ -26,7 +27,8 @@
     </rule>
     <rule context="/mets:mets/mets:amdSec/mets:rightsMD">
       <assert id="CSIP46" role="ERROR" test="@ID">Mandatory, unique id for the rights metadata.</assert>
-      <assert id="CSIP47" role="WARN" test="@STATUS">Should be used to indicate the status of the package.</assert>
+      <assert id="CSIP47_1" role="WARN" test="@STATUS">SHOULD be used to indicated the status of the package.</assert>
+      <assert id="CSIP47_2" role="ERROR" test="not(@STATUS) or (@STATUS_vocabulary_test)">SHOULD be used to indicated the status of the package.</assert>
       <assert id="CSIP48" role="WARN" test="mets:mdRef">Should provide a reference to the digital provenance metadata file stored in the “metadata” section of the IP.</assert>
     </rule>
     <rule context="/mets:mets/mets:amdSec/mets:rightsMD/mets:mdRef">

@@ -105,6 +105,9 @@ class TestResults():
         """Create a Test result from an element."""
         context = rule.get('context')
         rule_id = failed_assert.get('id')
+        if isinstance(rule_id, str):
+            rule_id = rule_id.split('_')[0]
+
         test = failed_assert.get('test')
         severity = Severity.from_role(failed_assert.get('role', Severity.ERROR))
         location = failed_assert.get('location')
