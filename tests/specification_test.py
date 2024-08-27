@@ -23,6 +23,7 @@
 # under the License.
 #
 
+from typing import Optional
 import unittest
 
 from lxml import etree as ET
@@ -72,12 +73,12 @@ class StructuralRequirementsTest(unittest.TestCase):
 
 class SpecificationTypeTest(unittest.TestCase):
     def test_value(self):
-        type = SpecificationType.CSIP
-        self.assertEqual(type.value, 'E-ARK-CSIP')
-        type = SpecificationType.SIP
-        self.assertEqual(type.value, 'E-ARK-SIP')
-        type = SpecificationType.DIP
-        self.assertEqual(type.value, 'E-ARK-DIP')
+        spec_type: SpecificationType = SpecificationType.CSIP
+        self.assertEqual(spec_type.value, 'E-ARK-CSIP')
+        spec_type = SpecificationType.SIP
+        self.assertEqual(spec_type.value, 'E-ARK-SIP')
+        spec_type = SpecificationType.DIP
+        self.assertEqual(spec_type.value, 'E-ARK-DIP')
 
 class SpecificationVersionTest(unittest.TestCase):
     def test_value(self):

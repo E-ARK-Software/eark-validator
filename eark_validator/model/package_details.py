@@ -27,12 +27,13 @@
 E-ARK : Information Package Validation
         Information Package Package Details type
 """
-from typing import List, Optional
+from typing import Any, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationInfo, model_validator
 
 from .checksum import Checksum
 from .metadata import MetsFile
+
 
 class PackageDetails(BaseModel):
     label: str = ''
@@ -50,3 +51,16 @@ class InformationPackage(BaseModel):
     mets: Optional[MetsFile] = None
     package: Optional[PackageDetails] = None
     representations: List[Representation] = []
+
+    @model_validator(mode='before')
+    @classmethod
+    def convert_dict(cls, data: Any) -> list[Representation]:
+        representations = data.get('representations')
+        if isinstance(representations, dict):
+            # If this is a dict type then it's a commons-ip type, coerce to list
+            reps : list[Representation] = []
+            for k, v in representations.items():
+                reps.append(Representation(name=v,))
+            data['representations'] = reps
+        # Return the reps for further validation.
+        return data

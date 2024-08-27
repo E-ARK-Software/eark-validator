@@ -86,7 +86,7 @@ class PackageValidator():
         return self._version
 
     @classmethod
-    def validate(self, version: SpecificationVersion, to_validate: Path) -> ValidationReport:
+    def validate(cls, version: SpecificationVersion, to_validate: Path) -> ValidationReport:
         """Returns the validation report that results from validating the path
         to_validate as a folder. The method does not validate archive files."""
         is_struct_valid, struct_results = structure.validate(to_validate)

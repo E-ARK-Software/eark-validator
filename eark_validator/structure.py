@@ -39,6 +39,7 @@ from eark_validator.model import (
 
 METS_NAME = 'METS.xml'
 STR_REQ_PREFIX = 'CSIPSTR'
+ROOT = 'root '
 DIR_NAMES = {
     'DATA': 'data',
     'DESC': 'descriptive',
@@ -145,15 +146,15 @@ class StructureChecker():
             'messages': results
             })
 
-    def get_representations(self) -> Dict[str, str]:
-        reps: Dict[str, str] = {}
+    def get_representations(self) -> List[Representation]:
+        reps: List[Representation] = []
         for rep in self.representations: # pylint: disable=C0201
             reps.append(Representation.model_validate({ 'name': rep }))
         return reps
 
     def get_root_results(self) -> List[Result]:
         results: List[Result] = []
-        location: str = 'root ' + self.name
+        location: str = ROOT + self.name
         if not self.parser.is_archive:
             results.append(test_result_from_id(3, location))
         if not self.parser.has_mets():
@@ -194,13 +195,13 @@ class StructureChecker():
         for tests in self.representations.values():
             if tests.has_schemas():
                 return None
-        return test_result_from_id(15, 'root ' + self.name)
+        return test_result_from_id(15, ROOT + self.name)
 
     def _get_dox_results(self) -> Optional[Result]:
         for tests in self.representations.values():
             if tests.has_documentation():
                 return None
-        return test_result_from_id(16, 'root ' + self.name)
+        return test_result_from_id(16, ROOT + self.name)
 
     @classmethod
     def get_status(cls, results: List[Result]) -> StructureStatus:
@@ -239,7 +240,7 @@ def get_bad_path_results(path) -> StructResults:
         })
 
 def _get_str1_result_list(name: str) -> List[Result]:
-    return [ test_result_from_id(1, 'root ' + str(name)) ]
+    return [ test_result_from_id(1, ROOT + str(name)) ]
 
 def validate(to_validate) -> Tuple[bool, StructResults]:
     try:
