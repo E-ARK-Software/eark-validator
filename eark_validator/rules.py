@@ -29,7 +29,7 @@ from typing import Dict, List
 from lxml import etree as ET
 
 from eark_validator.ipxml.schematron import SchematronRuleset, SVRL_NS, get_schematron_path
-from eark_validator.model.validation_report import Location, Result
+from eark_validator.model.validation_report import Result
 from eark_validator.specifications.specification import EarkSpecification, Specification, SpecificationType, SpecificationVersion
 from eark_validator.const import NO_PATH, NOT_FILE
 from eark_validator.model import Severity
@@ -112,11 +112,7 @@ class TestResults():
         severity = Severity.from_role(failed_assert.get('role', Severity.ERROR))
         location = failed_assert.get('location')
         message = failed_assert.find(SVRL_NS + 'text').text
-        location = Location.model_validate({
-            'context':context,
-            'test':test,
-            'description': location
-        })
+        location = context + test + location
         return Result.model_validate({
             'rule_id': rule_id, 'location':location, 'message':message, 'severity':severity
         })

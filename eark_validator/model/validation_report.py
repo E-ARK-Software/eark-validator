@@ -77,16 +77,10 @@ class Severity(str, Enum):
             return Severity.WARNING
         return Severity.INFORMATION
 
-class Location(BaseModel):
-    """All details of the location of an error."""
-    context: str = ''
-    test: str = ''
-    description: str = ''
-
 class Result(BaseModel):
     rule_id: Optional[str] = Field(default=None, alias='ruleId')
     severity: Severity = Severity.UNKNOWN
-    location: Location | None
+    location: str | None
     message: str | None
 
 @unique
