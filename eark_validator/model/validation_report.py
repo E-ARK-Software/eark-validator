@@ -33,7 +33,7 @@ from enum import Enum, unique
 from typing import List, Optional
 import uuid
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from .package_details import InformationPackage
 from .specifications import Level
@@ -78,10 +78,12 @@ class Severity(str, Enum):
         return Severity.INFORMATION
 
 class Result(BaseModel):
-    rule_id: Optional[str] = Field(default=None, alias='ruleId')
+    model_config = ConfigDict(populate_by_name=True)
+    rule_id: Optional[str] = Field(validation_alias='ruleId')
     severity: Severity = Severity.UNKNOWN
     location: str | None
     message: str | None
+
 
 @unique
 class StructureStatus(str, Enum):
