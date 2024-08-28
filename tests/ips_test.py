@@ -86,7 +86,7 @@ class InformationPackageTest(unittest.TestCase):
 
     def test_from_path_dir(self):
         ip: InformationPackage = InformationPackages.from_path(Path(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')))
-        self.assertEqual(ip.name, '733dc055-34be-4260-85c7-5549a7083031')
+        self.assertEqual(ip.details.name, '733dc055-34be-4260-85c7-5549a7083031')
 
 class SchemaTest(unittest.TestCase):
     def test_schema(self):

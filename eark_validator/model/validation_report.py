@@ -38,7 +38,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .package_details import InformationPackage
 from .specifications import Level
 from .constants import (
-    UNKNOWN, INFORMATION, WARNING, ERROR, WELLFORMED, NOTWELLFORMED)
+    UNKNOWN, INFORMATION, WARNING, ERROR, WELLFORMED, NOTWELLFORMED, VALID, INVALID)
 
 @unique
 class Severity(str, Enum):
@@ -110,12 +110,31 @@ class StructResults(BaseModel):
     def infos(self) -> List[Result]:
         return [m for m in self.messages if m.severity == Severity.INFORMATION]
 
-class MetatdataResults(BaseModel):
-    schema_results: List[Result] = []
-    schematron_results: List[Result] = []
+@unique
+class MetadataStatus(str, Enum):
+    """Enum for information package metadata status values."""
+    UNKNOWN = UNKNOWN
+    # Package metadata is valid according to the schema/schematron rules
+    VALID = VALID
+    # Package metadata is invalid according to the schema/schematron rules
+    INVALID = INVALID
+
+class MetadataResults(BaseModel):
+    status: MetadataStatus = MetadataStatus.UNKNOWN
+    messages: List[Result] = []
+
+class MetatdataResultSet(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    schema_results: MetadataResults = Field(validation_alias='schemaResults')
+    model_config = ConfigDict(populate_by_name=True)
+    schematron_results: MetadataResults = Field(validation_alias='schematronResults')
 
 class ValidationReport(BaseModel):
     uid: uuid.UUID = uuid.uuid4()
     structure: Optional[StructResults] = None
-    metadata: Optional[MetatdataResults] = None
+    metadata: Optional[MetatdataResultSet] = None
     package: Optional[InformationPackage] = None
+
+    @property
+    def is_valid(self) -> bool:
+        return self.structure.status == StructureStatus.WELLFORMED and self.metadata.schema_results.status == MetadataStatus.VALID and self.metadata.schematron_results.status == MetadataStatus.VALID

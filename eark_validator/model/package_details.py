@@ -36,6 +36,7 @@ from .metadata import MetsFile
 
 
 class PackageDetails(BaseModel):
+    name: str = ''
     label: str = ''
     oaispackagetype: str = ''
     othertype: str = ''
@@ -47,14 +48,13 @@ class Representation(BaseModel):
     name: Optional[str] = ''
 
 class InformationPackage(BaseModel):
-    name: str = ''
     mets: Optional[MetsFile] = None
-    package: Optional[PackageDetails] = None
+    details: Optional[PackageDetails] = None
     representations: List[Representation] = []
 
     @model_validator(mode='before')
     @classmethod
-    def convert_dict(cls, data: Any) -> list[Representation]:
+    def convert_representations_dict(cls, data: Any) -> list[Representation]:
         representations = data.get('representations')
         if isinstance(representations, dict):
             # If this is a dict type then it's a commons-ip type, coerce to list
@@ -62,5 +62,21 @@ class InformationPackage(BaseModel):
             for k, v in representations.items():
                 reps.append(Representation(name=v,))
             data['representations'] = reps
+        # Return the reps for further validation.
+        return data
+
+    @model_validator(mode='before')
+    @classmethod
+    def convert_checksum_ids(cls, data: Any) -> list[Representation]:
+        details = data.get('details', {})
+        if isinstance(details, dict):
+            incoming_checksums = details.get('checksums', [])
+            checksums : list[Checksum] = []
+            for checksum in incoming_checksums:
+                alg_name = checksum.get('algorithm')
+                if alg_name and alg_name.startswith('SHA') and '-' not in alg_name:
+                    alg_name = f'{alg_name[:3]}-{alg_name[3:]}'
+                checksums.append(Checksum(algorithm=alg_name, value=checksum.get('value')))
+            data['details']['checksums'] = checksums
         # Return the reps for further validation.
         return data
