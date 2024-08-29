@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # flake8: noqa
+# -*- coding: utf-8 -*-
 #
 # E-ARK Validation
 # Copyright (C) 2019
@@ -24,21 +25,6 @@
 # under the License.
 #
 """
-    E-ARK : Information Package Validation Model constants
-    Constant values for the model package
+E-ARK : Information Package Validation
+        JSON report representation
 """
-METS = 'mets'
-METS_FILE = 'METS.xml'
-MIME_DEFAULT = 'application/octet-stream'
-MAY = 'MAY'
-SHOULD = 'SHOULD'
-MUST = 'MUST'
-UNKNOWN = 'Unknown'
-INFORMATION = 'Info'
-WARNING = 'Warn'
-ERROR = 'Error'
-NOTWELLFORMED = 'NotWellFormed'
-WELLFORMED = 'WellFormed'
-PACKAGE = 'Package'
-VALID = 'VALID'
-INVALID = 'INVALID'

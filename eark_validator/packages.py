@@ -35,7 +35,7 @@ from eark_validator.infopacks.package_handler import PackageHandler
 from eark_validator.mets import MetsValidator
 from eark_validator.model import ValidationReport
 from eark_validator.model.package_details import InformationPackage
-from eark_validator.model.validation_report import MetatdataResults
+from eark_validator.model.validation_report import MetadataResults, MetadataStatus, MetatdataResultSet, Result, Severity
 from eark_validator.specifications.specification import SpecificationType, SpecificationVersion
 
 METS: str = 'METS.xml'
@@ -86,7 +86,7 @@ class PackageValidator():
         return self._version
 
     @classmethod
-    def validate(self, version: SpecificationVersion, to_validate: Path) -> ValidationReport:
+    def validate(cls, version: SpecificationVersion, to_validate: Path) -> ValidationReport:
         """Returns the validation report that results from validating the path
         to_validate as a folder. The method does not validate archive files."""
         is_struct_valid, struct_results = structure.validate(to_validate)
@@ -100,20 +100,23 @@ class PackageValidator():
         results = csip_profile.get_all_results()
 
         package: InformationPackage = InformationPackages.from_path(to_validate)
-        if package.package.oaispackagetype in ['SIP', 'DIP']:
-            profile = SC.ValidationProfile(SpecificationType.from_string(package.package.oaispackagetype), version)
+        if package.details.oaispackagetype in ['SIP', 'DIP']:
+            profile = SC.ValidationProfile(SpecificationType.from_string(package.details.oaispackagetype), version)
             profile.validate(to_validate.joinpath(METS))
             results.extend(profile.get_all_results())
 
-        metadata: MetatdataResults = MetatdataResults.model_validate({
-            'schema_results': validator.validation_errors,
-            'schematron_results': results
+        metadata: MetatdataResultSet = MetatdataResultSet.model_validate({
+            'schema_results': MetadataResults.model_validate({ 'status': _validity_from_messages(validator.validation_errors), 'messages': validator.validation_errors }),
+            'schematron_results': MetadataResults.model_validate({ 'status': _validity_from_messages(results), 'messages': results })
             })
         return ValidationReport.model_validate({
             'structure': struct_results,
             'package': package,
             'metadata': metadata
             })
+
+def _validity_from_messages(messages: list[Result]) -> MetadataStatus:
+    return MetadataStatus.VALID if len([ res for res in messages if res.severity == Severity.ERROR]) == 0 else MetadataStatus.INVALID
 
 def _report_from_bad_path(package_path: Path) -> ValidationReport:
     struct_results = structure.get_bad_path_results(package_path)

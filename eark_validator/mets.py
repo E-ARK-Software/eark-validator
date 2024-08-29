@@ -33,7 +33,7 @@ from eark_validator.ipxml.schema import IP_SCHEMA
 from eark_validator.ipxml.namespaces import Namespaces
 from eark_validator.model.checksum import Checksum, ChecksumAlg
 from eark_validator.model.metadata import FileEntry, MetsFile, MetsRoot
-from eark_validator.model.validation_report import Location, Result
+from eark_validator.model.validation_report import Result
 from eark_validator.utils import get_path
 from eark_validator.const import NOT_FILE, NOT_VALID_FILE
 
@@ -155,11 +155,7 @@ class MetsValidator():
             self._validation_errors.append(
                 Result.model_validate({
                     'rule_id': 'XML-1',
-                    'location': Location.model_validate({
-                                        'context': synt_err.filename,
-                                        'test': str(synt_err.lineno),
-                                        'description': str(synt_err.offset)
-                                }),
+                    'location': synt_err.filename + str(synt_err.lineno) + str(synt_err.offset),
                     'message': f'File {mets} is not valid XML. {synt_err.msg}',
                     'severity': 'Error'
                     })

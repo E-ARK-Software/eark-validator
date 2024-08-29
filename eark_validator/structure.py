@@ -26,7 +26,6 @@
 import os
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
-from eark_validator.model.validation_report import Location
 
 from eark_validator.specifications.struct_reqs import REQUIREMENTS
 from eark_validator.infopacks.package_handler import PackageHandler, PackageError
@@ -40,6 +39,7 @@ from eark_validator.model import (
 
 METS_NAME = 'METS.xml'
 STR_REQ_PREFIX = 'CSIPSTR'
+ROOT = 'root'
 DIR_NAMES = {
     'DATA': 'data',
     'DESC': 'descriptive',
@@ -134,10 +134,7 @@ class StructureChecker():
         results: List[Result] = self.get_root_results()
         results = results + self.get_package_results()
         for name, tests in self.representations.items():
-            location = Location.model_validate({
-                'context': str(name),
-                'description': 'representation'
-                })
+            location = str(name) + ' representation'
             if not tests.has_data():
                 results.append(test_result_from_id(11, location))
             if not tests.has_mets():
@@ -157,10 +154,7 @@ class StructureChecker():
 
     def get_root_results(self) -> List[Result]:
         results: List[Result] = []
-        location: Location = Location.model_validate({
-            'context': 'root',
-            'description': self.name
-            })
+        location: str = _root_loc(self.name)
         if not self.parser.is_archive:
             results.append(test_result_from_id(3, location))
         if not self.parser.has_mets():
@@ -201,19 +195,13 @@ class StructureChecker():
         for tests in self.representations.values():
             if tests.has_schemas():
                 return None
-        return test_result_from_id(15, Location.model_validate({
-            'context': 'root',
-            'description': self.name
-            }))
+        return test_result_from_id(15, _root_loc(self.name))
 
     def _get_dox_results(self) -> Optional[Result]:
         for tests in self.representations.values():
             if tests.has_documentation():
                 return None
-        return test_result_from_id(16, Location.model_validate({
-            'context': 'root',
-            'description': self.name
-            }))
+        return test_result_from_id(16, _root_loc(self.name))
 
     @classmethod
     def get_status(cls, results: List[Result]) -> StructureStatus:
@@ -252,10 +240,10 @@ def get_bad_path_results(path) -> StructResults:
         })
 
 def _get_str1_result_list(name: str) -> List[Result]:
-    return [ test_result_from_id(1, Location.model_validate({
-            'context': 'root',
-            'description': str(name)
-            })) ]
+    return [ test_result_from_id(1, _root_loc(name)) ]
+
+def _root_loc(name: str) -> str:
+    return f'{ROOT} {name}'
 
 def validate(to_validate) -> Tuple[bool, StructResults]:
     try:

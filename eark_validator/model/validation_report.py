@@ -30,15 +30,15 @@ E-ARK : Information Package Validation
 """
 
 from enum import Enum, unique
-from typing import List, Optional
+from typing import Any, List, Optional
 import uuid
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .package_details import InformationPackage
 from .specifications import Level
 from .constants import (
-    UNKNOWN, INFORMATION, WARNING, ERROR, WELLFORMED, NOTWELLFORMED)
+    UNKNOWN, INFORMATION, WARNING, ERROR, WELLFORMED, NOTWELLFORMED, VALID, INVALID)
 
 @unique
 class Severity(str, Enum):
@@ -77,21 +77,17 @@ class Severity(str, Enum):
             return Severity.WARNING
         return Severity.INFORMATION
 
-class Location(BaseModel):
-    """All details of the location of an error."""
-    context: str = ''
-    test: str = ''
-    description: str = ''
-
 class Result(BaseModel):
-    rule_id: str | None
+    model_config = ConfigDict(populate_by_name=True)
+    rule_id: Optional[str] = Field(validation_alias='ruleId')
     severity: Severity = Severity.UNKNOWN
-    location: Location | None
+    location: str | None
     message: str | None
+
 
 @unique
 class StructureStatus(str, Enum):
-    """Enum covering information package validation statuses."""
+    """Enum for information package structure status values."""
     UNKNOWN = UNKNOWN
     # Package has basic parse / structure problems and can't be validated
     NOTWELLFORMED = NOTWELLFORMED
@@ -114,12 +110,40 @@ class StructResults(BaseModel):
     def infos(self) -> List[Result]:
         return [m for m in self.messages if m.severity == Severity.INFORMATION]
 
-class MetatdataResults(BaseModel):
-    schema_results: List[Result] = []
-    schematron_results: List[Result] = []
+@unique
+class MetadataStatus(str, Enum):
+    """Enum for information package metadata status values."""
+    UNKNOWN = UNKNOWN
+    # Package metadata is valid according to the schema/schematron rules
+    VALID = VALID
+    # Package metadata is invalid according to the schema/schematron rules
+    INVALID = INVALID
+
+class MetadataResults(BaseModel):
+    status: MetadataStatus = MetadataStatus.UNKNOWN
+    messages: List[Result] = []
+
+    # Validator to convert commons-ip status from NOTVALID to INVALID
+    @model_validator(mode='before')
+    @classmethod
+    def convert_status(cls, data: Any) -> Any:
+        status = data.get('status')
+        if status and status == 'NOTVALID':
+            data['status'] = 'INVALID'
+        return data
+
+class MetatdataResultSet(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    schema_results: MetadataResults = Field(validation_alias='schemaResults')
+    model_config = ConfigDict(populate_by_name=True)
+    schematron_results: MetadataResults = Field(validation_alias='schematronResults')
 
 class ValidationReport(BaseModel):
     uid: uuid.UUID = uuid.uuid4()
     structure: Optional[StructResults] = None
-    metadata: Optional[MetatdataResults] = None
+    metadata: Optional[MetatdataResultSet] = None
     package: Optional[InformationPackage] = None
+
+    @property
+    def is_valid(self) -> bool:
+        return self.structure.status == StructureStatus.WELLFORMED and self.metadata.schema_results.status == MetadataStatus.VALID and self.metadata.schematron_results.status == MetadataStatus.VALID

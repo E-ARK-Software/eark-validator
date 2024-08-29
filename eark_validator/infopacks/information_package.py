@@ -70,6 +70,7 @@ class InformationPackages:
         except (etree.XMLSyntaxError, AttributeError) as ex:
             raise ValueError(NOT_VALID_FILE.format(mets_file, 'XML')) from ex
         return PackageDetails.model_validate({
+            'name': mets_file.parent.stem,
             'label': label,
             'othertype': othertype,
             CONTENTINFORMATIONTYPE: contentinformationtype,
@@ -87,9 +88,8 @@ class InformationPackages:
             raise ValueError('No METS file found in package')
         mets: MetsFile = MetsFiles.from_file(to_parse.joinpath(METS_FILE))
         return InformationPackage.model_validate({
-            'name': to_parse.stem,
             METS: mets,
-            'package': InformationPackages.details_from_mets_file(to_parse.joinpath(METS_FILE))
+            'details': InformationPackages.details_from_mets_file(to_parse.joinpath(METS_FILE))
         })
 
     @staticmethod
