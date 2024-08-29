@@ -41,6 +41,7 @@ TEST_RES = 'tests.resources'
 TEST_RES_XML = TEST_RES + '.xml'
 TEST_RES_JSON = TEST_RES + '.json'
 COMMONS_IP_JSON = str(files(JSON).joinpath('commons-ip-report.json'))
+COMMONS_IP_INVALID_JSON = str(files(JSON).joinpath('commons-ip-invalid.json'))
 PERSON_PATH = str(files(SCHEMATRON).joinpath('person.xml'))
 NOT_FOUND_PATH = str(files(SCHEMATRON).joinpath('not-found.xml'))
 EMPTY_FILE_PATH = str(files(TEST_RES).joinpath('empty.file'))
@@ -230,6 +231,13 @@ class ValidationProfileTest(unittest.TestCase):
 
     def test_deserialise_commons_ip_report(self):
         file_name = COMMONS_IP_JSON
+        with open(file_name, 'r', encoding='utf-8') as _f:
+            contents = _f.read()
+        result: ValidationReport = ValidationReport.model_validate_json(contents)
+        self.assertIsNotNone(result)
+
+    def test_deserialise_commons_ip_invalid(self):
+        file_name = COMMONS_IP_INVALID_JSON
         with open(file_name, 'r', encoding='utf-8') as _f:
             contents = _f.read()
         result: ValidationReport = ValidationReport.model_validate_json(contents)

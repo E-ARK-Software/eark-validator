@@ -1,0 +1,79 @@
+{
+  "package" : {
+    "details" : {
+      "name" : "minimal_IP_with_schemas.zip",
+      "checksums" : [ {
+        "algorithm" : "SHA1",
+        "value" : "54BBE654FE332B51569BAF21338BC811CAD2AF66"
+      } ]
+    },
+    "profile" : {
+      "type" : "CSIP",
+      "name" : "minimal_IP_with_schemas.zip",
+      "version" : "CSIP-"
+    },
+    "representations" : {
+      "name" : "minimal_IP_with_schemas.zip"
+    }
+  },
+  "uid" : "e11da9f2-e59e-4f23-b7f8-5ac86632231f",
+  "structure" : {
+    "status" : "WellFormed",
+    "messages" : [ {
+      "ruleId" : "CSIPSTR7",
+      "location" : "",
+      "message" : "If descriptive metadata are available should include inside metadata/descriptive ",
+      "severity" : "Warn"
+    }, {
+      "ruleId" : "CSIPSTR8",
+      "location" : "",
+      "message" : "If any other metadata are available, they MAY be included in separate sub-folders, for example an additional folder named other. ",
+      "severity" : "Info"
+    }, {
+      "ruleId" : "CSIPSTR12",
+      "location" : "",
+      "message" : "The recommended best practice is to always have a METS.xml in the representation folder. ",
+      "severity" : "Warn"
+    }, {
+      "ruleId" : "CSIPSTR13",
+      "location" : "",
+      "message" : "The representation folder SHOULD include a sub-folder named metadata which MAY include all metadata about the specific representation. ",
+      "severity" : "Warn"
+    }, {
+      "ruleId" : "CSIPSTR16",
+      "location" : "",
+      "message" : "There is no documentation folder in the representation folder minimal_IP_with_schemas/representations/rep1. ",
+      "severity" : "Warn"
+    } ]
+  },
+  "metadata" : {
+    "schemaResults" : {
+      "status" : "VALID",
+      "messages" : [ ]
+    },
+    "schematronResults" : {
+      "status" : "NOTVALID",
+      "messages" : [ {
+        "ruleId" : "CSIP31",
+        "location" : "mets/amdSec",
+        "message" : "You have administrative files in the metadata/folder, you must have mets/amdSec in Root METS.xml ",
+        "severity" : "Warn"
+      }, {
+        "ruleId" : "CSIP45",
+        "location" : "mets/amdSec/rightsMD",
+        "message" : "Individual representations should state their specific rights in their representation METS file (Root METS.xml) ",
+        "severity" : "Info"
+      }, {
+        "ruleId" : "CSIP66",
+        "location" : "mets/fileSec/fileGrp/file",
+        "message" : "You have files in SIP that are not referenced in Root METS.xml ",
+        "severity" : "Error"
+      }, {
+        "ruleId" : "CSIP80",
+        "location" : "mets/structMap",
+        "message" : "Must have one structMap with the mets/structMap[@LABEL='CSIP'] in Root METS.xml doens't appear mets/structMap[@LABEL='CSIP']. ",
+        "severity" : "Error"
+      } ]
+    }
+  }
+}

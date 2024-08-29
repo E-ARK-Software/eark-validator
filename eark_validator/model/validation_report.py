@@ -30,10 +30,10 @@ E-ARK : Information Package Validation
 """
 
 from enum import Enum, unique
-from typing import List, Optional
+from typing import Any, List, Optional
 import uuid
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .package_details import InformationPackage
 from .specifications import Level
@@ -122,6 +122,15 @@ class MetadataStatus(str, Enum):
 class MetadataResults(BaseModel):
     status: MetadataStatus = MetadataStatus.UNKNOWN
     messages: List[Result] = []
+
+    # Validator to convert commons-ip status from NOTVALID to INVALID
+    @model_validator(mode='before')
+    @classmethod
+    def convert_status(cls, data: Any) -> Any:
+        status = data.get('status')
+        if status and status == 'NOTVALID':
+            data['status'] = 'INVALID'
+        return data
 
 class MetatdataResultSet(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
