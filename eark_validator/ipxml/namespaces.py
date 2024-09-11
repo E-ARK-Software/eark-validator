@@ -24,31 +24,30 @@
 #
 """
 E-ARK : Information package validation
-        Information Package modules
+        METS/E-ARK namespaces.
 """
 from enum import Enum, unique
-from lxml import etree
-from importlib_resources import files
 
 @unique
-class Namespaces(Enum):
+class Namespaces(str, Enum):
+    """Enumeration of the common namespace prefixes and URIs used in METS and E-ARK."""
     METS = 'http://www.loc.gov/METS/'
     CSIP = 'https://DILCIS.eu/XML/METS/CSIPExtensionMETS'
     SIP = 'https://DILCIS.eu/XML/METS/SIPExtensionMETS'
     XML = 'http://www.w3.org/XML/1998/namespace'
     XHTML = 'http://www.w3.org/1999/xhtml'
     XLINK = 'http://www.w3.org/1999/xlink'
-    PROFILE = 'http://www.loc.gov/METS_Profile/v2',
+    PROFILE = 'http://www.loc.gov/METS_Profile/v2'
     XSI = 'http://www.w3.org/2001/XMLSchema-instance'
 
     def __init__(self, value: str):
-        self._id = value
-        self._qualifier = '{{{}}}'.format(value)
+        self._uri = value
+        self._qualifier = f'{{{value}}}'
         self._prefix = self.name.lower()
 
     @property
-    def id(self) -> str:
-        return self._id
+    def uri(self) -> str:
+        return self._uri
 
     @property
     def prefix(self) -> str:
@@ -62,18 +61,27 @@ class Namespaces(Enum):
         return _qualify(self.qualifier, value)
 
     @classmethod
-    def from_id(cls, id: str) -> 'Namespaces':
+    def from_uri(cls, uri: str) -> 'Namespaces':
         for namespace in cls:
-            if namespace.id == id:
+            if namespace.uri == uri:
                 return namespace
         return cls.METS
 
     @classmethod
     def from_prefix(cls, prefix: str) -> 'Namespaces':
+        """Request a namespace instance by prefix.
+
+        Args:
+            prefix (str): the prefix of the namespace to be returned.
+
+        Returns:
+            Namespaces: The namespace instance with the given prefix.
+        """
+        search: str = prefix.lower() if prefix else ''
         for namespace in cls:
-            if namespace.prefix == prefix.lower():
+            if namespace.prefix == search:
                 return namespace
         return cls.METS
 
 def _qualify(_ns: str, _v: str) -> str:
-    return '{}{}'.format(_ns, _v)
+    return f'{_ns}{_v}'

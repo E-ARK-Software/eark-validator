@@ -22,13 +22,13 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from typing import List
 import unittest
-
-from enum import Enum
 
 from importlib_resources import files
 
 from eark_validator import rules as SC
+from eark_validator.model.validation_report import Severity, Result
 import tests.resources.schematron as SCHEMATRON
 import tests.resources.xml as XML
 
@@ -68,26 +68,29 @@ class SchematronTest(unittest.TestCase):
 
     def test_load_schematron(self):
         assert_count = 0
-        for _ in self._person_rules.get_assertions():
+        for _ in self._person_rules.assertions:
             assert_count += 1
-        self.assertTrue(assert_count > 0)
+        self.assertGreater(assert_count, 0)
 
     def test_validate_person(self):
         self._person_rules.validate(str(files(XML).joinpath(PERSON_XML)))
-        self.assertTrue(SC.TestReport.from_validation_report(self._person_rules._schematron.validation_report).is_valid)
+        self.assertTrue(_is_list_valid(SC.TestResults.from_validation_report(self._person_rules._schematron.validation_report)))
 
     def test_validate_invalid_person(self):
         self._person_rules.validate(str(files(XML).joinpath('invalid-person.xml')))
-        self.assertFalse(SC.TestReport.from_validation_report(self._person_rules._schematron.validation_report).is_valid)
+        self.assertFalse(_is_list_valid(SC.TestResults.from_validation_report(self._person_rules._schematron.validation_report)))
 
     def test_validate_mets(self):
         self._mets_one_def_rules.validate(METS_VALID_PATH)
-        self.assertTrue(SC.TestReport.from_validation_report(self._mets_one_def_rules._schematron.validation_report).is_valid)
+        self.assertTrue(_is_list_valid(SC.TestResults.from_validation_report(self._mets_one_def_rules._schematron.validation_report)))
 
     def test_validate_mets_no_root(self):
         self._mets_one_def_rules.validate(str(files(XML).joinpath('METS-no-root.xml')))
-        self.assertFalse(SC.TestReport.from_validation_report(self._mets_one_def_rules._schematron.validation_report).is_valid)
+        self.assertFalse(_is_list_valid(SC.TestResults.from_validation_report(self._mets_one_def_rules._schematron.validation_report)))
 
     def test_validate_mets_no_objid(self):
         self._mets_one_def_rules.validate(str(files(XML).joinpath('METS-no-objid.xml')))
-        self.assertFalse(SC.TestReport.from_validation_report(self._mets_one_def_rules._schematron.validation_report).is_valid)
+        self.assertFalse(_is_list_valid(SC.TestResults.from_validation_report(self._mets_one_def_rules._schematron.validation_report)))
+
+def _is_list_valid(to_test: List[Result]) -> bool:
+    return len(list(filter(lambda a: a.severity == Severity.ERROR, to_test))) < 1

@@ -1,0 +1,49 @@
+{
+  "package" : {
+    "details" : {
+      "name" : "733dc055-34be-4260-85c7-5549a7083031.zip",
+      "checksums" : [ {
+        "algorithm" : "SHA1",
+        "value" : "B8EFAE7679EF63CDB9EF80B643672EE31E1C2898"
+      } ]
+    },
+    "profile" : {
+      "type" : null,
+      "name" : "733dc055-34be-4260-85c7-5549a7083031.zip",
+      "version" : "CSIP-"
+    },
+    "representations" : {
+      "name" : "733dc055-34be-4260-85c7-5549a7083031.zip"
+    }
+  },
+  "uid" : "d991e991-8abc-4ad3-984c-c936de6c53d7",
+  "structure" : {
+    "status" : "WellFormed",
+    "messages" : [ {
+      "ruleId" : "CSIPSTR16",
+      "location" : "",
+      "message" : "There is no documentation folder in the representation folder 733dc055-34be-4260-85c7-5549a7083031/representations/rep1. ",
+      "severity" : "Warn"
+    } ]
+  },
+  "metadata" : {
+    "schemaResults" : {
+      "status" : "VALID",
+      "messages" : [ ]
+    },
+    "schematronResults" : {
+      "status" : "VALID",
+      "messages" : [ {
+        "ruleId" : "CSIP17",
+        "location" : "mets/dmdSec",
+        "message" : "Doesn't have files in metadata/descriptive folder but have dmdSec in 733dc055-34be-4260-85c7-5549a7083031/representations/rep1/METS.xml; Put the files under metadata folder ",
+        "severity" : "Warn"
+      }, {
+        "ruleId" : "CSIP45",
+        "location" : "mets/amdSec/rightsMD",
+        "message" : "Individual representations should state their specific rights in their representation METS file (733dc055-34be-4260-85c7-5549a7083031/representations/rep1/METS.xml) Individual representations should state their specific rights in their representation METS file (Root METS.xml) ",
+        "severity" : "Info"
+      } ]
+    }
+  }
+}

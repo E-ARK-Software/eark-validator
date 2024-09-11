@@ -1,0 +1,10 @@
+<schema xmlns="http://purl.oclc.org/dsdl/schematron">
+  <ns prefix="mets" uri="http://www.loc.gov/METS/" />
+  <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
+  <pattern id="METS_header_element">
+    <title>Use of the METS header</title>
+    <rule context="/mets:mets/mets:metsHdr">
+      <assert id="DIP3" role="ERROR" test="@csip:OAISPACKAGETYPE = 'DIP'">The in CSIP added attribute `@csip:OAISPACKAGETYPE` is used with the value "DIP".</assert>
+    </rule>
+  </pattern>
+</schema>

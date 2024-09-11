@@ -23,115 +23,82 @@
 # under the License.
 #
 """Module covering information package structure validation and navigation."""
-import os
+from pathlib import Path
 from lxml import etree
 
 from eark_validator.const import NO_PATH, NOT_FILE, NOT_VALID_FILE
+from eark_validator.mets import MetsFiles, MetsFile
 from eark_validator.ipxml.namespaces import Namespaces
-from eark_validator.infopacks.manifest import Manifest
+from eark_validator.model import PackageDetails
+from eark_validator.model.package_details import InformationPackage
+from eark_validator.model.validation_report import Result
+from .package_handler import PackageHandler
 
-class PackageDetails:
+CONTENTINFORMATIONTYPE = 'contentinformationtype'
+QUAL_CONTENTINFORMATIONTYPE = Namespaces.CSIP.qualify(CONTENTINFORMATIONTYPE.upper())
+QUAL_OTHERTYPE = Namespaces.CSIP.qualify('OTHERTYPE')
+QUAL_OAISPACKAGETYPE = Namespaces.CSIP.qualify('OAISPACKAGETYPE')
+METS = 'mets'
+METS_FILE = 'METS.xml'
+QUAL_METS = Namespaces.METS.qualify(METS)
+QUAL_METSHDR = Namespaces.METS.qualify('metsHdr')
 
-    def __init__(
-            self: str,
-            objid: str,
-            label: str,
-            type: str,
-            othertype: str,
-            contentinformationtype: str,
-            profile: str,
-            oaispackagetype: str,
-            ns: str):
-        self._objid = objid
-        self._label = label
-        self._type = type
-        self._othertype = othertype
-        self._contentinformationtype = contentinformationtype
-        self._profile = profile
-        self._oaispackagetype = oaispackagetype
-        self._ns = ns
+class InformationPackages:
 
-    @property
-    def objid(self) -> str:
-        return self._objid
-
-    @property
-    def label(self) -> str:
-        return self._label
-
-    @property
-    def type(self) -> str:
-        return self._type
-
-    @property
-    def othertype(self) -> str:
-        return self._othertype
-
-    @property
-    def contentinformationtype(self) -> str:
-        return self._contentinformationtype
-
-    @property
-    def profile(self) -> str:
-        return self._profile
-
-    @property
-    def oaispackagetype(self) -> str:
-        return self._oaispackagetype
-
-    @property
-    def namespaces(self) -> str:
-        return self._ns
-
-    @classmethod
-    def from_mets_file(cls, mets_file: str) -> 'PackageDetails':
-        if (not os.path.exists(mets_file)):
+    @staticmethod
+    def details_from_mets_file(mets_file: Path) -> PackageDetails:
+        if not mets_file.exists():
             raise FileNotFoundError(NO_PATH.format(mets_file))
-        if (not os.path.isfile(mets_file)):
+        if not mets_file.is_file():
             raise ValueError(NOT_FILE.format(mets_file))
         ns = {}
-        objid = label = ptype = othertype = contentinformationtype = profile = oaispackagetype = ''
+        label = othertype = contentinformationtype = oaispackagetype = ''
         try:
             parsed_mets = etree.iterparse(mets_file, events=['start', 'start-ns'])
             for event, element in parsed_mets:
                 if event == 'start-ns':
-                    prefix = element[0]
-                    ns_uri = element[1]
-                    ns[prefix] = ns_uri
+                    # Add namespace id to the dictionary
+                    ns[element[1]] = element[0]
                 if event == 'start':
-                    if element.tag == Namespaces.METS.qualify('mets'):
-                        objid = element.get('OBJID', '')
+                    if element.tag == QUAL_METS:
                         label = element.get('LABEL', '')
-                        ptype = element.get('TYPE', '')
-                        othertype = element.get(Namespaces.CSIP.qualify('OTHERTYPE'), '')
-                        contentinformationtype = element.get(Namespaces.CSIP.qualify('CONTENTINFORMATIONTYPE'), '')
-                        profile = element.get('PROFILE', '')
-                        oaispackagetype = element.find(Namespaces.METS.qualify('metsHdr')).get(Namespaces.CSIP.qualify('OAISPACKAGETYPE'), '')
-                    elif element.tag == Namespaces.METS.qualify('metsHdr'):
+                        othertype = element.get(QUAL_OTHERTYPE, '')
+                        contentinformationtype = element.get(QUAL_CONTENTINFORMATIONTYPE, '')
+                        oaispackagetype = element.find(QUAL_METSHDR).get(QUAL_OAISPACKAGETYPE, '')
+                    else:
                         break
-        except etree.XMLSyntaxError:
-            raise ValueError(NOT_VALID_FILE.format(mets_file, 'XML'))
-        return cls(objid, label, ptype, othertype, contentinformationtype, profile, oaispackagetype, ns)
+        except (etree.XMLSyntaxError, AttributeError) as ex:
+            raise ValueError(NOT_VALID_FILE.format(mets_file, 'XML')) from ex
+        return PackageDetails.model_validate({
+            'name': mets_file.parent.stem,
+            'label': label,
+            'othertype': othertype,
+            CONTENTINFORMATIONTYPE: contentinformationtype,
+            'oaispackagetype': oaispackagetype
+        })
 
+    @staticmethod
+    def from_path(package_path: Path) -> InformationPackage:
+        if not package_path.exists():
+            raise FileNotFoundError(NO_PATH.format(package_path))
+        handler: PackageHandler = PackageHandler()
+        to_parse:Path = handler.prepare_package(package_path)
+        mets_path: Path = to_parse.joinpath(METS_FILE)
+        if not mets_path.is_file():
+            raise ValueError('No METS file found in package')
+        mets: MetsFile = MetsFiles.from_file(to_parse.joinpath(METS_FILE))
+        return InformationPackage.model_validate({
+            METS: mets,
+            'details': InformationPackages.details_from_mets_file(to_parse.joinpath(METS_FILE))
+        })
 
-class InformationPackage:
-    """Stores the vital facts and figures about a package."""
-    def __init__(self, path: str, details: PackageDetails, manifest: Manifest=None):
-        self._path = path
-        self._details = details
-        self._manifest = manifest if manifest else Manifest.from_directory(path)
-
-    @property
-    def path(self) -> str:
-        """Get the specification of the package."""
-        return self._path
-
-    @property
-    def details(self) -> PackageDetails:
-        """Get the package details."""
-        return self._details
-
-    @property
-    def manifest(self) -> Manifest:
-        """Return the package manifest."""
-        return self._manifest
+    @staticmethod
+    def validate(package_path: Path) -> Result:
+        if not package_path.exists():
+            raise FileNotFoundError(NO_PATH.format(package_path))
+        handler: PackageHandler = PackageHandler()
+        to_parse:Path = handler.prepare_package(package_path)
+        mets_path: Path = to_parse.joinpath(METS_FILE)
+        if not mets_path.is_file():
+            raise ValueError('No METS file found in package')
+        return True

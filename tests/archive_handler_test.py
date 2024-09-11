@@ -24,13 +24,16 @@
 #
 
 from enum import Enum
+from pathlib import Path
 import os
 import unittest
 
-from eark_validator import structure as STRUCT
-from eark_validator.infopacks.manifest import Checksum
+from eark_validator.infopacks.manifest import Checksummer
+from eark_validator.infopacks.package_handler import PackageError, PackageHandler
 
-MIN_TAR_SHA1 = '47ca3a9d7f5f23bf35b852a99785878c5e543076'
+from eark_validator.model import StructureStatus, StructResults
+
+MIN_TAR_SHA1 = '47CA3A9D7F5F23BF35B852A99785878C5E543076'
 
 class TestStatus(Enum):
     __test__ = False
@@ -39,46 +42,67 @@ class TestStatus(Enum):
 class StatusValuesTest(unittest.TestCase):
     """Tests for package and manifest status values."""
     def test_lgl_pckg_status(self):
-        for status in list(STRUCT.StructureStatus):
-            details = STRUCT.StructureReport(status=status)
-            self.assertTrue(details.status == status)
+        for status in list(StructureStatus):
+            results = StructResults(status=status, messages=[])
+            self.assertEqual(results.status, status)
 
     def test_illgl_pckg_status(self):
-        self.assertRaises(ValueError, STRUCT.StructureReport, status=TestStatus.Illegal)
+        self.assertRaises(ValueError, StructResults, status=TestStatus.Illegal)
 
-class ArchiveHandlerTest(unittest.TestCase):
-    empty_path = os.path.join(os.path.dirname(__file__), 'resources', 'empty.file')
-    min_tar_path = os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
-                                'minimal_IP_with_schemas.tar')
-    min_zip_path = os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
-                                'minimal_IP_with_schemas.zip')
-    min_targz_path = os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
-                                  'minimal_IP_with_schemas.tar.gz')
+class PackageHandlerTest(unittest.TestCase):
+    dir_path = Path(os.path.join(os.path.dirname(__file__), 'resources'))
+    empty_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'empty.file'))
+    not_exists_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'not_there.zip'))
+    min_tar_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
+                                'minimal_IP_with_schemas.tar'))
+    min_zip_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
+                                'minimal_IP_with_schemas.zip'))
+    min_targz_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'minimal',
+                                  'minimal_IP_with_schemas.tar.gz'))
+    multi_dir_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'bad',
+                                  'multi_dir.zip'))
+    single_file_path = Path(os.path.join(os.path.dirname(__file__), 'resources', 'ips', 'bad',
+                                  'single_file.zip'))
 
     def test_sha1(self):
-        sha1 = Checksum.from_file(self.empty_path, 'SHA1').value
-        self.assertTrue(sha1 == 'da39a3ee5e6b4b0d3255bfef95601890afd80709')
-        sha1 = Checksum.from_file(self.min_tar_path, 'SHA1').value
-        self.assertTrue(sha1 == MIN_TAR_SHA1)
+        sha1 = Checksummer.from_file(self.empty_path, 'SHA-1').value
+        self.assertEqual(sha1, 'DA39A3EE5E6B4B0D3255BFEF95601890AFD80709')
+        sha1 = Checksummer.from_file(self.min_tar_path, 'SHA-1').value
+        self.assertEqual(sha1, MIN_TAR_SHA1)
 
     def test_is_archive(self):
-        self.assertTrue(STRUCT.ArchivePackageHandler.is_archive(self.min_tar_path))
-        self.assertTrue(STRUCT.ArchivePackageHandler.is_archive(self.min_zip_path))
-        self.assertTrue(STRUCT.ArchivePackageHandler.is_archive(self.min_targz_path))
-        self.assertFalse(STRUCT.ArchivePackageHandler.is_archive(self.empty_path))
+        self.assertTrue(PackageHandler.is_archive(self.min_tar_path))
+        self.assertTrue(PackageHandler.is_archive(self.min_zip_path))
+        self.assertTrue(PackageHandler.is_archive(self.min_targz_path))
+        self.assertFalse(PackageHandler.is_archive(self.empty_path))
 
     def test_unpack_illgl_archive(self):
-        handler = STRUCT.ArchivePackageHandler()
-        self.assertRaises(STRUCT.PackageStructError, handler.unpack_package, self.empty_path)
+        handler = PackageHandler()
+        self.assertRaises(ValueError, handler.unpack_package, self.empty_path)
+
+    def test_multi_dir(self):
+        handler = PackageHandler()
+        self.assertRaises(PackageError, handler.unpack_package, self.multi_dir_path)
+
+    def test_single_file(self):
+        handler = PackageHandler()
+        self.assertRaises(PackageError, handler.unpack_package, self.single_file_path)
+
+    def test_prepare_not_exists(self):
+        handler = PackageHandler()
+        self.assertRaises(ValueError, handler.prepare_package, self.not_exists_path)
 
     def test_unpack_archives(self):
-        handler = STRUCT.ArchivePackageHandler()
-        dest = handler.unpack_package(self.min_tar_path)
-        self.assertTrue(os.path.basename(dest) == MIN_TAR_SHA1)
-        dest = handler.unpack_package(self.min_zip_path)
-        self.assertTrue(os.path.basename(dest) == '54bbe654fe332b51569baf21338bc811cad2af66')
-        dest = handler.unpack_package(self.min_targz_path)
-        self.assertTrue(os.path.basename(dest) == 'db2703ff464e613e9d1dc5c495e23a2e2d49b89d')
+        handler = PackageHandler()
+        dest = Path(handler.unpack_package(self.min_tar_path))
+        self.assertEqual(os.path.basename(dest.parent), MIN_TAR_SHA1)
+        dest = Path(handler.unpack_package(self.min_zip_path))
+        self.assertEqual(os.path.basename(dest.parent), '54BBE654FE332B51569BAF21338BC811CAD2AF66')
+        dest = Path(handler.unpack_package(self.min_targz_path))
+        self.assertEqual(os.path.basename(dest.parent), 'DB2703FF464E613E9D1DC5C495E23A2E2D49B89D')
+
+    def test_is_dir_archive(self):
+        self.assertFalse(PackageHandler.is_archive(self.dir_path))
 
 if __name__ == '__main__':
     unittest.main()

@@ -24,5 +24,5 @@
 #
 """
 E-ARK : Information package validation
-        Information Package modules
+        Information Package Specifications
 """

@@ -23,320 +23,231 @@
 # under the License.
 #
 """Encapsulates all things related to information package structure."""
-from enum import Enum, unique
 import os
-import tarfile
-import tempfile
-import zipfile
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
-from eark_validator.rules import Severity
-import eark_validator.specifications.specification as SPECS
+from eark_validator.specifications.struct_reqs import REQUIREMENTS
+from eark_validator.infopacks.package_handler import PackageHandler, PackageError
+from eark_validator.model import (
+    StructResults,
+    StructureStatus,
+    Result,
+    Severity,
+    Representation
+)
 
-from eark_validator.infopacks.manifest import Checksum
-
-MD_DIR = 'metadata'
-REPS_DIR = 'representations'
-SCHEMA_DIR = 'schemas'
 METS_NAME = 'METS.xml'
 STR_REQ_PREFIX = 'CSIPSTR'
-SUB_MESS_NOT_EXIST = 'Path {} does not exist'
-SUB_MESS_NOT_ARCH = 'Path {} is not a directory or archive format file.'
-# Map requirement levels to severity
-LEVEL_SEVERITY = {
-    'MUST': Severity.ERROR,
-    'SHOULD': Severity.WARN,
-    'MAY': Severity.INFO
+ROOT = 'root'
+DIR_NAMES = {
+    'DATA': 'data',
+    'DESC': 'descriptive',
+    'DOCS': 'documentation',
+    'META': 'metadata',
+    'OTHR': 'other',
+    'PRES': 'preservation',
+    'REPS': 'representations',
+    'SCHM': 'schemas'
 }
-@unique
-class StructureStatus(Enum):
-    """Enum covering information package validation statuses."""
-    Unknown = 'Unknown'
-    # Package has basic parse / structure problems and can't be validated
-    NotWellFormed = 'Not Well Formed'
-    # Package structure is OK
-    WellFormed = 'Well Formed'
 
-class StructureReport:
-    """Stores the vital facts and figures about a package."""
-    structure_values = list(StructureStatus)
-    def __init__(self, status: StructureStatus=StructureStatus.Unknown, errors: list[str]=None, warnings: list[str]=None, infos: list[str]=None):
-        self.status = status
-        self._errors = errors if errors else []
-        self._warnings = warnings if warnings else []
-        self._infos = infos if infos else []
+class StructureParser():
+    _package_handler = PackageHandler()
+    """Encapsulates the set of tests carried out on folder structure."""
+    def __init__(self, package_path: Path):
+        self._is_archive = PackageHandler.is_archive(package_path)
+        self.md_folders: set[str]= set()
+        self.folders: set[str] = set()
+        self.files : set[str] = set()
+        self.is_parsable = False
+        if self._is_archive or package_path.is_dir():
+            self.is_parsable = True
+            self.resolved_path = self._package_handler.prepare_package(package_path)
+            self.folders, self.files = _folders_and_files(self.resolved_path)
+            if DIR_NAMES['META'] in self.folders:
+                self.md_folders, _ = _folders_and_files(
+                    os.path.join(self.resolved_path,
+                                 DIR_NAMES['META']))
 
-    @property
-    def status(self) -> StructureStatus:
-        """Get the structure status."""
-        return self._status
+    def has_data(self) -> bool:
+        """Returns True if the package/representation has a structure folder."""
+        return DIR_NAMES['DATA'] in self.folders
 
-    @status.setter
-    def status(self, value: StructureStatus) -> None:
-        if value not in self.structure_values:
-            raise ValueError('Illegal package status value')
-        self._status = value
+    def has_descriptive_md(self) -> bool:
+        """Returns True if the package/representation has a descriptive metadata folder."""
+        return DIR_NAMES['DESC'] in self.md_folders
 
-    @property
-    def errors(self) -> list[str]:
-        """Return the full list of error messages."""
-        return self._errors
+    def has_documentation(self) -> bool:
+        """Returns True if the package/representation has a documentation folder."""
+        return DIR_NAMES['DOCS'] in self.folders
 
-    @property
-    def warnings(self) -> list[str]:
-        """Return the full list of warnings messages."""
-        return self._warnings
+    def has_mets(self) -> bool:
+        """Returns True if the package/representation has a root METS.xml file."""
+        return METS_NAME in self.files
 
-    @property
-    def infos(self) -> list[str]:
-        """Return the full list of info messages."""
-        return self._infos
+    def has_metadata(self) -> bool:
+        """Returns True if the package/representation has a metadata folder."""
+        return DIR_NAMES['META'] in self.folders
 
-    @property
-    def messages(self):
-        """Generator that yields all of the messages in the report."""
-        for entry in self.errors:
-            yield entry
-        for entry in self.warnings:
-            yield entry
-        for entry in self.infos:
-            yield entry
+    def has_other_md(self) -> bool:
+        """Returns True if the package/representation has extra metadata folders
+        after preservation and descriptive."""
+        md_folder_count = len(self.md_folders)
+        if self.has_preservation_md():
+            md_folder_count-=1
+        if self.has_descriptive_md():
+            md_folder_count-=1
+        return md_folder_count > 0
 
-    def add_error(self, error: str) -> None:
-        """Add a validation error to package lists."""
-        if error.severity == Severity.INFO:
-            self._infos.append(error)
-        elif error.severity == Severity.WARN:
-            self._warnings.append(error)
-        elif error.severity == Severity.ERROR:
-            self._errors.append(error)
-            self.status = StructureStatus.NotWellFormed
+    def has_preservation_md(self) -> bool:
+        """Returns True if the package/representation has a preservation metadata folder."""
+        return DIR_NAMES['PRES'] in self.md_folders
 
-    def add_errors(self, errors: list[str]) -> None:
-        """Add a validation error to package lists."""
-        for error in errors:
-            self.add_error(error)
+    def has_representations_folder(self) -> bool:
+        """Returns True if the package/representation has a representations folder."""
+        return DIR_NAMES['REPS'] in self.folders
 
-    @classmethod
-    def from_path(cls, path: str) -> 'StructureReport':
-        """Create a structure report from a path, this can be a folder or an archive file."""
-        rep = StructureReport(status=StructureStatus.WellFormed)
-        root = path
-        if not os.path.exists(path):
-            # If it doesn't exist then add an error message
-            rep.add_error(StructError.from_rule_no(1, sub_message=SUB_MESS_NOT_EXIST.format(path)))
-        elif os.path.isfile(path):
-            if ArchivePackageHandler.is_archive(path):
-                root = cls._handle_archive(path)
-            else:
-                rep.add_error(StructError.from_rule_no(1,
-                                                     sub_message=SUB_MESS_NOT_ARCH.format(path)))
-        if rep.errors:
-            return rep
-
-        struct_checker = StructureChecker.from_directory(root)
-        rep.add_errors(struct_checker.validate_manifest())
-        reps_dir = os.path.join(root, REPS_DIR)
-        if os.path.isdir(reps_dir):
-            for entry in os.listdir(reps_dir):
-                struct_checker = StructureChecker.from_directory(os.path.join(reps_dir, entry))
-                rep.add_errors(struct_checker.validate_manifest(is_root=False))
-        return rep
-
-    @classmethod
-    def _handle_archive(cls, archive_path: str) -> str:
-        arch_handler = ArchivePackageHandler()
-        root = arch_handler.unpack_package(archive_path)
-        if len(os.listdir(root)) == 1:
-            for entry in os.listdir(root):
-                ent_path = os.path.join(root, entry)
-                if os.path.isdir(ent_path):
-                    root = ent_path
-        return root
-
-
-    def __str__(self):
-        return 'status:' + str(self.status)
-
-class StructError():
-    """Encapsulates an individual validation test result."""
-    def __init__(self, requirement: str, sub_message: str):
-        self._requirement = requirement
-        self.severity = LEVEL_SEVERITY.get(requirement.level, Severity.UNKNOWN)
-        self._sub_message = sub_message
+    def has_schemas(self) -> bool:
+        """Returns True if the package/representation has a schemas folder."""
+        return DIR_NAMES['SCHM'] in self.folders
 
     @property
-    def id(self) -> str: # pylint: disable-msg=C0103
-        """Get the rule_id."""
-        return self._requirement.id
-
-    @property
-    def severity(self) -> Severity:
-        """Get the severity."""
-        return self._severity
-
-    @severity.setter
-    def severity(self, value: Severity) -> None:
-        if value not in list(Severity):
-            raise ValueError('Illegal severity value')
-        self._severity = value
-
-    @property
-    def is_error(self) -> bool:
-        """Returns True if this is an error message, false otherwise."""
-        return self.severity == Severity.ERROR
-
-    @property
-    def is_info(self) -> bool:
-        """Returns True if this is an info message, false otherwise."""
-        return self.severity == Severity.INFO
-
-    @property
-    def is_warning(self) -> bool:
-        """Returns True if this is an warning message, false otherwise."""
-        return self.severity == Severity.WARN
-
-    @property
-    def message(self) -> str:
-        """Get the message."""
-        return self._requirement.message
-
-    @property
-    def sub_message(self) -> str:
-        """Get the sub-message."""
-        return self._sub_message
-
-    def to_json(self) -> dict:
-        """Output the message in JSON format."""
-        return {'id' : self.id, 'severity' : str(self.severity.name),
-                'message' : self.message, 'sub_message' : self.sub_message}
-
-    def __str__(self) -> str:
-        return 'id:{}, severity:{}, message:{}, sub_message:{}'.format(self.id,
-                                                                       str(self.severity.name),
-                                                                       self.message,
-                                                                       self.sub_message)
-    @classmethod
-    def from_rule_no(cls, rule_no: int, sub_message: str=None) -> 'StructError':
-        """Create an StructError from values supplied."""
-        requirement = SPECS.Specification.StructuralRequirement.from_rule_no(rule_no)
-        return StructError(requirement, sub_message)
-
-    @classmethod
-    def from_values(cls, requirement: str, sub_message: str=None) -> 'StructError':
-        """Create an StructError from values supplied."""
-        return StructError(requirement, sub_message)
-
-class ArchivePackageHandler():
-    """Class to handle archive / compressed information packages."""
-    def __init__(self, unpack_root: str=tempfile.gettempdir()):
-        self._unpack_root = unpack_root
-
-    @property
-    def unpack_root(self) -> str:
-        """Returns the root directory for archive unpacking."""
-        return self._unpack_root
-
-    def unpack_package(self, to_unpack: str, dest: str=None) -> str:
-        """Unpack an archived package to a destination (defaults to tempdir).
-        returns the destination folder."""
-        if not os.path.isfile(to_unpack) or not self.is_archive(to_unpack):
-            raise PackageStructError('File is not an archive file.')
-        sha1 = Checksum.from_file(to_unpack, 'sha1')
-        dest_root = dest if dest else self.unpack_root
-        destination = os.path.join(dest_root, sha1.value)
-        if zipfile.is_zipfile(to_unpack):
-            zip_ip = zipfile.ZipFile(to_unpack)
-            zip_ip.extractall(path=destination)
-        elif tarfile.is_tarfile(to_unpack):
-            tar_ip = tarfile.open(to_unpack)
-            tar_ip.extractall(path=destination)
-        return destination
-
-    @staticmethod
-    def is_archive(to_test: str) -> bool:
-        """Return True if the file is a recognised archive type, False otherwise."""
-        if zipfile.is_zipfile(to_test):
-            return True
-        return tarfile.is_tarfile(to_test)
-
-def validate_package_structure(package_path: str) -> StructureReport:
-    """Carry out all structural package tests."""
-    # It's a file so we need to unpack it
-    return StructureReport.from_path(package_path)
+    def is_archive(self) -> bool:
+        """Returns True if the package/representation is an archive."""
+        return self._is_archive
 
 class StructureChecker():
-    """Encapsulate the mess that is the manifest details."""
-    def __init__(self, name, has_mets=True, has_md=True, has_schema=True,
-                 has_data=False, has_reps=True):
-        self.name = name
-        self.has_mets = has_mets
-        self.has_md = has_md
-        self.has_schema = has_schema
-        self.has_data = has_data
-        self.has_reps = has_reps
+    def __init__(self, dir_to_scan: Path):
+        self.name: str = os.path.basename(dir_to_scan)
+        self.parser: StructureParser = StructureParser(dir_to_scan)
+        self.representations: Dict[Representation, StructureParser] = {}
+        if self.parser.is_parsable:
+            _reps = os.path.join(self.parser.resolved_path, DIR_NAMES['REPS'])
+            if os.path.isdir(_reps):
+                for entry in  os.listdir(_reps):
+                    self.representations[entry] = StructureParser(Path(os.path.join(_reps, entry)))
 
-    def validate_manifest(self, is_root: bool=True) -> list[StructError]:
-        """Validate a manifest report and return the list of validation errors."""
-        validation_errors = []
-        # [CSIPSTR4] Is there a file called METS.xml (perform case checks)
-        # [CSIPSTR12] Does each representation folder have a METS.xml file? (W)
-        if not self.has_mets:
-            if is_root:
-                validation_errors.append(StructError.from_rule_no(4))
-            else:
-                validation_errors.append(StructError.from_rule_no(12))
-        # [CSIPSTR5] Is there a first level folder called metadata?
-        # [CSIPSTR13] Does each representation folder have a metadata folder (W)
-        if not self.has_md:
-            if is_root:
-                validation_errors.append(StructError.from_rule_no(5))
-            else:
-                validation_errors.append(StructError.from_rule_no(13))
-        # [CSIPSTR15] Is there a schemas folder at the root level/representations? (W)
-        if not self.has_schema:
-            validation_errors.append(StructError.from_rule_no(15))
-        # [CSIPSTR11] Does each representation folder have a sub folder called data? (W)
-        if not self.has_data and not is_root:
-            validation_errors.append(StructError.from_rule_no(11))
-        # [CSIPSTR9] Is there a first level folder called representations (W)
-        if not self.has_reps and is_root:
-            validation_errors.append(StructError.from_rule_no(9))
-        return validation_errors
+    def get_test_results(self) -> StructResults:
+        if not self.parser.is_parsable:
+            return get_bad_path_results(self.name)
+
+        results: List[Result] = self.get_root_results()
+        results = results + self.get_package_results()
+        for name, tests in self.representations.items():
+            location = str(name) + ' representation'
+            if not tests.has_data():
+                results.append(test_result_from_id(11, location))
+            if not tests.has_mets():
+                results.append(test_result_from_id(12, location))
+            if not tests.has_metadata():
+                results.append(test_result_from_id(13, location))
+        return StructResults.model_validate({
+            'status': self.get_status(results),
+            'messages': results
+            })
+
+    def get_representations(self) -> List[Representation]:
+        reps: List[Representation] = []
+        for rep in self.representations: # pylint: disable=C0201
+            reps.append(Representation.model_validate({ 'name': rep }))
+        return reps
+
+    def get_root_results(self) -> List[Result]:
+        results: List[Result] = []
+        location: str = _root_loc(self.name)
+        if not self.parser.is_archive:
+            results.append(test_result_from_id(3, location))
+        if not self.parser.has_mets():
+            results.append(test_result_from_id(4, location))
+        results.extend(self._get_metadata_results(location=location))
+        if not self.parser.has_representations_folder():
+            results.append(test_result_from_id(9, location))
+        elif len(self.representations) < 1:
+            results.append(test_result_from_id(10, location))
+        return results
+
+    def get_package_results(self) -> List[Result]:
+        results: List[Result] = []
+        if not self.parser.has_schemas():
+            result = self._get_schema_results()
+            if result:
+                results.append(result)
+        if not self.parser.has_documentation():
+            result = self._get_dox_results()
+            if result:
+                results.append(result)
+        return results
+
+    def _get_metadata_results(self, location: str) -> List[Result]:
+        results: List[Result] = []
+        if not self.parser.has_metadata():
+            results.append(test_result_from_id(5, location))
+        else:
+            if not self.parser.has_preservation_md():
+                results.append(test_result_from_id(6, location))
+            if not self.parser.has_descriptive_md():
+                results.append(test_result_from_id(7, location))
+            if not self.parser.has_other_md():
+                results.append(test_result_from_id(8, location))
+        return results
+
+    def _get_schema_results(self) -> Optional[Result]:
+        for tests in self.representations.values():
+            if tests.has_schemas():
+                return None
+        return test_result_from_id(15, _root_loc(self.name))
+
+    def _get_dox_results(self) -> Optional[Result]:
+        for tests in self.representations.values():
+            if tests.has_documentation():
+                return None
+        return test_result_from_id(16, _root_loc(self.name))
 
     @classmethod
-    def from_directory(cls, dir_to_scan: str) -> 'StructureChecker':
-        """Create a manifest instance from a directory."""
-        has_mets = False
-        has_md = False
-        has_schema = False
-        has_data = False
-        has_reps = False
-        name = os.path.basename(dir_to_scan)
-        for entry in os.listdir(dir_to_scan):
-            entry_path = os.path.join(dir_to_scan, entry)
-            # [CSIPSTR4] Is there a file called METS.xml (perform case checks)
-            # [CSIPSTR12] Does each representation folder have a METS.xml file? (W)
-            if entry == METS_NAME:
-                if os.path.isfile(entry_path):
-                    has_mets = True
-            # [CSIPSTR5] Is there a first level folder called metadata?
-            # [CSIPSTR13] Does each representation folder have a metadata folder (W)
-            if os.path.isdir(entry_path):
-                if entry == 'metadata':
-                    has_md = True
-                # [CSIPSTR15] Is there a schemas folder at the root level/representations? (W)
-                elif entry == 'schemas':
-                    has_schema = True
-                # [CSIPSTR11] Does each representation folder have a sub folder called data? (W)
-                elif entry == 'data':
-                    has_data = True
-                # [CSIPSTR9] Is there a first level folder called representations (W)
-                elif entry == REPS_DIR:
-                    has_reps = True
-        return StructureChecker(name, has_mets, has_md, has_schema, has_data, has_reps)
+    def get_status(cls, results: List[Result]) -> StructureStatus:
+        for result in results:
+            if result.severity == Severity.ERROR:
+                return StructureStatus.NOTWELLFORMED
+        return StructureStatus.WELLFORMED
 
-class PackageStructError(RuntimeError):
-    """Exception to signal fatal pacakge structure errors."""
-    def __init__(self, arg):
-        super().__init__()
-        self.args = arg
+def _folders_and_files(dir_to_scan: Path) -> Tuple[Set[str], Set[str]]:
+    folders: Set[str] = set()
+    files: Set[str] = set()
+    if os.path.isdir(dir_to_scan):
+        for entry in os.listdir(dir_to_scan):
+            path = os.path.join(dir_to_scan, entry)
+            if os.path.isfile(path):
+                files.add(entry)
+            elif os.path.isdir(path):
+                folders.add(entry)
+    return folders, files
+
+def test_result_from_id(requirement_id, location, message=None) -> Result:
+    """Return a TestResult instance created from the requirment ID and location."""
+    req = REQUIREMENTS[requirement_id]
+    test_msg = message if message else req['message']
+    return Result.model_validate({
+        'rule_id': req['id'],
+        'location': location,
+        'message': test_msg,
+        'severity': Severity.from_level(req['level'])
+        })
+
+def get_bad_path_results(path) -> StructResults:
+    return StructResults.model_validate({
+        'status': StructureStatus.NOTWELLFORMED,
+        'messages': _get_str1_result_list(path)
+        })
+
+def _get_str1_result_list(name: str) -> List[Result]:
+    return [ test_result_from_id(1, _root_loc(name)) ]
+
+def _root_loc(name: str) -> str:
+    return f'{ROOT} {name}'
+
+def validate(to_validate) -> Tuple[bool, StructResults]:
+    try:
+        struct_tests = StructureChecker(to_validate).get_test_results()
+        return struct_tests.status == StructureStatus.WELLFORMED, struct_tests
+    except PackageError:
+        return False, get_bad_path_results(to_validate)

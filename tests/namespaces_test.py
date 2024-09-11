@@ -25,10 +25,6 @@
 
 import unittest
 
-from importlib_resources import files
-
-import tests.resources.xml as XML
-
 from eark_validator.ipxml import namespaces as NS
 
 class MetsValidatorTest(unittest.TestCase):
@@ -37,13 +33,23 @@ class MetsValidatorTest(unittest.TestCase):
         for namespace in NS.Namespaces:
             self.assertEqual(namespace, NS.Namespaces.from_prefix(namespace.prefix))
 
+    def test_from_bad_prefix(self):
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_prefix('bad'))
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_prefix(''))
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_prefix(None))
+
     def test_from_id(self):
         for namespace in NS.Namespaces:
-            self.assertEqual(namespace, NS.Namespaces.from_id(namespace.id))
+            self.assertEqual(namespace, NS.Namespaces.from_uri(namespace.uri))
+
+    def test_from_bad_id(self):
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_uri('bad'))
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_uri(''))
+        self.assertEqual(NS.Namespaces.METS, NS.Namespaces.from_uri(None))
 
     def test_qualify(self):
         for namespace in NS.Namespaces:
-            self.assertEqual('{{{}}}file'.format(namespace.id), namespace.qualify('file'))
+            self.assertEqual('{{{}}}file'.format(namespace.uri), namespace.qualify('file'))
 
 
 if __name__ == '__main__':

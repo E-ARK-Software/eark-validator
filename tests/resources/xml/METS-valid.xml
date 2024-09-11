@@ -8,7 +8,7 @@
   xmlns:xlink="http://www.w3.org/1999/xlink"
   xsi:schemaLocation="http://www.w3.org/2001/XMLSchema-instance schemas/XMLSchema.xsd http://www.loc.gov/METS/ schemas/mets.xsd http://www.w3.org/1999/xlink schemas/xlink.xsd https://DILCIS.eu/XML/METS/CSIPExtensionMETS schemas/CSIPExtensionMETS.xsd"
   OBJID="minimal_IP_with_schemas"
-  TYPE="OTHER"
+  TYPE="Other"
   csip:OTHERTYPE="SIARD2"
   csip:CONTENTINFORMATIONTYPE="SIARD2"
   PROFILE="https://earkcsip.dilcis.eu/profile/CSIP.xml" >
@@ -109,8 +109,13 @@
       <div ID="ID-Structmap_Div_ID_Metadata" LABEL="Metadata">
       </div>
       <div ID="ID-Structmap_Div_ID_Documentation" LABEL="Documentation">
+        <fptr FILEID="ID-minimal_with_schemas_fileGrp_documentation"/>
       </div>
       <div ID="ID-Structmap_Div_ID_Schemas" LABEL="Schemas" CONTENTIDS="minimal_with_schemas_fileGrp_schemas">
+        <fptr FILEID="ID-minimal_with_schemas_fileGrp_schemas"/>
+      </div>
+      <div ID="ID-Structmap_Div_ID_Representations" LABEL="Representations">
+        <fptr FILEID="ID-minimal_with_schemas_fileGrp_representations"/>
       </div>
     </div>
 

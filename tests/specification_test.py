@@ -23,107 +23,81 @@
 # under the License.
 #
 
+from typing import Optional
 import unittest
 
 from lxml import etree as ET
 
 from importlib_resources import files
+from eark_validator.model.specifications import Specification, Requirement
 
-from eark_validator.specifications.specification import EarkSpecifications
-from eark_validator.specifications.specification import Specification
+from eark_validator.specifications.specification import EarkSpecification, Specifications, StructuralRequirements, SpecificationType, SpecificationVersion
 import tests.resources.xml as XML
-
-
+from eark_validator.ipxml.resources import profiles
 
 class SpecificationTest(unittest.TestCase):
 
     def test_no_file(self):
         with self.assertRaises(FileNotFoundError):
-            Specification._from_xml_file(str(files('tests.resources').joinpath('nosuch.file')))
+            Specifications._from_xml_file(str(files('tests.resources').joinpath('nosuch.file')))
 
     def test_is_dir(self):
         with self.assertRaises(ValueError):
-            Specification._from_xml_file(str(files(XML)))
+            Specifications._from_xml_file(str(files(XML)))
 
     def test_no_xml(self):
         with self.assertRaises(ET.XMLSyntaxError):
-            Specification._from_xml_file(str(files('tests.resources').joinpath('empty.file')))
+            Specifications._from_xml_file(str(files('tests.resources').joinpath('empty.file')))
 
     def test_invalid_xml(self):
         with self.assertRaises(ET.XMLSyntaxError):
-            Specification._from_xml_file(str(files('tests.resources.xml').joinpath('person.xml')))
+            Specifications._from_xml_file(str(files('tests.resources.xml').joinpath('person.xml')))
 
-    def test_title(self):
-        spec = EarkSpecifications.CSIP.specification
-        self.assertEqual(spec.title, 'E-ARK CSIP METS Profile')
-        spec = EarkSpecifications.SIP.specification
-        self.assertEqual(spec.title, 'E-ARK SIP METS Profile 2.0')
-        spec = EarkSpecifications.DIP.specification
-        self.assertEqual(spec.title, 'E-ARK DIP METS Profile')
+    def test_valid_xml(self):
+        specification: Specification = Specifications._from_xml_file(str(files(profiles).joinpath('V2.0.4', 'E-ARK-CSIP' + '.xml')))
+        self.assertEqual(EarkSpecification(SpecificationType.CSIP, SpecificationVersion.V2_0_4).specification, specification)
 
-    def test_url(self):
-        spec = EarkSpecifications.CSIP.specification
-        self.assertEqual(spec.url, 'https://earkcsip.dilcis.eu/profile/E-ARK-CSIP.xml')
-        spec = EarkSpecifications.SIP.specification
-        self.assertEqual(spec.url, 'https://earksip.dilcis.eu/profile/E-ARK-SIP.xml')
-        spec = EarkSpecifications.DIP.specification
-        self.assertEqual(spec.url, 'https://earkdip.dilcis.eu/profile/E-ARK-DIP.xml')
+class StructuralRequirementsTest(unittest.TestCase):
 
-    def test_version(self):
-        spec = EarkSpecifications.CSIP.specification
-        self.assertEqual(spec.version, 'V2.0.4')
-        spec = EarkSpecifications.SIP.specification
-        self.assertEqual(spec.version, 'SIPV2.0.4')
-        spec = EarkSpecifications.DIP.specification
-        self.assertEqual(spec.version, 'DIPV2.0.4')
+    def test_from_rule_no_none(self):
+        with self.assertRaises(ValueError):
+            StructuralRequirements.from_rule_no(None)
 
-    def test_date(self):
-        spec_date = '2020-06-12T09:00:00'
-        spec = EarkSpecifications.CSIP.specification
-        self.assertEqual(spec.date, spec_date)
-        spec = EarkSpecifications.SIP.specification
-        self.assertEqual(spec.date, spec_date)
-        spec = EarkSpecifications.DIP.specification
-        self.assertEqual(spec.date, spec_date)
+    def test_from_rule_no_str(self):
+        with self.assertRaises(ValueError):
+            StructuralRequirements.from_rule_no('1')
 
-    def test_requirements(self):
-        spec = EarkSpecifications.CSIP.specification
-        self.assertEqual(self._count_reqs(spec), spec.requirement_count)
-        spec = EarkSpecifications.SIP.specification
-        self.assertEqual(self._count_reqs(spec), spec.requirement_count)
-        spec = EarkSpecifications.DIP.specification
-        self.assertEqual(self._count_reqs(spec), spec.requirement_count)
+    def test_from_rule_no(self):
+        req: Requirement = StructuralRequirements.from_rule_no(1)
+        self.assertEqual(req.id, 'CSIPSTR1')
 
-    def test_get_requirement(self):
-        spec = EarkSpecifications.CSIP.specification
-        rule_1 = spec.get_requirement_by_id('CSIP1')
-        rule_1_by_sect = spec.get_requirement_by_sect('CSIP1', 'metsRootElement')
-        self.assertEqual(rule_1, rule_1_by_sect)
-        self.assertIsNone(spec.get_requirement_by_id('CSIP999'))
+class SpecificationTypeTest(unittest.TestCase):
+    def test_value(self):
+        spec_type: SpecificationType = SpecificationType.CSIP
+        self.assertEqual(spec_type.value, 'E-ARK-CSIP')
+        spec_type = SpecificationType.SIP
+        self.assertEqual(spec_type.value, 'E-ARK-SIP')
+        spec_type = SpecificationType.DIP
+        self.assertEqual(spec_type.value, 'E-ARK-DIP')
 
-    def test_sections(self):
-        spec = EarkSpecifications.CSIP.specification
-        self.assertGreater(spec.section_count, 0)
-        self.assertEqual(self._count_reqs_via_section(spec), spec.requirement_count)
-        self.assertEqual(len(spec.section_requirements()), spec.requirement_count)
-        spec = EarkSpecifications.SIP.specification
-        self.assertGreater(spec.section_count, 0)
-        self.assertEqual(self._count_reqs_via_section(spec), spec.requirement_count)
-        self.assertEqual(len(spec.section_requirements()), spec.requirement_count)
-        spec = EarkSpecifications.DIP.specification
-        self.assertGreater(spec.section_count, 0)
-        self.assertEqual(self._count_reqs_via_section(spec), spec.requirement_count)
-        self.assertEqual(len(spec.section_requirements()), spec.requirement_count)
+class SpecificationVersionTest(unittest.TestCase):
+    def test_value(self):
+        version = SpecificationVersion.V2_0_4
+        self.assertEqual(version.value, 'V2.0.4')
+        version = SpecificationVersion.V2_1_0
+        self.assertEqual(version.value, 'V2.1.0')
 
-    def _count_reqs(self, spec):
-        req_count = 0
-        for _ in spec.requirements:
-            req_count += 1
-        return req_count
+class EarkSpecificationsTest(unittest.TestCase):
+    def test_specifiction_type(self):
+        eark_specification = EarkSpecification(SpecificationType.CSIP, SpecificationVersion.V2_0_4)
+        self.assertEqual(eark_specification.type, SpecificationType.CSIP)
+        eark_specification = EarkSpecification(SpecificationType.SIP, SpecificationVersion.V2_0_4)
+        self.assertEqual(eark_specification.type, SpecificationType.SIP)
+        eark_specification = EarkSpecification(SpecificationType.DIP, SpecificationVersion.V2_0_4)
+        self.assertEqual(eark_specification.type, SpecificationType.DIP)
 
-    def _count_reqs_via_section(self, spec):
-        req_count = 0
-        for section in spec.sections:
-            for _ in spec.section_requirements(section):
-                req_count += 1
-        return req_count
+    def test_specifiction_version(self):
+        eark_specification = EarkSpecification(SpecificationType.CSIP, SpecificationVersion.V2_0_4)
+        self.assertEqual(eark_specification.version, SpecificationVersion.V2_0_4)
+        eark_specification = EarkSpecification(SpecificationType.SIP, SpecificationVersion.V2_1_0)
+        self.assertEqual(eark_specification.version, SpecificationVersion.V2_1_0)
