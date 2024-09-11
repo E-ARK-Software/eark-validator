@@ -54,8 +54,8 @@ DIR_NAMES = {
 class StructureParser():
     _package_handler = PackageHandler()
     """Encapsulates the set of tests carried out on folder structure."""
-    def __init__(self, package_path: Path):
-        self._is_archive = PackageHandler.is_archive(package_path)
+    def __init__(self, package_path: Path, is_archive: bool = False):
+        self._is_archive = is_archive
         self.md_folders: set[str]= set()
         self.folders: set[str] = set()
         self.files : set[str] = set()
@@ -117,9 +117,9 @@ class StructureParser():
         return self._is_archive
 
 class StructureChecker():
-    def __init__(self, dir_to_scan: Path):
+    def __init__(self, dir_to_scan: Path, is_archive: bool=False):
         self.name: str = os.path.basename(dir_to_scan)
-        self.parser: StructureParser = StructureParser(dir_to_scan)
+        self.parser: StructureParser = StructureParser(dir_to_scan, is_archive)
         self.representations: Dict[Representation, StructureParser] = {}
         if self.parser.is_parsable:
             _reps = os.path.join(self.parser.resolved_path, DIR_NAMES['REPS'])
@@ -245,9 +245,9 @@ def _get_str1_result_list(name: str) -> List[Result]:
 def _root_loc(name: str) -> str:
     return f'{ROOT} {name}'
 
-def validate(to_validate) -> Tuple[bool, StructResults]:
+def validate(to_validate, is_archive: bool=False) -> Tuple[bool, StructResults]:
     try:
-        struct_tests = StructureChecker(to_validate).get_test_results()
+        struct_tests = StructureChecker(to_validate, is_archive).get_test_results()
         return struct_tests.status == StructureStatus.WELLFORMED, struct_tests
     except PackageError:
         return False, get_bad_path_results(to_validate)
