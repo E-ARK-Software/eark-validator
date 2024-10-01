@@ -19,7 +19,7 @@
       <assert id="CSIP37" role="ERROR" test="@xlink:type = 'simple'">Attribute MUST be used with the value “simple”. Value list is maintained by the xlink standard.</assert>
       <assert id="CSIP38" role="ERROR" test="@xlink:href">MUST record the actual location of the resource. This specification recommends recording a URL type filepath within this attribute.</assert>
       <assert id="CSIP39" role="ERROR" test="@MDTYPE">MUST record the type of metadata at the referenced location.</assert>
-      <assert id="CSIP40" role="ERROR" test="@MIMETYPE_IANA_test">MUST record the MIME type of the referenced file.</assert>
+      <assert id="CSIP40" role="ERROR" test="@MIMETYPE">MUST record the MIME type of the referenced file.</assert>
       <assert id="CSIP41" role="ERROR" test="@SIZE">MUST record the size in bytes of the referenced file.</assert>
       <assert id="CSIP42" role="ERROR" test="@CREATED">MUST record the date and time the referenced file was created.</assert>
       <assert id="CSIP43" role="ERROR" test="@CHECKSUM">MUST record the checksum of the referenced file.</assert>
