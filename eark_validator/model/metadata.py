@@ -62,4 +62,3 @@ class MetsFile(BaseModel):
     root: MetsRoot = MetsRoot()
     file_entries: List[FileEntry] = []
     invalid_file_entries: List[InvalidFileEntry] = []
-
