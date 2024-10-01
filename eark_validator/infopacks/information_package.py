@@ -82,14 +82,16 @@ class InformationPackages:
         if not package_path.exists():
             raise FileNotFoundError(NO_PATH.format(package_path))
         handler: PackageHandler = PackageHandler()
-        to_parse:Path = handler.prepare_package(package_path)
+        to_parse: Path = handler.prepare_package(package_path)
         mets_path: Path = to_parse.joinpath(METS_FILE)
         if not mets_path.is_file():
             raise ValueError('No METS file found in package')
-        mets: MetsFile = MetsFiles.from_file(to_parse.joinpath(METS_FILE))
+        
+        mets: MetsFile = MetsFiles.from_file(mets_path)
+        details: PackageDetails = InformationPackages.details_from_mets_file(mets_path)
         return InformationPackage.model_validate({
             METS: mets,
-            'details': InformationPackages.details_from_mets_file(to_parse.joinpath(METS_FILE))
+            'details': details
         })
 
     @staticmethod
