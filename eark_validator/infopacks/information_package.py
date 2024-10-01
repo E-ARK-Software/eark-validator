@@ -86,7 +86,7 @@ class InformationPackages:
         mets_path: Path = to_parse.joinpath(METS_FILE)
         if not mets_path.is_file():
             raise ValueError('No METS file found in package')
-        
+
         mets: MetsFile = MetsFiles.from_file(mets_path)
         details: PackageDetails = InformationPackages.details_from_mets_file(mets_path)
         return InformationPackage.model_validate({

@@ -205,14 +205,14 @@ def _parse_file_entry(element: etree.Element) -> FileEntry:
         'mimetype': element.attrib.get('MIMETYPE')
         })
 
-    
+
 def _validate_file_entry(file_entry: FileEntry, element: etree.Element, root: Path) -> list[str]:
     errors: List[str] = []
 
     if file_entry.path is None:
         errors.append(_get_path_requirement_id(element))
         return errors
-    
+
     full_path: Path = Path(os.path.join(root, file_entry.path))
     if not os.path.isfile(full_path):
         errors.append(_get_path_requirement_id(element))
@@ -279,91 +279,91 @@ def _handle_rel_paths(rootpath: str, metspath: str) -> tuple[str, str]:
     else:
         relpath = os.path.join(rootpath, metspath)
     return relpath.rsplit('/', 1)[0], relpath
-       
+
 def _get_path_requirement_id(element: etree.Element) -> str:
     tag = _get_tag_value(element)
 
-    if tag == "FLocat": 
-        return "CSIP79"
-    elif tag == "mptr": 
-        return "CSIP110"
-    
+    if tag == 'FLocat':
+        return 'CSIP79'
+    elif tag == 'mptr':
+        return 'CSIP110'
+
     parent = element.getparent()
     parent_tag = _get_tag_value(parent)
     match parent_tag:
-        case "dmdSec":
-            return "CSIP24"
-        case "digiprovMD": 
-            return "CSIP38"
-        case "rightsMD": 
-            return "CSIP51"
+        case 'dmdSec':
+            return 'CSIP24'
+        case 'digiprovMD':
+            return 'CSIP38'
+        case 'rightsMD':
+            return 'CSIP51'
         case _:
             raise ValueError(f'Tag {tag} cannot be converted to a requirement ID.')
-        
+
 def _get_size_requirement_id(element: etree.Element) -> str:
     element_parent: etree.Element = element.getparent()
     tag = _get_tag_value(element_parent)
 
     match tag:
-        case "dmdSec":
-            return "CSIP27"
-        case "digiprovMD":
-            return "CSIP41"
-        case "rightsMD":
-            return "CSIP54"
-        case "fileGrp":
-            return "CSIP69"
+        case 'dmdSec':
+            return 'CSIP27'
+        case 'digiprovMD':
+            return 'CSIP41'
+        case 'rightsMD':
+            return 'CSIP54'
+        case 'fileGrp':
+            return 'CSIP69'
         case _:
             raise ValueError(f'Tag {tag} cannot be converted to a requirement ID.')
-        
+
 def _get_checksum_algorithm_requirement_id(element: etree.Element) -> str:
     element_parent: etree.Element = element.getparent()
     tag = _get_tag_value(element_parent)
 
     match tag:
-        case "dmdSec":
-            return "CSIP30"
-        case "digiprovMD":
-            return "CSIP44"
-        case "rightsMD":
-            return "CSIP57"
-        case "fileGrp":
-            return "CSIP72"
+        case 'dmdSec':
+            return 'CSIP30'
+        case 'digiprovMD':
+            return 'CSIP44'
+        case 'rightsMD':
+            return 'CSIP57'
+        case 'fileGrp':
+            return 'CSIP72'
         case _:
             raise ValueError(f'Tag {tag} cannot be converted to a requirement ID.')
-        
+
 def _get_checksum_value_requirement_id(element: etree.Element) -> str:
     element_parent: etree.Element = element.getparent()
     tag = _get_tag_value(element_parent)
 
     match tag:
-        case "dmdSec":
-            return "CSIP29"
-        case "digiprovMD":
-            return "CSIP43"
-        case "rightsMD":
-            return "CSIP56"
-        case "fileGrp":
-            return "CSIP71"
+        case 'dmdSec':
+            return 'CSIP29'
+        case 'digiprovMD':
+            return 'CSIP43'
+        case 'rightsMD':
+            return 'CSIP56'
+        case 'fileGrp':
+            return 'CSIP71'
         case _:
             raise ValueError(f'Tag {tag} cannot be converted to a requirement ID.')
-        
+
 def _get_mimetype_requirement_id(element: etree.Element) -> str:
     element_parent: etree.Element = element.getparent()
     tag = _get_tag_value(element_parent)
 
     match tag:
-        case "dmdSec":
-            return "CSIP26"
-        case "digiprovMD":
-            return "CSIP40"
-        case "rightsMD":
-            return "CSIP53"
-        case "fileGrp":
-            return "CSIP68"
+        case 'dmdSec':
+            return 'CSIP26'
+        case 'digiprovMD':
+            return 'CSIP40'
+        case 'rightsMD':
+            return 'CSIP53'
+        case 'fileGrp':
+            return 'CSIP68'
         case _:
             raise ValueError(f'Tag {tag} cannot be converted to a requirement ID.')
-        
+
 def _get_tag_value(element: etree.Element) -> str:
     index: int = element.tag.find('}')
     return element.tag if index == -1 else element.tag[index+1:]

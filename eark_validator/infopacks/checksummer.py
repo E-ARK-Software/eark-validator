@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pathlib import Path
 
 from eark_validator.const import NO_PATH, NOT_FILE

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 media_types = [
     'application/1d-interleaved-parityfec',
     'application/3gpdash-qoe-report+xml',
