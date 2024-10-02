@@ -52,7 +52,7 @@ class ManifestEntries:
             algorithm: ChecksumAlg = ChecksumAlg.from_string(checksum_algorithm)
         checksums = [ Checksummer.from_file(abs_path, algorithm) ] if checksum_algorithm else []
         return ManifestEntry.model_validate({
-            'path': entry_path,
+            'path': str(entry_path),
             'size': os.path.getsize(abs_path),
             'checksums': checksums
             })
@@ -122,7 +122,7 @@ class Manifests:
                                                    entry_path,
                                                    checksum_algorithm=checksum_algorithm))
         return Manifest.model_validate({
-            'root': path,
+            'root': str(path),
             'source': SourceType.PACKAGE,
             'summary': None,
             'entries': entries
@@ -137,7 +137,7 @@ class Manifests:
         entries: list[ManifestEntry] = list(map(ManifestEntries.from_file_entry,
                                                 mets_file.file_entries))
         return Manifest.model_validate({
-            'root': path,
+            'root': str(path),
             'source': SourceType.METS,
             'summary': None,
             'entries': entries
@@ -153,8 +153,9 @@ def _test_checksums(path: Path, checksums: list[Checksum]) -> list[str]:
     return issues
 
 def _resolve_manifest_root(manifest: Manifest) -> Path:
+    root: Path = Path(manifest.root)
     if manifest.source == SourceType.PACKAGE:
-        return manifest.root
+        return root
     if manifest.source == SourceType.METS:
-        return manifest.root.parent
+        return root.parent
     raise ValueError(f'Unknown source type {manifest.source}')

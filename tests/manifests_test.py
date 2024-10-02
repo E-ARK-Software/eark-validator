@@ -175,7 +175,7 @@ class ManifestEntryTest(unittest.TestCase):
         entry: ManifestEntry = ManifestEntries.from_file_entry(_parse_file_entry(ET.fromstring(FILE_XML)))
         self.assertEqual(entry.checksums[0].algorithm, ChecksumAlg.SHA256)
         self.assertEqual(entry.checksums[0].value, 'F37E90511B5DDE2E9C60378A0F0A0A1CF07145C8F12651E0E19731892C608DA7')
-        self.assertEqual(entry.path, Path('representations/rep1/METS.xml'))
+        self.assertEqual(str(entry.path), 'representations/rep1/METS.xml')
         self.assertEqual(entry.size, 3554)
 
 class ManifestTest(unittest.TestCase):
@@ -255,7 +255,7 @@ class ManifestTest(unittest.TestCase):
 
     def test_resolve_manifest_bad_source(self):
         manifest = Manifest.model_validate({
-            'root': Path(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')),
+            'root': str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')),
             'source': SourceType.UNKNOWN
             })
         with self.assertRaises(ValueError):
