@@ -30,8 +30,8 @@ E-ARK : Information Package Validation
 """
 
 from enum import Enum, unique
-from typing import Any, List, Optional
-import uuid
+from typing import Any, List, Optional, Annotated
+from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -139,7 +139,7 @@ class MetatdataResultSet(BaseModel):
     schematron_results: MetadataResults = Field(validation_alias='schematronResults')
 
 class ValidationReport(BaseModel):
-    uid: uuid.UUID = uuid.uuid4()
+    uid: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
     structure: Optional[StructResults] = None
     metadata: Optional[MetatdataResultSet] = None
     package: Optional[InformationPackage] = None

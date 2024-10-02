@@ -24,7 +24,6 @@
 # under the License.
 #
 from enum import Enum
-from pathlib import Path
 from typing import Annotated, List
 
 from pydantic import BaseModel, StringConstraints
@@ -37,7 +36,7 @@ class EntryType(str, Enum):
     METADATA = 'metadata'
 
 class FileEntry(BaseModel):
-    path : Path | str
+    path : str
     type: EntryType = EntryType.FILE
     size : int = 0
     checksum : Checksum

@@ -33,7 +33,7 @@ from .checksum import Checksum
 from .constants import METS, UNKNOWN, PACKAGE # pylint: disable=W0611
 
 class ManifestEntry(BaseModel):
-    path : Path | str
+    path : str
     size : int = 0
     checksums : List[Checksum] = []
 
@@ -52,7 +52,7 @@ class SourceType(str, Enum):
 
 class Manifest(BaseModel):
     source: SourceType = SourceType.UNKNOWN
-    root: Path
+    root: str
     summary: Optional[ManifestSummary] = None
     entries: List[ManifestEntry] = []
 
