@@ -24,7 +24,7 @@
 # under the License.
 #
 from enum import Enum
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 
 from pydantic import BaseModel, StringConstraints
 
@@ -36,14 +36,14 @@ class EntryType(str, Enum):
     METADATA = 'metadata'
 
 class FileEntry(BaseModel):
-    path : str
+    path : Optional[str]
     type: EntryType = EntryType.FILE
     size: Optional[str]
     checksum: Checksum
     mimetype: Optional[Annotated[ str, StringConstraints(to_lower=True) ]] = MIME_DEFAULT
 
 class InvalidFileEntry(BaseModel):
-    path: Optional[Path]
+    path: Optional[str]
     type: Optional[EntryType] = EntryType.FILE
     size: Optional[str]
     checksum: Checksum
