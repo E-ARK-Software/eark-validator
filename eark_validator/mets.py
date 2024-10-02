@@ -28,12 +28,15 @@ from pathlib import Path
 from typing import Dict, List
 
 from lxml import etree
+from typing import Optional
 
 from eark_validator.ipxml.schema import IP_SCHEMA
 from eark_validator.ipxml.namespaces import Namespaces
 from eark_validator.model.checksum import Checksum, ChecksumAlg
-from eark_validator.model.metadata import FileEntry, MetsFile, MetsRoot
+from eark_validator.model.metadata import FileEntry, InvalidFileEntry, MetsFile, MetsRoot
 from eark_validator.model.validation_report import Result
+from eark_validator.model.mimetype import media_types
+from eark_validator.infopacks.checksummer import Checksummer
 from eark_validator.utils import get_path
 from eark_validator.const import NOT_FILE, NOT_VALID_FILE
 
@@ -65,6 +68,7 @@ class MetsFiles():
             raise ValueError(NOT_FILE.format(mets_file))
         ns: dict[str, str] = {}
         entries: list[FileEntry] = []
+        invalid_entries: list[InvalidFileEntry] = []
         othertype = contentinformationtype = oaispackagetype = mets_root = ''
         try:
             parsed_mets = etree.iterparse(mets_file, events=[START_ELE, START_NS])
@@ -89,7 +93,19 @@ class MetsFiles():
                             Namespaces.METS.qualify('file'),
                             Namespaces.METS.qualify('mdRef')
                         ]:
-                        entries.append(_parse_file_entry(element))
+                        file_entry: FileEntry = _parse_file_entry(element)
+                        errors: List[str] = _validate_file_entry(file_entry, element, os.path.dirname(mets_file))
+
+                        if len(errors) == 0:
+                            entries.append(file_entry)
+                        else:
+                            invalid_entries.append(InvalidFileEntry.model_validate({
+                                'path': file_entry.path,
+                                'size': file_entry.size,
+                                'checksum': file_entry.checksum,
+                                'mimetype': file_entry.mimetype,
+                                'errors': errors
+                                }))
         except etree.XMLSyntaxError as ex:
             raise ValueError(NOT_VALID_FILE.format(mets_file, 'XML')) from ex
         return MetsFile.model_validate({
@@ -97,7 +113,8 @@ class MetsFiles():
             'oaispackagetype': oaispackagetype,
             'othertype': othertype,
             'contentinformationtype': contentinformationtype,
-            'file_entries': entries
+            'file_entries': entries,
+            'invalid_file_entries': invalid_entries
             })
 
 class MetsValidator():
@@ -183,12 +200,47 @@ def _parse_file_entry(element: etree.Element) -> FileEntry:
     """Create a FileItem from an etree element."""
     return FileEntry.model_validate({
         'path': _path_from_xml_element(element),
-        'size': int(element.attrib['SIZE']),
+        'size': element.attrib.get('SIZE'),
         'checksum': _checksum_from_mets_element(element),
-        'mimetype': element.attrib.get('MIMETYPE') or ''
+        'mimetype': element.attrib.get('MIMETYPE')
         })
 
-def _path_from_xml_element(element: etree.Element) -> str:
+
+def _validate_file_entry(file_entry: FileEntry, element: etree.Element, root: Path) -> list[str]:
+    errors: List[str] = []
+
+    if file_entry.path is None:
+        errors.append(_get_path_requirement_id(element))
+        return errors
+
+    full_path: Path = Path(os.path.join(root, file_entry.path))
+    if not os.path.isfile(full_path):
+        errors.append(_get_path_requirement_id(element))
+        return errors
+
+    if file_entry.size is None or not file_entry.size.isdecimal():
+        errors.append(_get_size_requirement_id(element))
+    else:
+        size = int(file_entry.size)
+        if os.path.getsize(full_path) != size:
+            errors.append(_get_size_requirement_id(element))
+
+    if file_entry.checksum.algorithm is None:
+        errors.append(_get_checksum_algorithm_requirement_id(element))
+        errors.append(_get_checksum_value_requirement_id(element))
+    elif file_entry.checksum.value is None:
+        errors.append(_get_checksum_value_requirement_id(element))
+    elif file_entry.checksum.value is not None:
+        checksum = Checksummer.from_file(full_path, file_entry.checksum.algorithm)
+        if file_entry.checksum.value != checksum.value:
+            errors.append(_get_checksum_value_requirement_id(element))
+
+    if file_entry.mimetype is None or file_entry.mimetype not in media_types:
+        errors.append(_get_mimetype_requirement_id(element))
+
+    return errors
+
+def _path_from_xml_element(element: etree.Element) -> Optional[str]:
     loc_ele: etree.Element = element
     if element.tag in [ Namespaces.METS.qualify('file'), 'file' ]:
         tag: str = Namespaces.METS.qualify('FLocat') if hasattr(element, 'nsmap') else 'FLocat'
@@ -201,17 +253,22 @@ def _path_from_xml_element(element: etree.Element) -> str:
         return  _get_path_attrib(loc_ele)
     raise ValueError(f'Element {element.tag} is not a METS:file or METS:mdRef element.')
 
-def _get_path_attrib(element: etree.Element) -> str:
+def _get_path_attrib(element: etree.Element) -> Optional[str]:
     """Get the path attribute from an etree element."""
     attrib_name = Namespaces.XLINK.qualify('href') if hasattr(element, 'nsmap') else 'href'
-    return element.attrib.get(attrib_name) or ''
+    return element.attrib.get(attrib_name)
 
-def _checksum_from_mets_element(element: etree.Element) -> Checksum:
+def _checksum_from_mets_element(element: etree.Element) -> Optional[Checksum]:
     """Create a Checksum from an etree element."""
     # Get the child flocat element and grab the href attribute.
+    try:
+        algorithm = ChecksumAlg.from_string(element.attrib.get('CHECKSUMTYPE'))
+    except ValueError:
+        algorithm = None
+
     return Checksum.model_validate({
-        'algorithm': ChecksumAlg.from_string(element.attrib['CHECKSUMTYPE']),
-        'value': element.attrib['CHECKSUM']},
+        'algorithm': algorithm,
+        'value': element.attrib.get('CHECKSUM')},
             strict=True)
 
 def _handle_rel_paths(rootpath: str, metspath: str) -> tuple[str, str]:
@@ -222,3 +279,91 @@ def _handle_rel_paths(rootpath: str, metspath: str) -> tuple[str, str]:
     else:
         relpath = os.path.join(rootpath, metspath)
     return relpath.rsplit('/', 1)[0], relpath
+
+def _get_path_requirement_id(element: etree.Element) -> str:
+    tag = _get_tag_value(element)
+
+    if tag == 'FLocat':
+        return 'CSIP79'
+    elif tag == 'mptr':
+        return 'CSIP110'
+
+    parent = element.getparent()
+    parent_tag = _get_tag_value(parent)
+    match parent_tag:
+        case 'dmdSec':
+            return 'CSIP24'
+        case 'digiprovMD':
+            return 'CSIP38'
+        case 'rightsMD':
+            return 'CSIP51'
+        case _:
+            raise ValueError(f'Tag {tag} cannot be converted to a requirement ID.')
+
+def _get_size_requirement_id(element: etree.Element) -> str:
+    element_parent: etree.Element = element.getparent()
+    tag = _get_tag_value(element_parent)
+
+    match tag:
+        case 'dmdSec':
+            return 'CSIP27'
+        case 'digiprovMD':
+            return 'CSIP41'
+        case 'rightsMD':
+            return 'CSIP54'
+        case 'fileGrp':
+            return 'CSIP69'
+        case _:
+            raise ValueError(f'Tag {tag} cannot be converted to a requirement ID.')
+
+def _get_checksum_algorithm_requirement_id(element: etree.Element) -> str:
+    element_parent: etree.Element = element.getparent()
+    tag = _get_tag_value(element_parent)
+
+    match tag:
+        case 'dmdSec':
+            return 'CSIP30'
+        case 'digiprovMD':
+            return 'CSIP44'
+        case 'rightsMD':
+            return 'CSIP57'
+        case 'fileGrp':
+            return 'CSIP72'
+        case _:
+            raise ValueError(f'Tag {tag} cannot be converted to a requirement ID.')
+
+def _get_checksum_value_requirement_id(element: etree.Element) -> str:
+    element_parent: etree.Element = element.getparent()
+    tag = _get_tag_value(element_parent)
+
+    match tag:
+        case 'dmdSec':
+            return 'CSIP29'
+        case 'digiprovMD':
+            return 'CSIP43'
+        case 'rightsMD':
+            return 'CSIP56'
+        case 'fileGrp':
+            return 'CSIP71'
+        case _:
+            raise ValueError(f'Tag {tag} cannot be converted to a requirement ID.')
+
+def _get_mimetype_requirement_id(element: etree.Element) -> str:
+    element_parent: etree.Element = element.getparent()
+    tag = _get_tag_value(element_parent)
+
+    match tag:
+        case 'dmdSec':
+            return 'CSIP26'
+        case 'digiprovMD':
+            return 'CSIP40'
+        case 'rightsMD':
+            return 'CSIP53'
+        case 'fileGrp':
+            return 'CSIP68'
+        case _:
+            raise ValueError(f'Tag {tag} cannot be converted to a requirement ID.')
+
+def _get_tag_value(element: etree.Element) -> str:
+    index: int = element.tag.find('}')
+    return element.tag if index == -1 else element.tag[index+1:]

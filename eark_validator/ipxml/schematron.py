@@ -34,7 +34,6 @@ from lxml.isoschematron import Schematron
 
 from eark_validator.const import NO_PATH, NOT_FILE
 from .resources import schematron as SCHEMATRON
-from .resources import vocabs as vocabularies
 
 SCHEMATRON_NS = '{http://purl.oclc.org/dsdl/schematron}'
 SVRL_NS = '{http://purl.oclc.org/dsdl/svrl}'
@@ -53,8 +52,6 @@ class SchematronTests():
         for attribute, vocabulary_uri in self.__vocabulary_definitions.items():
             self.tests[attribute + '_vocabulary_test'] = self.__create_vocabulary_test(attribute, vocabulary_uri)
 
-        self.tests['@MIMETYPE_IANA_test'] = self.___create_IANA_test()
-
     def __create_vocabulary_test(self, attribute: str, vocabulary_uri: str) -> str:
         vocabulary_tests = []
         for line_bytes in urlopen(vocabulary_uri):
@@ -69,15 +66,6 @@ class SchematronTests():
             vocabulary_tests.append(f"({attribute} = '{vocabulary_item}')")
 
         return ' or '.join(vocabulary_tests)
-
-    def ___create_IANA_test(self) -> str:
-        mime_tests = []
-        with open(str(files(vocabularies).joinpath('IANA.txt')), 'r') as iana:
-            for mime_type in iana:
-                mime_type = mime_type.rstrip('\n')
-                mime_tests.append(f"(@MIMETYPE = '{mime_type}')")
-
-        return ' or '.join(mime_tests)
 
 schematron_tests = SchematronTests()
 
