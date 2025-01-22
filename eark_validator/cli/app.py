@@ -143,7 +143,7 @@ def _validate_ip(path: str, version: SpecificationVersion, output_path: Optional
 
     output = report.model_dump_json()
     if output_path is not None:
-        with open(output_path, "w") as text_file:
+        with open(output_path, 'w') as text_file:
             text_file.write(output)
         print(f"Detiled output saved in {output_path}")
     else:
