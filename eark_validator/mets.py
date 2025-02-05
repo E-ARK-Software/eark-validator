@@ -277,7 +277,7 @@ def _handle_rel_paths(rootpath: str, metspath: str) -> tuple[str, str]:
 def _get_path_requirement_id(element: etree.Element) -> str:
     tag = _get_tag_value(element)
 
-    if tag == 'FLocat':
+    if tag == 'file':
         return 'CSIP79'
     elif tag == 'mptr':
         return 'CSIP110'
