@@ -11,7 +11,7 @@ website of the Digital Information LifeCycle Interoperability Standards Board (D
 
 ### Pre-requisites
 
-Python 3.10 or later is required to run the E-ARK Python Information Package Validator.
+Python 3.12 is required to run the E-ARK Python Information Package Validator.
 
 You must be running either a Debian/Ubuntu Linux distribution or Windows Subsystem for Linux on Windows to follow these commands.
 If you are running a different Linux distribution you must change the apt commands to your package manager.
