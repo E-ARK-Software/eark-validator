@@ -2,76 +2,25 @@
   <ns prefix="mets" uri="http://www.loc.gov/METS/" />
   <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
-
-  <pattern id="METS_descriptive_metadata_element_1">
-    <rule context="/mets:mets/mets:dmdSec" id="CSIP18;ERROR" >
-      <assert test="@ID">Mandatory, identifier must be unique within the package.</assert>
+  <pattern id="METS_descriptive_metadata_element">
+    <title>Use of the METS descriptive metadata section.</title>
+    <rule context="/mets:mets/mets:dmdSec">
+      <assert test="@ID">CSIP18;ERROR;Mandatory, identifier must be unique within the package.</assert>
+      <assert test="@CREATED">CSIP19;ERROR;Mandatory, creation date of the descriptive metadata in this section.</assert>
+      <assert test="@STATUS">CSIP20_1;WARN;SHOULD be used to indicated the status of the package.</assert>
+      <assert test="not(@STATUS) or (@STATUS_vocabulary_test)">CSIP20_2;ERROR;SHOULD be used to indicated the status of the package.</assert>
+      <assert test="mets:mdRef">CSIP21;WARN;SHOULD provide a reference to the descriptive metadata file located in the “metadata” section of the IP..</assert>
     </rule>
-  </pattern>
-  <pattern id="METS_descriptive_metadata_element_2">
-    <rule context="/mets:mets/mets:dmdSec" id="CSIP19;ERROR" >
-      <assert test="@CREATED">Mandatory, creation date of the descriptive metadata in this section.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_descriptive_metadata_element_3">
-    <rule context="/mets:mets/mets:dmdSec" id="CSIP20_1;WARN" >
-      <assert test="@STATUS">SHOULD be used to indicated the status of the package.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_descriptive_metadata_element_4">
-    <rule context="/mets:mets/mets:dmdSec" id="CSIP20_2;ERROR" >
-      <assert test="not(@STATUS) or (@STATUS_vocabulary_test)">SHOULD be used to indicated the status of the package.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_descriptive_metadata_element_5">
-    <rule context="/mets:mets/mets:dmdSec" id="CSIP21;WARN" >
-      <assert test="mets:mdRef">SHOULD provide a reference to the descriptive metadata file located in the “metadata” section of the IP..</assert>
-    </rule>
-  </pattern>
-
-  <pattern id="METS_descriptive_metadata_element_6">
-    <rule context="/mets:mets/mets:dmdSec/mets:mdRef" id="CSIP22;ERROR" >
-      <assert test="@LOCTYPE = 'URL'">The locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_descriptive_metadata_element_7">
-    <rule context="/mets:mets/mets:dmdSec/mets:mdRef" id="CSIP23;ERROR" >
-      <assert test="@xlink:type = 'simple'">Attribute used with the value “simple”. Value list is maintained by the xlink standard.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_descriptive_metadata_element_8">
-    <rule context="/mets:mets/mets:dmdSec/mets:mdRef" id="CSIP24;ERROR" >
-      <assert test="@xlink:href">The actual location of the resource. This specification recommends recording a URL type filepath in this attribute.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_descriptive_metadata_element_9">
-    <rule context="/mets:mets/mets:dmdSec/mets:mdRef" id="CSIP25;ERROR" >
-      <assert test="@MDTYPE">Specifies the type of metadata in the referenced file. Values are taken from the list provided by the METS.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_descriptive_metadata_element_10">
-    <rule context="/mets:mets/mets:dmdSec/mets:mdRef" id="CSIP26;ERROR" >
-      <assert test="@MIMETYPE">MUST hold the IANA mime type of the referenced file.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_descriptive_metadata_element_11">
-    <rule context="/mets:mets/mets:dmdSec/mets:mdRef" id="CSIP27;ERROR" >
-      <assert test="@SIZE">MUST hold the size of the referenced file in bytes.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_descriptive_metadata_element_12">
-    <rule context="/mets:mets/mets:dmdSec/mets:mdRef" id="CSIP28;ERROR" >
-      <assert test="@CREATED">MUST hold the creation date of the referenced file.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_descriptive_metadata_element_13">
-    <rule context="/mets:mets/mets:dmdSec/mets:mdRef" id="CSIP29;ERROR" >
-      <assert test="@CHECKSUM">MUST hold the checksum of the referenced file.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_descriptive_metadata_element_14">
-    <rule context="/mets:mets/mets:dmdSec/mets:mdRef" id="CSIP30;ERROR" >
-      <assert test="@CHECKSUMTYPE">MUST hold the algorithm type of checksum of the referenced file.</assert>
+    <rule context="/mets:mets/mets:dmdSec/mets:mdRef">
+      <assert test="@LOCTYPE = 'URL'">CSIP22;ERROR;The locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
+      <assert test="@xlink:type = 'simple'">CSIP23;ERROR;Attribute used with the value “simple”. Value list is maintained by the xlink standard.</assert>
+      <assert test="@xlink:href">CSIP24;ERROR;The actual location of the resource. This specification recommends recording a URL type filepath in this attribute.</assert>
+      <assert test="@MDTYPE">CSIP25;ERROR;Specifies the type of metadata in the referenced file. Values are taken from the list provided by the METS.</assert>
+      <assert test="@MIMETYPE">CSIP26;ERROR;MUST hold the IANA mime type of the referenced file.</assert>
+      <assert test="@SIZE">CSIP27;ERROR;MUST hold the size of the referenced file in bytes.</assert>
+      <assert test="@CREATED">CSIP28;ERROR;MUST hold the creation date of the referenced file.</assert>
+      <assert test="@CHECKSUM">CSIP29;ERROR;MUST hold the checksum of the referenced file.</assert>
+      <assert test="@CHECKSUMTYPE">CSIP30;ERROR;MUST hold the algorithm type of checksum of the referenced file.</assert>
     </rule>
   </pattern>
 </schema>

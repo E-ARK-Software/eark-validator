@@ -2,149 +2,45 @@
   <ns prefix="mets" uri="http://www.loc.gov/METS/" />
   <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
-
-  <pattern id="METS_administrative_metadata_element_1">
-    <rule context="/mets:mets/mets:amdSec" id="CSIP32;WARN" >
-      <assert test="mets:digiprovMD">Sould be used to record information about preservation the standard PREMIS is used.</assert>
+  <pattern id="METS_administrative_metadata_element">
+    <title>Use of the METS administrative metadata section.</title>
+    <rule context="/mets:mets/mets:amdSec">
+      <assert test="mets:digiprovMD">CSIP32;WARN;Sould be used to record information about preservation the standard PREMIS is used.</assert>
+      <report test="mets:rightsMD">CSIP45;INFO;A simple rights statement may be used to describe general permissions for the package. Individual representations should state their specific rights in their representation METS file.</report>
     </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_2">
-    <rule context="/mets:mets/mets:amdSec" id="CSIP45;INFO" >
-      <report test="mets:rightsMD">A simple rights statement may be used to describe general permissions for the package. Individual representations should state their specific rights in their representation METS file.</report>
+    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD">
+      <assert test="@ID">CSIP33;ERROR;Mandatory, unique id for the digital provenance.</assert>
+      <assert test="@STATUS">CSIP34_1;WARN;SHOULD be used to indicated the status of the package.</assert>
+      <assert test="not(@STATUS) or (@STATUS_vocabulary_test)">CSIP34_2;ERROR;SHOULD be used to indicated the status of the package.</assert>
+      <assert test="mets:mdRef">CSIP35;WARN;Should provide a reference to the digital provenance metadata file stored in the “metadata” section of the IP.</assert>
     </rule>
-  </pattern>
-
-  <pattern id="METS_administrative_metadata_element_3">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD" id="CSIP33;ERROR" >
-      <assert test="@ID">Mandatory, unique id for the digital provenance.</assert>
+    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef">
+      <assert test="@LOCTYPE = 'URL'">CSIP36;ERROR;Mandatory, locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
+      <assert test="@xlink:type = 'simple'">CSIP37;ERROR;Attribute MUST be used with the value “simple”. Value list is maintained by the xlink standard.</assert>
+      <assert test="@xlink:href">CSIP38;ERROR;MUST record the actual location of the resource. This specification recommends recording a URL type filepath within this attribute.</assert>
+      <assert test="@MDTYPE">CSIP39;ERROR;MUST record the type of metadata at the referenced location.</assert>
+      <assert test="@MIMETYPE">CSIP40;ERROR;MUST record the MIME type of the referenced file.</assert>
+      <assert test="@SIZE">CSIP41;ERROR;MUST record the size in bytes of the referenced file.</assert>
+      <assert test="@CREATED">CSIP42;ERROR;MUST record the date the referenced file was created.</assert>
+      <assert test="@CHECKSUM">CSIP43;ERROR;MUST record the checksum of the referenced file.</assert>
+      <assert test="@CHECKSUMTYPE">CSIP44;ERROR;MUST record the checksum type of the referenced file.</assert>
     </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_4">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD" id="CSIP34_1;WARN" >
-      <assert test="@STATUS">SHOULD be used to indicated the status of the package.</assert>
+    <rule context="/mets:mets/mets:amdSec/mets:rightsMD">
+      <assert test="@ID">CSIP46;ERROR;Mandatory, unique id for the rights metadata.</assert>
+      <assert test="@STATUS">CSIP47_1;WARN;SHOULD be used to indicated the status of the package.</assert>
+      <assert test="not(@STATUS) or (@STATUS_vocabulary_test)">CSIP47_2;ERROR;SHOULD be used to indicated the status of the package.</assert>
+      <assert test="mets:mdRef">CSIP48;WARN;Should provide a reference to the digital provenance metadata file stored in the “metadata” section of the IP.</assert>
     </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_5">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD" id="CSIP34_2;ERROR" >
-      <assert test="not(@STATUS) or (@STATUS_vocabulary_test)">SHOULD be used to indicated the status of the package.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_6">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD" id="CSIP35;WARN" >
-      <assert test="mets:mdRef">Should provide a reference to the digital provenance metadata file stored in the “metadata” section of the IP.</assert>
-    </rule>
-  </pattern>
-
-  <pattern id="METS_administrative_metadata_element_7">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef" id="CSIP36;ERROR" >
-      <assert test="@LOCTYPE = 'URL'">Mandatory, locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_8">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef" id="CSIP37;ERROR" >
-      <assert test="@xlink:type = 'simple'">Attribute MUST be used with the value “simple”. Value list is maintained by the xlink standard.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_9">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef" id="CSIP38;ERROR" >
-      <assert test="@xlink:href">MUST record the actual location of the resource. This specification recommends recording a URL type filepath within this attribute.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_10">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef" id="CSIP39;ERROR" >
-      <assert test="@MDTYPE">MUST record the type of metadata at the referenced location.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_11">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef" id="CSIP40;ERROR" >
-      <assert test="@MIMETYPE">MUST record the MIME type of the referenced file.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_12">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef" id="CSIP41;ERROR" >
-      <assert test="@SIZE">MUST record the size in bytes of the referenced file.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_13">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef" id="CSIP42;ERROR" >
-      <assert test="@CREATED">MUST record the date the referenced file was created.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_14">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef" id="CSIP43;ERROR" >
-      <assert test="@CHECKSUM">MUST record the checksum of the referenced file.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_15">
-    <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef" id="CSIP44;ERROR" >
-      <assert test="@CHECKSUMTYPE">MUST record the checksum type of the referenced file.</assert>
-    </rule>
-  </pattern>
-
-  <pattern id="METS_administrative_metadata_element_16">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD" id="CSIP46;ERROR" >
-      <assert test="@ID">Mandatory, unique id for the rights metadata.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_17">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD" id="CSIP47_1;WARN" >
-      <assert test="@STATUS">SHOULD be used to indicated the status of the package.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_18">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD" id="CSIP47_2;ERROR" >
-      <assert test="not(@STATUS) or (@STATUS_vocabulary_test)">SHOULD be used to indicated the status of the package.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_19">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD" id="CSIP48;WARN" >
-      <assert test="mets:mdRef">Should provide a reference to the digital provenance metadata file stored in the “metadata” section of the IP.</assert>
-    </rule>
-  </pattern>
-
-  <pattern id="METS_administrative_metadata_element_20">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD/mets:mdRef" id="CSIP49;ERROR" >
-      <assert test="@LOCTYPE = 'URL'">Mandatory, locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_21">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD/mets:mdRef" id="CSIP50;ERROR" >
-      <assert test="@xlink:type = 'simple'">Attribute MUST be used with the value “simple”. Value list is maintained by the xlink standard.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_22">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD/mets:mdRef" id="CSIP51;ERROR" >
-      <assert test="@xlink:href">MUST record the actual location of the resource. This specification recommends recording a URL type filepath within this attribute.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_23">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD/mets:mdRef" id="CSIP52;ERROR" >
-      <assert test="@MDTYPE">MUST record the type of metadata at the referenced location.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_24">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD/mets:mdRef" id="CSIP53;ERROR" >
-      <assert test="@MIMETYPE">MUST record the MIME type of the referenced file.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_25">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD/mets:mdRef" id="CSIP54;ERROR" >
-      <assert test="@SIZE">MUST record the size in bytes of the referenced file.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_26">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD/mets:mdRef" id="CSIP55;ERROR" >
-      <assert test="@CREATED">MUST record the date the referenced file was created.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_27">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD/mets:mdRef" id="CSIP56;ERROR" >
-      <assert test="@CHECKSUM">MUST record the checksum of the referenced file.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_administrative_metadata_element_28">
-    <rule context="/mets:mets/mets:amdSec/mets:rightsMD/mets:mdRef" id="CSIP57;ERROR" >
-      <assert test="@CHECKSUMTYPE">MUST record the checksum type of the referenced file.</assert>
+    <rule context="/mets:mets/mets:amdSec/mets:rightsMD/mets:mdRef">
+      <assert test="@LOCTYPE = 'URL'">CSIP49;ERROR;Mandatory, locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
+      <assert test="@xlink:type = 'simple'">CSIP50;ERROR;Attribute MUST be used with the value “simple”. Value list is maintained by the xlink standard.</assert>
+      <assert test="@xlink:href">CSIP51;ERROR;MUST record the actual location of the resource. This specification recommends recording a URL type filepath within this attribute.</assert>
+      <assert test="@MDTYPE">CSIP52;ERROR;MUST record the type of metadata at the referenced location.</assert>
+      <assert test="@MIMETYPE">CSIP53;ERROR;MUST record the MIME type of the referenced file.</assert>
+      <assert test="@SIZE">CSIP54;ERROR;MUST record the size in bytes of the referenced file.</assert>
+      <assert test="@CREATED">CSIP55;ERROR;MUST record the date the referenced file was created.</assert>
+      <assert test="@CHECKSUM">CSIP56;ERROR;MUST record the checksum of the referenced file.</assert>
+      <assert test="@CHECKSUMTYPE">CSIP57;ERROR;MUST record the checksum type of the referenced file.</assert>
     </rule>
   </pattern>
 </schema>

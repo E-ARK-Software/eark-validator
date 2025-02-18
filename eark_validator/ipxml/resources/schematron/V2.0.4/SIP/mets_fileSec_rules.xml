@@ -3,25 +3,13 @@
   <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
   <ns prefix="sip" uri="https://DILCIS.eu/XML/METS/SIPExtensionMETS"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
-
-  <pattern id="METS_file_element_1">
-    <rule context="/mets:mets/mets:fileSec/mets:fileGrp/mets:file" id="CSIP73;INFO" >
-      <report test="@sip:FILEFORMATNAME">A file element has an FILEFORMATNAME attribute.</report>
-    </rule>
-  </pattern>
-  <pattern id="METS_file_element_2">
-    <rule context="/mets:mets/mets:fileSec/mets:fileGrp/mets:file" id="CSIP74;INFO" >
-      <report test="@sip:FILEFORMATVERSION">A file element has an FILEFORMATVERSION attribute.</report>
-    </rule>
-  </pattern>
-  <pattern id="METS_file_element_3">
-    <rule context="/mets:mets/mets:fileSec/mets:fileGrp/mets:file" id="CSIP75;INFO" >
-      <report test="@sip:FILEFORMATREGISTRY">A file element has an FILEFORMATREGISTRY attribute.</report>
-    </rule>
-  </pattern>
-  <pattern id="METS_file_element_4">
-    <rule context="/mets:mets/mets:fileSec/mets:fileGrp/mets:file" id="CSIP76;INFO" >
-      <report test="@sip:FILEFORMATKEY">A file element has an FILEFORMATKEY attribute.</report>
+  <pattern id="METS_file_element">
+    <title>Use of the METS file section.</title>
+    <rule context="/mets:mets/mets:fileSec/mets:fileGrp/mets:file">
+      <report test="@sip:FILEFORMATNAME">CSIP73;INFO;A file element has an FILEFORMATNAME attribute.</report>
+      <report test="@sip:FILEFORMATVERSION">CSIP74;INFO;A file element has an FILEFORMATVERSION attribute.</report>
+      <report test="@sip:FILEFORMATREGISTRY">CSIP75;INFO;A file element has an FILEFORMATREGISTRY attribute.</report>
+      <report test="@sip:FILEFORMATKEY">CSIP76;INFO;A file element has an FILEFORMATKEY attribute.</report>
     </rule>
   </pattern>
 </schema>

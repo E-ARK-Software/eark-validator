@@ -2,10 +2,10 @@
   <ns prefix="mets" uri="http://www.loc.gov/METS/" />
   <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
-
-  <pattern id="METS_descriptive_metadata_element_1">
-    <rule context="/mets:mets/mets:dmdSec" id="DIP4;WARN" >
-      <assert test="@STATUS = 'CURRENT'">Indicates the status of the package using a fixed vocabulary. The status SHOULD in a DIP be set to "CURRENT".</assert>
+  <pattern id="METS_descriptive_metadata_element">
+    <title>Use of the METS descriptive metadata section.</title>
+    <rule context="/mets:mets/mets:dmdSec">
+      <assert test="@STATUS = 'CURRENT'">DIP4;WARN;Indicates the status of the package using a fixed vocabulary. The status SHOULD in a DIP be set to "CURRENT".</assert>
     </rule>
   </pattern>
 </schema>

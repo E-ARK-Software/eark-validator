@@ -103,17 +103,20 @@ class TestResults():
     @staticmethod
     def from_element(rule: ET.Element, failed_assert: ET.Element) -> Result:
         """Create a Test result from an element."""
-        context = rule.get('context')
-        data = rule.get('id','').split(';')
+        dataFromText = failed_assert.find(SVRL_NS + 'text').text.split(';')
 
-        rule_id = data[0]
-        severity = Severity.from_role(data[1])
+        rule_id = dataFromText[0]
+        if isinstance(rule_id, str):
+            rule_id = rule_id.split('_')[0]
+        severity = Severity.from_role(dataFromText[1])
+        message = dataFromText[2]
+
+        context = rule.get('context')
         test = failed_assert.get('test')
         location = failed_assert.get('location')
-        message = failed_assert.find(SVRL_NS + 'text').text
-        location = context + test + location
+
         return Result.model_validate({
-            'rule_id': rule_id, 'location':location, 'message':message, 'severity':severity
+            'rule_id': rule_id, 'location': context + test + location, 'message': message, 'severity': severity
         })
 
     @staticmethod

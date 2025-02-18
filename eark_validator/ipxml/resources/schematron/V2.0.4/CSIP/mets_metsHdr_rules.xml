@@ -1,56 +1,21 @@
 <schema xmlns="http://purl.oclc.org/dsdl/schematron">
   <ns prefix="mets" uri="http://www.loc.gov/METS/" />
   <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
-
-  <pattern id="METS_header_element_1">
-    <rule context="/mets:mets/mets:metsHdr" id="CSIP7;ERROR" >
-      <assert test="@CREATEDATE">The metsHdr element MUST have a CREATEDATE attribute.</assert>
+  <pattern id="METS_header_element">
+    <title>Use of the METS header</title>
+    <rule context="/mets:mets/mets:metsHdr">
+      <assert test="@CREATEDATE">CSIP7;ERROR;The metsHdr element MUST have a CREATEDATE attribute.</assert>
+      <assert test="@LASTMODDATE">CSIP8;WARN;The metsHdr element SHOULD have a LASTMODDATE attribute.</assert>
+      <assert test="@csip:OAISPACKAGETYPE_vocabulary_test">CSIP9;ERROR;The metsHdr element MUST have a csip:OAISPACKAGETYPE attribute.</assert>
+      <assert test="mets:agent">CSIP10;ERROR;The metsHdr element MUST contain an agent element that records the software used to create the package.</assert>
+      <assert test="count(mets:agent[@ROLE = 'CREATOR']) > 0">CSIP11;ERROR;The agent element MUST have a ROLE attribute with the value "CREATOR".</assert>
     </rule>
-  </pattern>
-  <pattern id="METS_header_element_2">
-    <rule context="/mets:mets/mets:metsHdr" id="CSIP8;WARN" >
-      <assert test="@LASTMODDATE">The metsHdr element SHOULD have a LASTMODDATE attribute.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_header_element_3">
-    <rule context="/mets:mets/mets:metsHdr" id="CSIP9;ERROR" >
-      <assert test="@csip:OAISPACKAGETYPE_vocabulary_test">The metsHdr element MUST have a csip:OAISPACKAGETYPE attribute.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_header_element_4">
-    <rule context="/mets:mets/mets:metsHdr" id="CSIP10;ERROR" >
-      <assert test="mets:agent">The metsHdr element MUST contain an agent element that records the software used to create the package.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_header_element_5">
-    <rule context="/mets:mets/mets:metsHdr" id="CSIP11;ERROR" >
-      <assert test="count(mets:agent[@ROLE = 'CREATOR']) > 0">The agent element MUST have a ROLE attribute with the value "CREATOR".</assert>
-    </rule>
-  </pattern>
-
-  <pattern id="METS_header_element_6">
-    <rule context="/mets:mets/mets:metsHdr/mets:agent[@ROLE = 'CREATOR']" id="CSIP12;ERROR" >
-      <assert test="@TYPE = 'OTHER'">The agent element MUST have a TYPE attribute with the value "OTHER".</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_header_element_7">
-    <rule context="/mets:mets/mets:metsHdr/mets:agent[@ROLE = 'CREATOR']" id="CSIP13;ERROR" >
-      <assert test="@OTHERTYPE = 'SOFTWARE'">The agent element MUST have a OTHERTYPE attribute with the value "SOFTWARE".</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_header_element_8">
-    <rule context="/mets:mets/mets:metsHdr/mets:agent[@ROLE = 'CREATOR']" id="CSIP14;ERROR" >
-      <assert test="count(mets:name) = 1 and mets:name != ''">The agent element MUST have a child name element that records the name of the software tool used to create the IP.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_header_element_9">
-    <rule context="/mets:mets/mets:metsHdr/mets:agent[@ROLE = 'CREATOR']" id="CSIP15;ERROR" >
-      <assert test="count(mets:note) = 1 and mets:note != ''">The agent element MUST have a child note element that records the version of the tool used to create the IP.</assert>
-    </rule>
-  </pattern>
-  <pattern id="METS_header_element_10">
-    <rule context="/mets:mets/mets:metsHdr/mets:agent[@ROLE = 'CREATOR']" id="CSIP16;ERROR" >
-      <assert test="mets:note[@csip:NOTETYPE='SOFTWARE VERSION']">The mandatory agent element’s note child has a @csip:NOTETYPE attribute with a fixed value of “SOFTWARE VERSION”.</assert>
+    <rule context="/mets:mets/mets:metsHdr/mets:agent[@ROLE = 'CREATOR']">
+      <assert test="@TYPE = 'OTHER'">CSIP12;ERROR;The agent element MUST have a TYPE attribute with the value "OTHER".</assert>
+      <assert test="@OTHERTYPE = 'SOFTWARE'">CSIP13;ERROR;The agent element MUST have a OTHERTYPE attribute with the value "SOFTWARE".</assert>
+      <assert test="count(mets:name) = 1 and mets:name != ''">CSIP14;ERROR;The agent element MUST have a child name element that records the name of the software tool used to create the IP.</assert>
+      <assert test="count(mets:note) = 1 and mets:note != ''">CSIP15;ERROR;The agent element MUST have a child note element that records the version of the tool used to create the IP.</assert>
+      <assert test="mets:note[@csip:NOTETYPE='SOFTWARE VERSION']">CSIP16;ERROR;The mandatory agent element’s note child has a @csip:NOTETYPE attribute with a fixed value of “SOFTWARE VERSION”.</assert>
     </rule>
   </pattern>
 </schema>
