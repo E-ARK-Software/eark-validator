@@ -15,7 +15,7 @@
       <assert test="(starts-with(@USE, 'Representations') and @csip:CONTENTINFORMATIONTYPE) or (not(starts-with(@USE, 'Representations')))">CSIP62;ERROR;When the file group describes a representation with the `mets/fileSec/fileGrp/@USE` attribute value is starting with "Representations", then `mets/fileSec/fileGrp/@CONTENTINFORMATIONTYPE` must state the content information type specification used for the representation.</assert>
       <assert test="(@csip:CONTENTINFORMATIONTYPE and @csip:CONTENTINFORMATIONTYPE_vocabulary_test) or not(@csip:CONTENTINFORMATIONTYPE)">CSIP62;ERROR;When @csip:CONTENTINFORMATIONTYPE exists, it must have value from Vocabulary Content Information Type Specification.</assert>
       <assert test="(@csip:CONTENTINFORMATIONTYPE = 'OTHER' and @csip:OTHERCONTENTINFORMATIONTYPE) or @csip:CONTENTINFORMATIONTYPE != 'OTHER' or not(@csip:CONTENTINFORMATIONTYPE)">CSIP63;ERROR;This attribute is mandatory when the mets/fileSec/fileGrp/@USE attribute value is “Representations”.</assert>
-      <assert test="@USE">CSIP64;ERROR;This attribute is mandatory.</assert>
+      <assert test="(@USE_vocabulary_test) or starts-with(@USE, 'Representations')">CSIP64;ERROR;This attribute is mandatory.</assert>
       <assert test="@ID">CSIP65;ERROR;This attribute is mandatory. An xml:id identifier for the file group used for internal package references. It must be unique within the package.</assert>
       <assert test="mets:file">CSIP66;ERROR;The file group contains the file elements which describe the file objects.</assert>
     </rule>
