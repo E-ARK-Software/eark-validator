@@ -1,22 +1,11 @@
 <schema xmlns="http://purl.oclc.org/dsdl/schematron" >
-  <pattern id="id_only_attribute_1">
-    <rule context="/Person" id="id1;ERROR" >
-      <assert test="@Title">The element Person must have a Title attribute.</assert>
-    </rule>
-  </pattern>
-  <pattern id="id_only_attribute_2">
-    <rule context="/Person" id="id2;ERROR" >
-      <assert test="count(*) = 2 and count(Name) = 1 and count(Gender)= 1">The element Person should have the child elements Name and Gender.</assert>
-    </rule>
-  </pattern>
-  <pattern id="id_only_attribute_3">
-    <rule context="/Person" id="id3;ERROR" >
-      <assert test="*[1] = Name">The element Name must appear before element Gender.</assert>
-    </rule>
-  </pattern>
-  <pattern id="id_only_attribute_4">
-    <rule context="/Person" id="id4;ERROR" >
-      <assert test="(@Title = 'Mr' and Gender = 'Male') or @Title != 'Mr'">If the Title is "Mr" then the gender of the person must be "Male". </assert>
+  <pattern id="id_only_attribute">
+    <title>id is the only permitted attribute name</title>
+    <rule context="/Person">
+      <assert test="@Title">ID1;ERROR;The element Person must have a Title attribute.</assert>
+      <assert test="count(*) = 2 and count(Name) = 1 and count(Gender)= 1">ID2;ERROR;The element Person should have the child elements Name and Gender.</assert>
+      <assert test="*[1] = Name">ID3;ERROR;The element Name must appear before element Gender.</assert>
+      <assert test="(@Title = 'Mr' and Gender = 'Male') or @Title != 'Mr'">ID4;ERROR;If the Title is "Mr" then the gender of the person must be "Male". </assert>
     </rule>
   </pattern>
 </schema>

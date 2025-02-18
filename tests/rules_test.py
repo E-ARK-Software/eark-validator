@@ -102,7 +102,7 @@ class ValidationRulesTest(unittest.TestCase):
     def test_mets_file_ownerid(self):
         result, _, _, infos = _test_validation(METS_FILE_RULES, 'METS-ownerid.xml')
         self.assertEqual(infos, 1)
-        self.assertTrue(result)
+        self.assertFalse(result)
 
     def test_mets_hdr_no_type(self):
         result, failures, _, _ = _test_validation(METS_HDR_RULES, 'METS-hdr-no-type.xml')
