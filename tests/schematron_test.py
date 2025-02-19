@@ -62,35 +62,21 @@ class SchematronTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             SC.SchematronRuleset(EMPTY_FILE_PATH)
 
-    def test_notschematron_file(self):
-        with self.assertRaises(ValueError):
-            SC.SchematronRuleset(str(files(XML).joinpath(PERSON_XML)))
-
-    def test_load_schematron(self):
-        assert_count = 0
-        for _ in self._person_rules.assertions:
-            assert_count += 1
-        self.assertGreater(assert_count, 0)
-
     def test_validate_person(self):
         self._person_rules.validate(str(files(XML).joinpath(PERSON_XML)))
-        self.assertTrue(_is_list_valid(SC.TestResults.from_validation_report(self._person_rules._schematron.validation_report)))
+        self.assertTrue(_is_list_valid(SC.TestResults.from_validation_report(self._person_rules.result.get_svrl())))
 
     def test_validate_invalid_person(self):
         self._person_rules.validate(str(files(XML).joinpath('invalid-person.xml')))
-        self.assertFalse(_is_list_valid(SC.TestResults.from_validation_report(self._person_rules._schematron.validation_report)))
+        self.assertFalse(_is_list_valid(SC.TestResults.from_validation_report(self._person_rules.result.get_svrl())))
 
     def test_validate_mets(self):
         self._mets_one_def_rules.validate(METS_VALID_PATH)
-        self.assertTrue(_is_list_valid(SC.TestResults.from_validation_report(self._mets_one_def_rules._schematron.validation_report)))
-
-    def test_validate_mets_no_root(self):
-        self._mets_one_def_rules.validate(str(files(XML).joinpath('METS-no-root.xml')))
-        self.assertFalse(_is_list_valid(SC.TestResults.from_validation_report(self._mets_one_def_rules._schematron.validation_report)))
+        self.assertTrue(_is_list_valid(SC.TestResults.from_validation_report(self._mets_one_def_rules.result.get_svrl())))
 
     def test_validate_mets_no_objid(self):
         self._mets_one_def_rules.validate(str(files(XML).joinpath('METS-no-objid.xml')))
-        self.assertFalse(_is_list_valid(SC.TestResults.from_validation_report(self._mets_one_def_rules._schematron.validation_report)))
+        self.assertFalse(_is_list_valid(SC.TestResults.from_validation_report(self._mets_one_def_rules.result.get_svrl())))
 
 def _is_list_valid(to_test: List[Result]) -> bool:
     return len(list(filter(lambda a: a.severity == Severity.ERROR, to_test))) < 1

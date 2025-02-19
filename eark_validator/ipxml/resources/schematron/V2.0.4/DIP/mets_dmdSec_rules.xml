@@ -5,7 +5,7 @@
   <pattern id="METS_descriptive_metadata_element">
     <title>Use of the METS descriptive metadata section.</title>
     <rule context="/mets:mets/mets:dmdSec">
-      <assert id="DIP4" role="WARN" test="@STATUS = 'CURRENT'">Indicates the status of the package using a fixed vocabulary. The status SHOULD in a DIP be set to "CURRENT".</assert>
+      <assert test="@STATUS = 'CURRENT'">DIP4;WARN;Indicates the status of the package using a fixed vocabulary. The status SHOULD in a DIP be set to "CURRENT".</assert>
     </rule>
   </pattern>
 </schema>

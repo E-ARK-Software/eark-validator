@@ -22,9 +22,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "lxml==5.1.0",
+    "lxml>=5.2.1",
     "importlib_resources==5.12.0",
     "pydantic>=2.5.3,<3.0.0",
+    "pyschematron>=1.1.7"
 ]
 
 [project.optional-dependencies]

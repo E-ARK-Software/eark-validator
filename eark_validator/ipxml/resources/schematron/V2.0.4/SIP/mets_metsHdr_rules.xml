@@ -4,28 +4,28 @@
   <pattern id="METS_header_element">
     <title>Use of the METS header</title>
     <rule context="/mets:mets/mets:metsHdr">
-      <report id="SIP3" role="INFO" test="@RECORDSTATUS">Optional @metsHdr:RECORDSTATUS attribute used to indicate package status.</report>
-      <assert id="SIP4" role="ERROR" test="@csip:OAISPACKAGETYPE">The metsHdr element MUST have a csip:OAISPACKAGETYPE attribute.</assert>
+      <report test="@RECORDSTATUS">SIP3;INFO;Optional @metsHdr:RECORDSTATUS attribute used to indicate package status.</report>
+      <assert test="@csip:OAISPACKAGETYPE">SIP4;ERROR;The metsHdr element MUST have a csip:OAISPACKAGETYPE attribute.</assert>
     </rule>
     <rule context="/mets:mets/mets:metsHdr/mets:altRecordID">
-      <report id="SIP5" role="INFO" test="@TYPE = 'SUBMISSIONAGREEMENT'">Optional altRecordID element identifying submission agreement.</report>
-      <report id="SIP6" role="INFO" test="@TYPE = 'PREVIOUSSUBMISSIONAGREEMENT'">Optional altRecordID element identifying previous submission agreement.</report>
-      <report id="SIP7" role="INFO" test="@TYPE = 'REFERENCECODE'">Optional altRecordID element identifying reference code.</report>
-      <report id="SIP8" role="INFO" test="@TYPE = 'PREVIOUSREFERENCECODE'">Optional altRecordID element identifying previous reference code.</report>
+      <report test="@TYPE = 'SUBMISSIONAGREEMENT'">SIP5;INFO;Optional altRecordID element identifying submission agreement.</report>
+      <report test="@TYPE = 'PREVIOUSSUBMISSIONAGREEMENT'">SIP6;INFO;Optional altRecordID element identifying previous submission agreement.</report>
+      <report test="@TYPE = 'REFERENCECODE'">SIP7;INFO;Optional altRecordID element identifying reference code.</report>
+      <report test="@TYPE = 'PREVIOUSREFERENCECODE'">SIP8;INFO;Optional altRecordID element identifying previous reference code.</report>
     </rule>
     <rule context="/mets:mets/mets:metsHdr">
-      <report id="SIP9" role="INFO" test="mets:agent">Optional METS agent element found.</report>
+      <report test="mets:agent">SIP9;INFO;Optional METS agent element found.</report>
     </rule>
     <rule context="/mets:mets/mets:metsHdr/mets:agent">
-      <assert id="SIP10" role="ERROR" test="@ROLE">The agent element MUST have a role attribute.</assert>
+      <assert test="@ROLE">SIP10;ERROR;The agent element MUST have a role attribute.</assert>
     </rule>
     <rule context="/mets:mets/mets:metsHdr/mets:agent[@ROLE = 'CREATOR']">
-      <assert id="SIP11" role="ERROR" test="@TYPE = 'ORGANIZATION' or @TYPE = 'INDIVIDUAL'">The agent element MUST have a role attribute.</assert>
-      <report id="SIP12" role="INFO" test="mets:name">Optional METS name element used.</report>
-      <report id="SIP13" role="INFO" test="mets:note">Optional METS note element used.</report>
+      <assert test="@TYPE = 'ORGANIZATION' or @TYPE = 'INDIVIDUAL'">SIP11;ERROR;The agent element MUST have a role attribute.</assert>
+      <report test="mets:name">SIP12;INFO;Optional METS name element used.</report>
+      <report test="mets:note">SIP13;INFO;Optional METS note element used.</report>
     </rule>
     <rule context="/mets:mets/mets:metsHdr/mets:agent[@ROLE = 'CREATOR']/mets:note">
-      <assert id="SIP14" role="ERROR" test="@NOTETYPE = 'IDENTIFICATIONCODE'">The creator agent element MUST have a NOTETYPE attribute of value IDENTIFICATIONCODE.</assert>
+      <assert test="@NOTETYPE = 'IDENTIFICATIONCODE'">SIP14;ERROR;The creator agent element MUST have a NOTETYPE attribute of value IDENTIFICATIONCODE.</assert>
     </rule>
   </pattern>
 </schema>

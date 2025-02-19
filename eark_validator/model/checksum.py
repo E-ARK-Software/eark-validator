@@ -97,7 +97,7 @@ class Checksum(BaseModel):
     """
     Model type for a checksum value
     """
-    algorithm: ChecksumAlg = ChecksumAlg.SHA1
+    algorithm: Optional[ChecksumAlg] = ChecksumAlg.SHA1
     """The algorithm used to generate the checksum, defaults to SHA1."""
-    value: Annotated[ str, StringConstraints(to_upper=True) ] = ''
+    value: Optional[Annotated[ str, StringConstraints(to_upper=True) ]] = ''
     """The checksum value as an uppercase hexadecimal string, defaults to an empty string."""

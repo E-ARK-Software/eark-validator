@@ -5,8 +5,8 @@
   <pattern id="METS_root_element">
       <title>Validate METS root element.</title>
       <rule context="/mets:mets">
-        <report id="SIP1" role="INFO" test="@LABEL">Optional LABEL attribute used as short text package name.</report>
-        <assert id="SIP2" role="ERROR" test="@PROFILE = 'https://earksip.dilcis.eu/profile/E-ARK-SIP.xml' ">The PROFILE attribute MUST contain the URL of the METS profile, for a SIP: https://earksip.dilcis.eu/profile/E-ARK-SIP.xml.</assert>
+        <report test="@LABEL">SIP1;INFO;Optional LABEL attribute used as short text package name.</report>
+        <assert test="@PROFILE = 'https://earksip.dilcis.eu/profile/E-ARK-SIP.xml' ">SIP2;ERROR;The PROFILE attribute MUST contain the URL of the METS profile, for a SIP: https://earksip.dilcis.eu/profile/E-ARK-SIP.xml.</assert>
       </rule>
   </pattern>
 </schema>
