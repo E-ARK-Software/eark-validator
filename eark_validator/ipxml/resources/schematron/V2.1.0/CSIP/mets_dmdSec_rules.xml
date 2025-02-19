@@ -5,22 +5,22 @@
   <pattern id="METS_descriptive_metadata_element">
     <title>Use of the METS descriptive metadata section.</title>
     <rule context="/mets:mets/mets:dmdSec">
-      <assert id="CSIP18" role="ERROR" test="@ID">Mandatory, identifier must be unique within the package.</assert>
-      <assert id="CSIP19" role="ERROR" test="@CREATED">Mandatory, creation date and time of the descriptive metadata in this section.</assert>
-      <assert id="CSIP20_1" role="WARN" test="@STATUS">SHOULD be used to indicated the status of the package.</assert>
-      <assert id="CSIP20_2" role="ERROR" test="not(@STATUS) or (@STATUS_vocabulary_test)">SHOULD be used to indicated the status of the package.</assert>
-      <assert id="CSIP21" role="WARN" test="mets:mdRef">SHOULD provide a reference to the descriptive metadata file located in the “metadata” section of the IP..</assert>
+      <assert test="@ID">CSIP18;ERROR;Mandatory, identifier must be unique within the package.</assert>
+      <assert test="@CREATED">CSIP19;ERROR;Mandatory, creation date and time of the descriptive metadata in this section.</assert>
+      <assert test="@STATUS">CSIP20_1;WARN;SHOULD be used to indicated the status of the package.</assert>
+      <assert test="not(@STATUS) or (@STATUS_vocabulary_test)">CSIP20_2;ERROR;SHOULD be used to indicated the status of the package.</assert>
+      <assert test="mets:mdRef">CSIP21;WARN;SHOULD provide a reference to the descriptive metadata file located in the “metadata” section of the IP..</assert>
     </rule>
     <rule context="/mets:mets/mets:dmdSec/mets:mdRef">
-      <assert id="CSIP22" role="ERROR" test="@LOCTYPE = 'URL'">The locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
-      <assert id="CSIP23" role="ERROR" test="@xlink:type = 'simple'">Attribute used with the value “simple”. Value list is maintained by the xlink standard.</assert>
-      <assert id="CSIP24" role="ERROR" test="@xlink:href">The actual location of the resource. This specification recommends recording a URL type filepath in this attribute.</assert>
-      <assert id="CSIP25" role="ERROR" test="@MDTYPE">Specifies the type of metadata in the referenced file. Values are taken from the list provided by the METS.</assert>
-      <assert id="CSIP26" role="ERROR" test="@MIMETYPE">MUST hold the IANA mime type of the referenced file.</assert>
-      <assert id="CSIP27" role="ERROR" test="@SIZE">MUST hold the size of the referenced file in bytes.</assert>
-      <assert id="CSIP28" role="ERROR" test="@CREATED">MUST hold the creation date and time of the referenced file.</assert>
-      <assert id="CSIP29" role="ERROR" test="@CHECKSUM">MUST hold the checksum of the referenced file.</assert>
-      <assert id="CSIP30" role="ERROR" test="@CHECKSUMTYPE">MUST hold a value from the METS-standard which identifies the algorithm used to calculate the checksum for the referenced file.</assert>
+      <assert test="@LOCTYPE = 'URL'">CSIP22;ERROR;The locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
+      <assert test="@xlink:type = 'simple'">CSIP23;ERROR;Attribute used with the value “simple”. Value list is maintained by the xlink standard.</assert>
+      <assert test="@xlink:href">CSIP24;ERROR;The actual location of the resource. This specification recommends recording a URL type filepath in this attribute.</assert>
+      <assert test="@MDTYPE">CSIP25;ERROR;Specifies the type of metadata in the referenced file. Values are taken from the list provided by the METS.</assert>
+      <assert test="@MIMETYPE">CSIP26;ERROR;MUST hold the IANA mime type of the referenced file.</assert>
+      <assert test="@SIZE">CSIP27;ERROR;MUST hold the size of the referenced file in bytes.</assert>
+      <assert test="@CREATED">CSIP28;ERROR;MUST hold the creation date and time of the referenced file.</assert>
+      <assert test="@CHECKSUM">CSIP29;ERROR;MUST hold the checksum of the referenced file.</assert>
+      <assert test="@CHECKSUMTYPE">CSIP30;ERROR;MUST hold a value from the METS-standard which identifies the algorithm used to calculate the checksum for the referenced file.</assert>
     </rule>
   </pattern>
 </schema>
