@@ -239,6 +239,9 @@ def _path_from_xml_element(element: etree.Element) -> Optional[str]:
     if element.tag in [ Namespaces.METS.qualify('file'), 'file' ]:
         tag: str = Namespaces.METS.qualify('FLocat') if hasattr(element, 'nsmap') else 'FLocat'
         loc_ele = element.find(tag)
+        if loc_ele is None:
+            return None
+
     if element.tag in [
         Namespaces.METS.qualify('file'),
         'file', Namespaces.METS.qualify('mdRef'),
