@@ -79,10 +79,10 @@
 
       </fileGrp>
   </fileSec>
-  <structMap TYPE="PHYSICAL" LABEL="CSIP StructMap" ID="ID-StructmapID">
+  <structMap TYPE="PHYSICAL" LABEL="CSIP" ID="ID-StructmapID">
     <!-- CSIP80 mets/structMap  -->
     <!-- CSIP81 mets/structMap/@TYPE The type attribute of the structural map (structMap) is set to value “PHYSICAL” from the vocabualry -->
-    <!-- CSIP82 mets/structMap/@LABEL The value must be “CSIP StructMap” -->
+    <!-- CSIP82 mets/structMap/@LABEL The value must be “CSIP” -->
     <!-- CSIP83 mets/structMap/@ID -->
     <div ID="ID-Structmap_Div_ID" LABEL="ID-Minimal_IP_with_schemas">
       <!-- CSIP84 mets/structMap/div -->
