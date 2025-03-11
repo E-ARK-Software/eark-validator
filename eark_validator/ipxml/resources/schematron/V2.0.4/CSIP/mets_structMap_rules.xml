@@ -15,8 +15,8 @@
     </rule>
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div">
       <assert test="@ID">CSIP85;ERROR;An xml:id identifier must be unique within the package.</assert>
-      <assert test="mets:div[@LABEL = 'Metadata']">CSIP88;ERROR;The metadata referenced in the administrative and/or descriptive metadata section is described in the structural map with one sub division.</assert>
-      <assert test="mets:div[@LABEL = 'Metadata']">CSIP90;ERROR;The metadata division div element's @LABEL attribute value must be "Metadata".</assert>
+      <assert test="count(mets:div[@LABEL = 'Metadata']) = 1">CSIP88;ERROR;The metadata referenced in the administrative and/or descriptive metadata section is described in the structural map with one sub division.</assert>
+      <assert test="count(mets:div[@LABEL = 'Metadata']) = 1">CSIP90;ERROR;The metadata division div element's @LABEL attribute value must be "Metadata".</assert>
       <assert test="mets:div[@LABEL = 'Documentation']">CSIP93;WARN;The documentation referenced in the file section file groups is described in the structural map with one sub division.</assert>
       <assert test="mets:div[@LABEL = 'Documentation']">CSIP95;ERROR;The documentation division div element in the package uses the value "Documentation" from the vocabulary as the value for the @LABEL attribute.</assert>
       <assert test="mets:div[@LABEL = 'Schemas']">CSIP97;WARN;The schemas referenced in the file section file groups are described in the structural map within a single sub-division.</assert>
