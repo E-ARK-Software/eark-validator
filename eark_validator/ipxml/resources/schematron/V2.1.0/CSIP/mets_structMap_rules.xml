@@ -1,4 +1,4 @@
-<schema xmlns="http://purl.oclc.org/dsdl/schematron">
+<schema xmlns="http://purl.oclc.org/dsdl/schematron" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" queryBinding="xslt2">
   <ns prefix="mets" uri="http://www.loc.gov/METS/" />
   <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
@@ -26,8 +26,8 @@
     </rule>
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Metadata']">
       <assert test="@ID">CSIP89;ERROR;An xml:id identifier must be unique within the package.</assert>
-      <assert test="@ADMID">CSIP91;WARN;The admimistrative metadata division should reference all current administrative metadata sections.</assert>
-      <assert test="@DMDID">CSIP92;WARN;The descriptive metadata division should reference all current descriptive metadata sections.</assert>
+      <assert test="every $admid_part in tokenize(@ADMID, '\s+') satisfies some $id in /mets:mets/mets:amdSec/*[@STATUS = 'CURRENT']/@ID satisfies $admid_part = $id">CSIP91;ERROR;The admimistrative metadata division should reference all current administrative metadata sections.</assert>
+      <assert test="every $dmdid_part in tokenize(@DMDID, '\s+') satisfies some $id in /mets:mets/mets:dmdSec/*[@STATUS = 'CURRENT']/@ID satisfies $dmdid_part = $id">CSIP92;ERROR;The descriptive metadata division should reference all current descriptive metadata sections.</assert>
     </rule>
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Documentation']">
       <assert test="@ID">CSIP94;ERROR;An xml:id identifier must be unique within the package.</assert>
