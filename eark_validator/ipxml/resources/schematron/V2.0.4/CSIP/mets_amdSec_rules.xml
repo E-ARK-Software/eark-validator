@@ -8,6 +8,9 @@
       <assert test="mets:digiprovMD">CSIP32;WARN;Sould be used to record information about preservation the standard PREMIS is used.</assert>
       <report test="mets:rightsMD">CSIP45;INFO;A simple rights statement may be used to describe general permissions for the package. Individual representations should state their specific rights in their representation METS file.</report>
     </rule>
+    <rule context="/mets:mets/mets:amdSec/*[@STATUS = 'CURRENT']">
+      <assert test="contains(/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Metadata']/@ADMID, @ID)">CSIP91;ERROR;When there is administrative metadata and the amdSec is present, all administrative metadata MUST be referenced via the administrative sections different identifiers.</assert>
+    </rule>
     <rule context="/mets:mets/mets:amdSec/mets:digiprovMD">
       <assert test="@ID">CSIP33;ERROR;Mandatory, unique id for the digital provenance.</assert>
       <assert test="@STATUS">CSIP34_1;WARN;SHOULD be used to indicated the status of the package.</assert>

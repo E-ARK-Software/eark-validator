@@ -28,8 +28,8 @@
     </rule>
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Metadata']">
       <assert test="@ID">CSIP89;ERROR;An xml:id identifier must be unique within the package.</assert>
-      <assert test="@ADMID">CSIP91;WARN;When there is administrative metadata and the amdSec is present, all administrative metadata MUST be referenced via the administrative sections different identifiers.</assert>
-      <assert test="@DMDID">CSIP92;WARN;When there are descriptive metadata and one or more dmdSec is present, all descriptive metadata MUST be referenced via the descriptive section identifiers.</assert>
+      <assert test="every $admid_part in tokenize(@ADMID, '\s+') satisfies some $id in /mets:mets/mets:amdSec/*[@STATUS = 'CURRENT']/@ID satisfies $admid_part = $id">CSIP91;ERROR;When there is administrative metadata and the amdSec is present, all administrative metadata MUST be referenced via the administrative sections different identifiers.</assert>
+      <assert test="every $dmdid_part in tokenize(@DMDID, '\s+') satisfies some $id in /mets:mets/mets:dmdSec/*[@STATUS = 'CURRENT']/@ID satisfies $dmdid_part = $id">CSIP92;ERROR;When there are descriptive metadata and one or more dmdSec is present, all descriptive metadata MUST be referenced via the descriptive section identifiers.</assert>
     </rule>
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Documentation']">
       <assert test="@ID">CSIP94;ERROR;An xml:id identifier must be unique within the package.</assert>
