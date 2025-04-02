@@ -17,7 +17,7 @@
         <assert test="mets:amdSec">CSIP31;WARN;If administrative / preservation metadata is available, it must be described using the administrative metadata section (amdSec) element. All administrative metadata is present in a single amdSec element.</assert>
         <assert test="mets:fileSec">CSIP58;WARN;The transferred content is placed in the file section in different file group elements, described in other requirements.</assert>
         <assert test="(@csip:CONTENTINFORMATIONTYPE='MIXED' and count(/mets:mets/mets:fileSec/mets:fileGrp/@csip:CONTENTINFORMATIONTYPE) > 0) or not(@csip:CONTENTINFORMATIONTYPE='MIXED')">CSIP62;WARN;When the element "Content Information Type Specification" (CSIP4) has the value "MIXED", then `mets/fileSec/fileGrp` with `CONTENTINFORMATIONTYPE` should exist.</assert>
-        <assert test="mets:structMap">CSIP80;ERROR;Each METS file must include ONE structural map structMap element used exactly as described here.</assert>
+        <assert test="count(mets:structMap[@LABEL = 'CSIP']) = 1">CSIP80;ERROR;Each METS file must include ONE structural map structMap element used exactly as described here.</assert>
         <assert test="mets:metsHdr">CSIP117;ERROR;There MUST be a general element that describes the package.</assert>
       </rule>
   </pattern>
