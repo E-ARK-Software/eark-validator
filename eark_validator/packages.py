@@ -102,7 +102,7 @@ class PackageValidator():
                 'metadata': metadata
                 })
         
-        csip_profile = SC.ValidationProfile(SpecificationType.CSIP, version, to_validate)
+        csip_profile = SC.ValidationProfile(SpecificationType.CSIP, version)
         csip_profile.validate(to_validate.joinpath(METS))
         results = csip_profile.get_all_results()
 
