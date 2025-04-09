@@ -134,7 +134,7 @@ class MetadataResults(BaseModel):
 
 class MetatdataResultSet(BaseModel):
     schema_results: Optional[MetadataResults] = None
-    schematron_results: Optional[MetadataResults] = None 
+    schematron_results: Optional[MetadataResults] = None
 
 class ValidationReport(BaseModel):
     uid: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
