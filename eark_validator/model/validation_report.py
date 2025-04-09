@@ -133,10 +133,8 @@ class MetadataResults(BaseModel):
         return data
 
 class MetatdataResultSet(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-    schema_results: MetadataResults = Field(validation_alias='schemaResults')
-    model_config = ConfigDict(populate_by_name=True)
-    schematron_results: MetadataResults = Field(validation_alias='schematronResults')
+    schema_results: Optional[MetadataResults] = None
+    schematron_results: Optional[MetadataResults] = None 
 
 class ValidationReport(BaseModel):
     uid: Annotated[str, Field(default_factory=lambda: uuid4().hex)]

@@ -166,7 +166,7 @@ class MetsValidator():
             self._validation_errors.append(
                 Result.model_validate({
                     'rule_id': 'XML-1',
-                    'location': synt_err.filename + str(synt_err.lineno) + str(synt_err.offset),
+                    'location': str(synt_err.filename) + str(synt_err.lineno) + str(synt_err.offset),
                     'message': f'File {mets} is not valid XML. {synt_err.msg}',
                     'severity': 'Error'
                     })
