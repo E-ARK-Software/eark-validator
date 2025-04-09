@@ -89,6 +89,20 @@ class StructureParser():
         """Returns True if the package/representation has a metadata folder."""
         return DIR_NAMES['META'] in self.folders
 
+    def has_other(self) -> bool:
+        """Returns True if the package/representation has extra folders
+        after metadata, representations, schemas and documentation."""
+        folder_count = len(self.folders)
+        if self.has_metadata():
+            folder_count-=1
+        if self.has_representations_folder():
+            folder_count-=1
+        if self.has_schemas():
+            folder_count-=1
+        if self.has_documentation():
+            folder_count-=1
+        return folder_count > 0
+
     def has_other_md(self) -> bool:
         """Returns True if the package/representation has extra metadata folders
         after preservation and descriptive."""
@@ -162,12 +176,16 @@ class StructureChecker():
         results.extend(self._get_metadata_results(location=location))
         if not self.parser.has_representations_folder():
             results.append(test_result_from_id(9, location))
-        elif len(self.representations) < 1:
+        elif len(self.representations) == 0 or not all(parser.is_parsable for _, parser in self.representations.items()):
             results.append(test_result_from_id(10, location))
         return results
 
     def get_package_results(self) -> List[Result]:
         results: List[Result] = []
+        if not self.parser.has_other():
+            result = self._get_other_results()
+            if result:
+                results.append(result)
         if not self.parser.has_schemas():
             result = self._get_schema_results()
             if result:
@@ -190,6 +208,12 @@ class StructureChecker():
             if not self.parser.has_other_md():
                 results.append(test_result_from_id(8, location))
         return results
+
+    def _get_other_results(self) -> Optional[Result]:
+        for tests in self.representations.values():
+            if tests.has_other():
+                return None
+        return test_result_from_id(14, _root_loc(self.name))
 
     def _get_schema_results(self) -> Optional[Result]:
         for tests in self.representations.values():
