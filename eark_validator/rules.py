@@ -37,7 +37,7 @@ from pathlib import Path
 
 class ValidationProfile():
     """ A complete set of Schematron rule sets that comprise a complete validation profile."""
-    def __init__(self, type: SpecificationType, version: SpecificationVersion, to_validate: Path):
+    def __init__(self, type: SpecificationType, version: SpecificationVersion, to_validate: Path = None):
         specification: Specification = EarkSpecification(type, version).specification
 
         self._rulesets: Dict[str, SchematronRuleset] = {}
