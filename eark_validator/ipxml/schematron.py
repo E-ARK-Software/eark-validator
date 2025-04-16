@@ -55,7 +55,7 @@ class SchematronTests():
         for attribute, vocabulary_uri in self.__vocabulary_definitions.items():
             self.tests[attribute + '_vocabulary_test'] = self._create_vocabulary_test(attribute, vocabulary_uri)
 
-        self.tests["@OBJID_test"] = self._create_OBJID_test(to_validate)
+        self.tests['@OBJID_test'] = self._create_OBJID_test(to_validate)
 
     def _create_vocabulary_test(self, attribute: str, vocabulary_uri: str) -> str:
         vocabulary_tests = []
@@ -71,7 +71,7 @@ class SchematronTests():
             vocabulary_tests.append(f"({attribute} = '{vocabulary_item}')")
 
         return ' or '.join(vocabulary_tests)
-    
+
     def _create_OBJID_test(self, to_validate: Optional[Path]):
         if to_validate:
             return f"(@OBJID = '{to_validate.stem}')"
