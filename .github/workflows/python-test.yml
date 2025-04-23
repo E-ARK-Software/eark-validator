@@ -33,7 +33,6 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install ".[testing]"
     - name: Install python package
       run: |
         pip install --editable ".[testing]"
@@ -49,3 +48,9 @@ jobs:
       run: |
         python -m pip install setuptools_git_versioning
         python -m setuptools_git_versioning
+    - name: Install and run the EARK IP test corpus tests
+      run: |
+        git clone https://github.com/DILCISBoard/eark-ip-test-corpus.git
+        cd eark-ip-test-corpus/tests
+        pip install -r requirements.txt
+        pytest
