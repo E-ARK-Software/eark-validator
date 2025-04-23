@@ -240,9 +240,9 @@ class StructValidationTests(unittest.TestCase):
         _, details = STRUCT.validate(ip_path)
         self.assertEqual(details.status, STRUCT.StructureStatus.WELLFORMED,
                         EXP_WELLFORMED.format(details.status))
-        err_count = 1
-        self.assertEqual(len(details.messages), err_count,
-                        EXP_ERRORS.format(err_count, len(details.warnings)))
+        warn_count = 1
+        self.assertEqual(len(details.warnings), warn_count,
+                        EXP_ERRORS.format(warn_count, len(details.warnings)))
         self.assertTrue(contains_rule_id(details.warnings, 'CSIPSTR10',
                                          severity=Severity.WARNING))
 
@@ -254,7 +254,7 @@ class StructValidationTests(unittest.TestCase):
         self.assertEqual(details.status, STRUCT.StructureStatus.WELLFORMED,
                         EXP_WELLFORMED.format(details.status))
         warn_count = 1
-        self.assertEqual(len(details.messages), warn_count,
+        self.assertEqual(len(details.warnings), warn_count,
                         EXP_ERRORS.format(warn_count, len(details.warnings)))
         self.assertTrue(contains_rule_id(details.warnings, 'CSIPSTR11',
                                          severity=Severity.WARNING))
