@@ -102,13 +102,13 @@ class PackageValidator():
                 'metadata': metadata
                 })
 
-        csip_profile = SC.ValidationProfile(SpecificationType.CSIP, version)
+        csip_profile = SC.ValidationProfile(SpecificationType.CSIP, version, to_validate)
         csip_profile.validate(to_validate.joinpath(METS))
         results = csip_profile.get_all_results()
 
         package: InformationPackage = InformationPackages.from_path(to_validate)
         if package.details.oaispackagetype in ['SIP', 'DIP']:
-            profile = SC.ValidationProfile(SpecificationType.from_string(package.details.oaispackagetype), version)
+            profile = SC.ValidationProfile(SpecificationType.from_string(package.details.oaispackagetype), version, to_validate)
             profile.validate(to_validate.joinpath(METS))
             results.extend(profile.get_all_results())
 
