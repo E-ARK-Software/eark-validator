@@ -93,15 +93,22 @@ class PackageValidator():
         if not is_struct_valid:
             return ValidationReport.model_validate({'structure': struct_results})
         validator = MetsValidator(str(to_validate))
-        validator.validate_mets(METS)
+        is_mets_valid = validator.validate_mets(METS)
+        if not is_mets_valid:
+            metadata: MetatdataResultSet = MetatdataResultSet.model_validate({
+                'schema_results': MetadataResults.model_validate({ 'status': _validity_from_messages(validator.validation_errors), 'messages': validator.validation_errors })})
+            return ValidationReport.model_validate({
+                'structure': struct_results,
+                'metadata': metadata
+                })
 
-        csip_profile = SC.ValidationProfile(SpecificationType.CSIP, version)
+        csip_profile = SC.ValidationProfile(SpecificationType.CSIP, version, to_validate)
         csip_profile.validate(to_validate.joinpath(METS))
         results = csip_profile.get_all_results()
 
         package: InformationPackage = InformationPackages.from_path(to_validate)
         if package.details.oaispackagetype in ['SIP', 'DIP']:
-            profile = SC.ValidationProfile(SpecificationType.from_string(package.details.oaispackagetype), version)
+            profile = SC.ValidationProfile(SpecificationType.from_string(package.details.oaispackagetype), version, to_validate)
             profile.validate(to_validate.joinpath(METS))
             results.extend(profile.get_all_results())
 

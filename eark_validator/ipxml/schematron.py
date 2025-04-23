@@ -51,11 +51,13 @@ class SchematronTests():
 
     tests = {}
 
-    def __init__(self):
+    def __init__(self, to_validate: Optional[Path]):
         for attribute, vocabulary_uri in self.__vocabulary_definitions.items():
-            self.tests[attribute + '_vocabulary_test'] = self.__create_vocabulary_test(attribute, vocabulary_uri)
+            self.tests[attribute + '_vocabulary_test'] = self._create_vocabulary_test(attribute, vocabulary_uri)
 
-    def __create_vocabulary_test(self, attribute: str, vocabulary_uri: str) -> str:
+        self.tests['@OBJID_test'] = self._create_OBJID_test(to_validate)
+
+    def _create_vocabulary_test(self, attribute: str, vocabulary_uri: str) -> str:
         vocabulary_tests = []
         for line_bytes in urlopen(vocabulary_uri):
             line = line_bytes.decode('utf-8')
@@ -70,17 +72,21 @@ class SchematronTests():
 
         return ' or '.join(vocabulary_tests)
 
-schematron_tests = SchematronTests()
+    def _create_OBJID_test(self, to_validate: Optional[Path]):
+        if to_validate:
+            return f"(@OBJID = '{to_validate.stem}')"
+        return "(@OBJID != '')"
 
 class SchematronRuleset():
     """Encapsulates a set of Schematron rules loaded from a file."""
-    def __init__(self, sch_path: str=None):
+    def __init__(self, sch_path: str=None, to_validate: Path=None):
         if not os.path.exists(sch_path):
             raise FileNotFoundError(NO_PATH.format(sch_path))
         if not os.path.isfile(sch_path):
             raise ValueError(NOT_FILE.format(sch_path))
         self._path = sch_path
 
+        schematron_tests = SchematronTests(to_validate)
         try:
             with open(sch_path) as schematron_file:
                 schematron_data = schematron_file.read()

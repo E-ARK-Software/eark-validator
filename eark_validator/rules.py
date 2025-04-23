@@ -33,10 +33,11 @@ from eark_validator.model.validation_report import Result
 from eark_validator.specifications.specification import EarkSpecification, Specification, SpecificationType, SpecificationVersion
 from eark_validator.const import NO_PATH, NOT_FILE
 from eark_validator.model import Severity
+from pathlib import Path
 
 class ValidationProfile():
     """ A complete set of Schematron rule sets that comprise a complete validation profile."""
-    def __init__(self, type: SpecificationType, version: SpecificationVersion):
+    def __init__(self, type: SpecificationType, version: SpecificationVersion, to_validate: Path = None):
         specification: Specification = EarkSpecification(type, version).specification
 
         self._rulesets: Dict[str, SchematronRuleset] = {}
@@ -46,7 +47,7 @@ class ValidationProfile():
         self.results: Dict[str, List[Result]] = {}
         self.messages: List[str] = []
         for section in specification.sections:
-            self.rulesets[section] = SchematronRuleset(get_schematron_path(version, specification.id, section))
+            self.rulesets[section] = SchematronRuleset(get_schematron_path(version, specification.id, section), to_validate)
 
     @property
     def specification(self) -> Specification:
