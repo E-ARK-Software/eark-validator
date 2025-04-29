@@ -63,7 +63,7 @@ class PackageValidator():
             self._report = _report_from_bad_path(package_path)
             return
 
-        self._report = self.validate(self._version, self._to_proc)
+        self._report = self.validate(self._version, self._to_proc, PackageHandler.is_archive(package_path))
 
     @property
     def original_path(self) -> Path:
@@ -86,10 +86,10 @@ class PackageValidator():
         return self._version
 
     @classmethod
-    def validate(cls, version: SpecificationVersion, to_validate: Path) -> ValidationReport:
+    def validate(cls, version: SpecificationVersion, to_validate: Path, is_archive: bool=False) -> ValidationReport:
         """Returns the validation report that results from validating the path
         to_validate as a folder. The method does not validate archive files."""
-        is_struct_valid, struct_results = structure.validate(to_validate)
+        is_struct_valid, struct_results = structure.validate(to_validate, is_archive)
         if not is_struct_valid:
             return ValidationReport.model_validate({'structure': struct_results})
         validator = MetsValidator(str(to_validate))
