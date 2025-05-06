@@ -2,8 +2,7 @@
   <ns prefix="mets" uri="http://www.loc.gov/METS/" />
   <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
-  <pattern id="METS_descriptive_metadata_element">
-    <title>Use of the METS descriptive metadata section.</title>
+  <pattern id="METS_descriptive_metadata_element_1">
     <rule context="/mets:mets/mets:dmdSec">
       <assert test="@ID">CSIP18;ERROR;Mandatory, identifier must be unique within the package.</assert>
       <assert test="@CREATED">CSIP19;ERROR;Mandatory, creation date and time of the descriptive metadata in this section.</assert>
@@ -11,9 +10,13 @@
       <assert test="not(@STATUS) or (@STATUS_vocabulary_test)">CSIP20_2;ERROR;SHOULD be used to indicated the status of the package.</assert>
       <assert test="mets:mdRef">CSIP21;WARN;SHOULD provide a reference to the descriptive metadata file located in the “metadata” section of the IP..</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_descriptive_metadata_element_2">
     <rule context="/mets:mets/mets:dmdSec/*[@STATUS = 'CURRENT']">
       <assert test="contains(/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Metadata']/@DMDID, @ID)">CSIP92;ERROR;The descriptive metadata division should reference all current descriptive metadata sections.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_descriptive_metadata_element_3">
     <rule context="/mets:mets/mets:dmdSec/mets:mdRef">
       <assert test="@LOCTYPE = 'URL'">CSIP22;ERROR;The locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
       <assert test="@xlink:type = 'simple'">CSIP23;ERROR;Attribute used with the value “simple”. Value list is maintained by the xlink standard.</assert>
