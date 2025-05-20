@@ -46,7 +46,8 @@ class SchematronTests():
         '@csip:CONTENTINFORMATIONTYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyContentInformationType.xml',
         '@csip:OAISPACKAGETYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyOAISPackageType.xml',
         '@STATUS': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyStatus.xml',
-        '@USE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyFileGrpAndStructMapDivisionLabel.xml'
+        '@USE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyFileGrpAndStructMapDivisionLabel.xml',
+        '@RECORDSTATUS': 'https://earksip.dilcis.eu/schema/SIPVocabularyRecordStatus.xml'
     }
 
     tests = {}
