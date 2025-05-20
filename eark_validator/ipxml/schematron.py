@@ -41,22 +41,26 @@ SCHEMATRON_NS = '{http://purl.oclc.org/dsdl/schematron}'
 SVRL_NS = '{http://purl.oclc.org/dsdl/svrl}'
 
 class SchematronTests():
+    __recordstatus_values: list[str] = ['NEW', 'SUPPLEMENT', 'REPLACEMENT', 'TEST', 'VERSION', 'DELETE', 'OTHER']
+
     __vocabulary_definitions = {
         '@TYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyContentCategory.xml',
         '@csip:CONTENTINFORMATIONTYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyContentInformationType.xml',
         '@csip:OAISPACKAGETYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyOAISPackageType.xml',
         '@STATUS': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyStatus.xml',
-        '@USE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyFileGrpAndStructMapDivisionLabel.xml',
-        '@RECORDSTATUS': 'https://earksip.dilcis.eu/schema/SIPVocabularyRecordStatus.xml'
+        '@USE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyFileGrpAndStructMapDivisionLabel.xml'
     }
 
     tests = {}
 
-    def __init__(self):
+    def __init__(self, to_validate: Optional[Path]):
         for attribute, vocabulary_uri in self.__vocabulary_definitions.items():
-            self.tests[attribute + '_vocabulary_test'] = self.__create_vocabulary_test(attribute, vocabulary_uri)
+            self.tests[attribute + '_vocabulary_test'] = self._create_vocabulary_test(attribute, vocabulary_uri)
 
-    def __create_vocabulary_test(self, attribute: str, vocabulary_uri: str) -> str:
+        self.tests['@OBJID_test'] = self._create_OBJID_test(to_validate)
+        self.tests['@RECORDSTATUS_vocabulary_test'] = ' or '.join([f"(@RECORDSTATUS = '{v}')" for v in self.__recordstatus_values])
+
+    def _create_vocabulary_test(self, attribute: str, vocabulary_uri: str) -> str:
         vocabulary_tests = []
         for line_bytes in urlopen(vocabulary_uri):
             line = line_bytes.decode('utf-8')
@@ -71,17 +75,21 @@ class SchematronTests():
 
         return ' or '.join(vocabulary_tests)
 
-schematron_tests = SchematronTests()
+    def _create_OBJID_test(self, to_validate: Optional[Path]):
+        if to_validate:
+            return f"(@OBJID = '{to_validate.stem}')"
+        return "(@OBJID != '')"
 
 class SchematronRuleset():
     """Encapsulates a set of Schematron rules loaded from a file."""
-    def __init__(self, sch_path: str=None):
+    def __init__(self, sch_path: str=None, to_validate: Path=None):
         if not os.path.exists(sch_path):
             raise FileNotFoundError(NO_PATH.format(sch_path))
         if not os.path.isfile(sch_path):
             raise ValueError(NOT_FILE.format(sch_path))
         self._path = sch_path
 
+        schematron_tests = SchematronTests(to_validate)
         try:
             with open(sch_path) as schematron_file:
                 schematron_data = schematron_file.read()
