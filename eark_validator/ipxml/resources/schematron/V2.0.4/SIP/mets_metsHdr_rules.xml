@@ -1,8 +1,7 @@
-<schema xmlns="http://purl.oclc.org/dsdl/schematron">
+<schema xmlns="http://purl.oclc.org/dsdl/schematron" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" queryBinding="xslt2">
   <ns prefix="mets" uri="http://www.loc.gov/METS/" />
   <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
   <pattern id="METS_header_element_1">
-    <title>Use of the METS header</title>
     <rule context="/mets:mets/mets:metsHdr">
       <assert test="@RECORDSTATUS">SIP3;INFO;A way of indicating the status of the package and to instruct the OAIS on how to properly handle the package. If not set, the expected behaviour is equal to NEW.</assert>
       <assert test="not(@RECORDSTATUS) or @RECORDSTATUS_vocabulary_test">SIP3;ERROR;The RECORDSTATUS must have value from vocabulary.</assert>
@@ -45,7 +44,7 @@
       <assert test="@TYPE = 'ORGANIZATION' or @TYPE = 'INDIVIDUAL'">SIP11;ERROR;The agent element MUST have a role attribute.</assert>
       <assert test="mets:name">SIP12;ERROR;The agent element MUST have a name element.</assert>
       <assert test="mets:note">SIP13;INFO;The agent element MAY have a note element.</assert>
-      <assert test="mets:note/*@NOTETYPE = 'IDENTIFICATIONCODE'">SIP14;ERROR;The agent element MUST have a NOTETYPE attribute of value IDENTIFICATIONCODE.</assert>
+      <assert test="every $note in mets:note satisfies $note/@NOTETYPE = 'IDENTIFICATIONCODE'">SIP14;ERROR;The agent element MUST have a NOTETYPE attribute of value IDENTIFICATIONCODE.</assert>
     </rule>
   </pattern>
   <pattern id="METS_header_element_7">
@@ -53,7 +52,7 @@
       <assert test="@TYPE = 'ORGANIZATION' or @TYPE = 'INDIVIDUAL'">SIP17;ERROR;The agent element MUST have a role attribute.</assert>
       <assert test="mets:name">SIP18;ERROR;The agent element MUST have a name element.</assert>
       <assert test="mets:note">SIP19;INFO;The agent element MAY have a note element.</assert>
-      <assert test="mets:note/*@NOTETYPE = 'IDENTIFICATIONCODE'">SIP20;ERROR;The agent element MUST have a NOTETYPE attribute of value IDENTIFICATIONCODE.</assert>
+      <assert test="every $note in mets:note satisfies $note/@NOTETYPE = 'IDENTIFICATIONCODE'">SIP20;ERROR;The agent element MUST have a NOTETYPE attribute of value IDENTIFICATIONCODE.</assert>
     </rule>
   </pattern>
   <pattern id="METS_header_element_8">
@@ -68,7 +67,7 @@
       <assert test="@TYPE = 'ORGANIZATION'">SIP28;ERROR;The agent element MUST have a role attribute.</assert>
       <assert test="mets:name">SIP29;ERROR;The agent element MUST have a name element.</assert>
       <assert test="mets:note">SIP30;INFO;The agent element MAY have a note element.</assert>
-      <assert test="mets:note/*@NOTETYPE = 'IDENTIFICATIONCODE'">SIP31;ERROR;The agent element MUST have a NOTETYPE attribute of value IDENTIFICATIONCODE.</assert>
+      <assert test="every $note in mets:note satisfies $note/@NOTETYPE = 'IDENTIFICATIONCODE'">SIP31;ERROR;The agent element MUST have a NOTETYPE attribute of value IDENTIFICATIONCODE.</assert>
     </rule>
   </pattern>
 </schema>
