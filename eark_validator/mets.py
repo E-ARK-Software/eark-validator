@@ -175,15 +175,15 @@ class MetsValidator():
 
     def _process_element(self, element: etree.Element) -> None:
         # Define what to do with specific tags.
-        if element.tag == Namespaces.METS.qualify('div') and \
-            element.attrib['LABEL'].lower().startswith('representations/'):
+        if element.tag == Namespaces.METS.qualify('div') and element.attrib.get('LABEL') and \
+            element.attrib.get('LABEL').lower().startswith('representations/'):
             self._process_rep_div(element)
             return
         if element.tag in [ Namespaces.METS.qualify('file'), Namespaces.METS.qualify('mdRef') ]:
             self._file_refs.append(_parse_file_entry(element))
 
     def _process_rep_div(self, element: etree.Element) -> None:
-        rep = element.attrib['LABEL'].rsplit('/', 1)[1]
+        rep = element.attrib.get('LABEL').rsplit('/', 1)[1]
         for child in element.getchildren():
             if child.tag == Namespaces.METS.qualify('mptr'):
                 self._reps_mets.update({
