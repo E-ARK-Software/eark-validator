@@ -235,16 +235,14 @@ def _validate_file_entry(file_entry: FileEntry, element: etree.Element, root: Pa
     return errors
 
 def _path_from_xml_element(element: etree.Element) -> Optional[str]:
-    loc_ele: etree.Element = element
-    if element.tag in [ Namespaces.METS.qualify('file'), 'file' ]:
+    if element.tag in [ Namespaces.METS.qualify('file'), 'file']:
         tag: str = Namespaces.METS.qualify('FLocat') if hasattr(element, 'nsmap') else 'FLocat'
-        loc_ele = element.find(tag)
-    if element.tag in [
-        Namespaces.METS.qualify('file'),
-        'file', Namespaces.METS.qualify('mdRef'),
-        'mdRef'
-        ]:
-        return  _get_path_attrib(loc_ele)
+        flocat: Optional[etree.Element] = element.find(tag)
+        if flocat is None:
+            return None
+        return _get_path_attrib(flocat)
+    if element.tag in [Namespaces.METS.qualify('mdRef'), 'mdRef']:
+        return _get_path_attrib(element)
     raise ValueError(f'Element {element.tag} is not a METS:file or METS:mdRef element.')
 
 def _get_path_attrib(element: etree.Element) -> Optional[str]:
