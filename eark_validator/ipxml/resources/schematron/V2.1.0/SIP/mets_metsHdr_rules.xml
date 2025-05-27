@@ -5,7 +5,7 @@
     <rule context="/mets:mets/mets:metsHdr">
       <assert test="@RECORDSTATUS">SIP3;INFO;A way of indicating the status of the package and to instruct the OAIS on how to properly handle the package. If not set, the expected behaviour is equal to NEW.</assert>
       <assert test="not(@RECORDSTATUS) or @RECORDSTATUS_vocabulary_test">SIP3;ERROR;The RECORDSTATUS must have value from vocabulary.</assert>
-      <assert test="@csip:OAISPACKAGETYPE">SIP4;ERROR;The metsHdr element MUST have a csip:OAISPACKAGETYPE attribute.</assert>
+      <assert test="@csip:OAISPACKAGETYPE = 'SIP'">SIP4;ERROR;The metsHdr element MUST have a csip:OAISPACKAGETYPE attribute.</assert>
       <assert test="count(mets:altRecordID[@TYPE = 'SUBMISSIONAGREEMENT']) &gt;= 1">SIP5;INFO;A reference to the Submission Agreement associated with the package.</assert>
       <assert test="count(mets:altRecordID[@TYPE = 'SUBMISSIONAGREEMENT']) &lt;= 1">SIP5;ERROR;The altRecordID with TYPE='SUBMISSIONAGREEMENT' may exist only once.</assert>
       <assert test="count(mets:altRecordID[@TYPE = 'PREVIOUSSUBMISSIONAGREEMENT']) &gt;= 1">SIP6;INFO;An optional reference to a previous submission agreement(s) which the information may have belonged to.</assert>
