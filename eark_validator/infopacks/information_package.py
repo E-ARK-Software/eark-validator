@@ -64,7 +64,9 @@ class InformationPackages:
                         label = element.get('LABEL', '')
                         othertype = element.get(QUAL_OTHERTYPE, '')
                         contentinformationtype = element.get(QUAL_CONTENTINFORMATIONTYPE, '')
-                        oaispackagetype = element.find(QUAL_METSHDR).get(QUAL_OAISPACKAGETYPE, '')
+
+                        mets_header = element.find(QUAL_METSHDR)
+                        oaispackagetype = '' if mets_header is None else mets_header.get(QUAL_OAISPACKAGETYPE, '')
                     else:
                         break
         except (etree.XMLSyntaxError, AttributeError) as ex:
