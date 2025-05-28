@@ -84,7 +84,7 @@ class PackageValidator():
     @property
     def version(self) -> SpecificationVersion:
         """Returns the specifiation version used for validation."""
-        return self._version 
+        return self._version
 
     @classmethod
     def validate(cls, version: SpecificationVersion, to_validate: Path, type: Optional[SpecificationType]) -> ValidationReport:
@@ -113,7 +113,7 @@ class PackageValidator():
             specific_profile = SC.ValidationProfile(type, version, to_validate)
         elif package.details.oaispackagetype in ['SIP', 'DIP']:
             specific_profile = SC.ValidationProfile(SpecificationType.from_string(package.details.oaispackagetype), version, to_validate)
-        
+
         if specific_profile:
             specific_profile.validate(to_validate.joinpath(METS))
             results.extend(specific_profile.get_all_results())
