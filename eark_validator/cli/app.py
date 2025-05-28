@@ -38,7 +38,7 @@ import argparse
 from eark_validator.model import ValidationReport
 import eark_validator.packages as PACKAGES
 from eark_validator.infopacks.package_handler import PackageHandler
-from eark_validator.specifications.specification import SpecificationVersion
+from eark_validator.specifications.specification import SpecificationVersion, SpecificationType
 
 __version__ = importlib.metadata.version('eark_validator')
 
@@ -95,6 +95,13 @@ def parse_command_line():
                         type=SpecificationVersion,
                         choices=list(SpecificationVersion),
                         help='Specification version used for validation. Default is %(default)s.')
+    PARSER.add_argument('-t', '--specification_type',
+                        nargs='?',
+                        dest='specification_type',
+                        default=None,
+                        type=lambda s: SpecificationType.from_string(s.upper()),
+                        choices=['CSIP', 'DIP', 'SIP'],
+                        help='Forces the validator to use specified specification type. By default, the specification type is deduced from the oaispackagetype attribute.')
     PARSER.add_argument('--version',
                         action='version',
                         version=__version__)
@@ -106,7 +113,6 @@ def parse_command_line():
 
     # Parse arguments
     args = PARSER.parse_args()
-
     return args
 
 def main():
@@ -124,15 +130,15 @@ def main():
 
     # Iterate the file arguments
     for file_arg in args.files:
-        _loop_exit, _ = _validate_ip(file_arg, args.specification_version)
+        _loop_exit, _ = _validate_ip(file_arg, args.specification_version, args.specification_type)
         _exit = _loop_exit if (_loop_exit > 0) else _exit
     sys.exit(_exit)
 
-def _validate_ip(path: str, version: SpecificationVersion) -> Tuple[int, Optional[ValidationReport]]:
+def _validate_ip(path: str, version: SpecificationVersion, type: Optional[SpecificationType]) -> Tuple[int, Optional[ValidationReport]]:
     ret_stat, checked_path = _check_path(path)
     if ret_stat > 0:
         return ret_stat, None
-    report = PACKAGES.PackageValidator(checked_path, version).validation_report
+    report = PACKAGES.PackageValidator(checked_path, version, type).validation_report
     print(f'Path {checked_path}, struct result is: {report.structure.status.value}')
     # for message in report.structure.messages:
     print(report.model_dump_json())
