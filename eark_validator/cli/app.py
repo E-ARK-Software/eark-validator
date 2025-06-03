@@ -138,7 +138,7 @@ def _validate_ip(path: str, version: SpecificationVersion, type: Optional[Specif
     ret_stat, checked_path = _check_path(path)
     if ret_stat > 0:
         return ret_stat, None
-    report = PACKAGES.PackageValidator(checked_path, version, type).validation_report
+    report = PACKAGES.PackageValidator(checked_path, type, version).validation_report
     print(f'Path {checked_path}, struct result is: {report.structure.status.value}')
     # for message in report.structure.messages:
     print(report.model_dump_json())
