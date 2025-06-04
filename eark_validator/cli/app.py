@@ -100,8 +100,7 @@ def parse_command_line():
                         dest='specification_type',
                         default=None,
                         type=lambda s: SpecificationType.from_string(s.upper()),
-                        choices=['CSIP', 'DIP', 'SIP'],
-                        help='Forces the validator to use specified specification type. By default, the specification type is deduced from the oaispackagetype attribute.')
+                        help='Forces the validator to use specified specification type. By default, the specification type is deduced from the oaispackagetype attribute. Choices: "DIP" or "SIP"')
     PARSER.add_argument('--version',
                         action='version',
                         version=__version__)
