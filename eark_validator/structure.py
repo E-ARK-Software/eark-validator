@@ -58,7 +58,7 @@ class StructureParser():
         self.md_folders: set[str]= set()
         self.folders: set[str] = set()
         self.files : set[str] = set()
-        
+
         self.folders, self.files = _folders_and_files(package_path)
         if DIR_NAMES['META'] in self.folders:
             self.md_folders, _ = _folders_and_files(
@@ -119,7 +119,7 @@ class StructureParser():
     def has_schemas(self) -> bool:
         """Returns True if the package/representation has a schemas folder."""
         return DIR_NAMES['SCHM'] in self.folders
-    
+
     def is_archive(self) -> bool:
         return self.was_package_compressed
 
@@ -129,7 +129,7 @@ class StructureChecker():
         if not package_path.is_dir():
             self._struct_results = get_bad_path_results(self.name)
             return
-        
+
         self.parser: StructureParser = StructureParser(package_path, was_package_compressed)
         self.representations: Dict[Path, StructureParser] = {}
         representations_folder = os.path.join(package_path, DIR_NAMES['REPS'])

@@ -133,7 +133,7 @@ class MetadataResults(BaseModel):
         if status and status == 'NOTVALID':
             data['status'] = 'INVALID'
         return data
-    
+
     def merge(self, other: Optional[MetadataResults]) -> MetadataResults:
         if other is None:
             return self
@@ -142,7 +142,7 @@ class MetadataResults(BaseModel):
             status = MetadataStatus.INVALID if self.status == MetadataStatus.INVALID or other.status == MetadataStatus.INVALID else MetadataStatus.VALID,
             messages = self.messages.extend(other.messages)
         )
-        
+
 class MetadataResultSet(BaseModel):
     schema_results: Optional[MetadataResults] = None
     schematron_results: Optional[MetadataResults] = None
@@ -162,4 +162,3 @@ class ValidationReport(BaseModel):
     @property
     def is_valid(self) -> bool:
         return self.structure.status == StructureStatus.WELLFORMED and self.metadata.schema_results.status == MetadataStatus.VALID and self.metadata.schematron_results.status == MetadataStatus.VALID
-    

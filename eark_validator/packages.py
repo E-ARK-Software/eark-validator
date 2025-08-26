@@ -98,7 +98,7 @@ class PackageValidator():
         structure_checker = structure.StructureChecker(path_to_package, self.compressed)
         if structure_checker.results.status != structure.StructureStatus.WELLFORMED:
             return ValidationReport.model_validate({'structure': structure_checker.results})
-        
+
         #metadata
         root_mets_path: Path = path_to_package.joinpath(METS)
         package_details: PackageDetails = InformationPackages.details_from_mets_file(root_mets_path)
@@ -110,12 +110,12 @@ class PackageValidator():
                 type = SpecificationType.from_string(package_details.oaispackagetype)
 
         metadata_results: MetadataResultSet = self.__validate_mets(path_to_package, version, type)
-        
+
         for representation in structure_checker.representations.keys():
             if representation.joinpath(METS).is_file():
                 representation_metadata_results: MetadataResultSet = self.__validate_mets(representation, version, type)
                 metadata_results = metadata_results.merge(representation_metadata_results)
-        
+
         #package
         package_mets: MetsFile = MetsFiles.from_file(root_mets_path)
         package_representations: List[Representation] = []
@@ -131,7 +131,7 @@ class PackageValidator():
                 }))
 
         package_mets.file_entries.extend(self.__find_undefined_files(MetsFiles.file_paths_defined_in_mets_files, path_to_package))
-        
+
         package: InformationPackage = InformationPackage.model_validate({
             'mets': package_mets,
             'details': package_details,
@@ -143,7 +143,7 @@ class PackageValidator():
             'metadata': metadata_results,
             'package': package,
             })
-        
+
     def __validate_mets(self, path_to_package: Path, version: SpecificationVersion, type: Optional[SpecificationType]) -> MetadataResultSet:
         mets_path: Path = path_to_package.joinpath(METS)
         validator = MetsValidator(mets_path)
@@ -151,11 +151,11 @@ class PackageValidator():
         if not is_mets_valid:
             return MetadataResultSet.model_validate({
                 'schema_results': MetadataResults.model_validate(
-                    { 
-                        'status': _validity_from_messages(validator.validation_errors), 
-                        'messages': validator.validation_errors 
+                    {
+                        'status': _validity_from_messages(validator.validation_errors),
+                        'messages': validator.validation_errors
                     })})
-        
+
         csip_profile = SC.ValidationProfile(SpecificationType.CSIP, version, path_to_package)
         csip_profile.validate(mets_path)
         results = csip_profile.get_all_results()
@@ -169,10 +169,10 @@ class PackageValidator():
             'schema_results': MetadataResults.model_validate({ 'status': _validity_from_messages(validator.validation_errors), 'messages': validator.validation_errors }),
             'schematron_results': MetadataResults.model_validate({ 'status': _validity_from_messages(results), 'messages': results })
             })
-    
+
     def __find_undefined_files(self, defined_files_in_mets_files: set[Path], package_path: Path) -> List[FileEntry]:
         package_path = package_path.resolve()
-        all_files_in_package: set[Path] = {f.resolve() for f in Path(package_path).rglob("*") if f.is_file()}
+        all_files_in_package: set[Path] = {f.resolve() for f in Path(package_path).rglob('*') if f.is_file()}
         defined_files = {p.resolve() for p in defined_files_in_mets_files}
 
         undefined_files = all_files_in_package.difference(defined_files)
@@ -184,7 +184,7 @@ class PackageValidator():
                     'checksum': None,
                     'mimetype': None
                 }) for p in undefined_files]
-        
+
 def _validity_from_messages(messages: list[Result]) -> MetadataStatus:
     return MetadataStatus.VALID if len([ res for res in messages if res.severity == Severity.ERROR]) == 0 else MetadataStatus.INVALID
 

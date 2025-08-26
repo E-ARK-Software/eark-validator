@@ -131,11 +131,11 @@ class MetsValidator():
     def validate_against_schema(self) -> bool:
         #get correct schema
         schema_path: str = IP_SCHEMA.get('csip')
-   
+
         with open(schema_path, 'rb') as schema_file:
             schema_doc = etree.parse(schema_file)
             schema = etree.XMLSchema(schema_doc)
-   
+
         with open(self._mets_path, 'rb') as xml_file:
             xml_doc = etree.parse(xml_file)
 
