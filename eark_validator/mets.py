@@ -39,6 +39,7 @@ from eark_validator.model.mimetype import media_types
 from eark_validator.infopacks.checksummer import Checksummer
 from eark_validator.utils import get_path
 from eark_validator.const import NOT_FILE, NOT_VALID_FILE
+from eark_validator.specifications.specification import SpecificationVersion
 
 NAMESPACES : str = 'namespaces'
 OBJID: str = 'objid'
@@ -51,6 +52,8 @@ START_ELE: str = 'start'
 START_NS: str = 'start-ns'
 
 class MetsFiles():
+    file_paths_defined_in_mets_files: set[Path] = set()
+
     @staticmethod
     def details_from_mets_root(namespaces: dict[str,str], root_element: etree.Element) -> MetsRoot:
         return MetsRoot.model_validate({
@@ -113,82 +116,42 @@ class MetsFiles():
 
 class MetsValidator():
     """Encapsulates METS schema validation."""
-    def __init__(self, root: str):
+    def __init__(self, mets_path: Path):
         self._validation_errors: List[Result] = []
-        self._package_root: str = root
-        self._reps_mets: Dict[str , str] = {}
-        self._file_refs: List[FileEntry] = []
-
-    @property
-    def root(self) -> str:
-        return self._package_root
+        self._mets_path: Path = mets_path
 
     @property
     def validation_errors(self) -> List[Result]:
         return self._validation_errors
 
     @property
-    def representations(self) -> List[str]:
-        return self._reps_mets.keys()
-
-    @property
-    def representation_mets(self) -> List[str]:
-        return self._reps_mets.values()
-
-    @property
-    def file_references(self) -> List[FileEntry]:
-        return self._file_refs
-
-    @property
     def is_valid(self) -> bool:
         return len(self._validation_errors) == 0
 
-    def get_mets_path(self, rep_name: str) -> str:
-        return self._reps_mets[rep_name]
+    def validate_against_schema(self) -> bool:
+        #get correct schema
+        schema_path: str = IP_SCHEMA.get('csip')
+   
+        with open(schema_path, 'rb') as schema_file:
+            schema_doc = etree.parse(schema_file)
+            schema = etree.XMLSchema(schema_doc)
+   
+        with open(self._mets_path, 'rb') as xml_file:
+            xml_doc = etree.parse(xml_file)
 
-    def validate_mets(self, mets: str) -> bool:
-        '''
-        Validates a Mets file. The Mets file is parsed with etree.iterparse(),
-        which allows event-driven parsing of large files. On certain events/conditions
-        actions are taken, like file validation or adding Mets files found inside
-        representations to a list so that they will be evaluated later on.
+        is_valid = schema.validate(xml_doc)
 
-        @param mets:    Path leading to a Mets file that will be evaluated.
-        @return:        Boolean validation result.
-        '''
-        # Handle relative package paths for representation METS files.
-        self._package_root, mets = _handle_rel_paths(self._package_root, mets)
-        try:
-            parsed_mets = etree.iterparse(mets, schema=IP_SCHEMA.get('csip'))
-            for _, element in parsed_mets:
-                self._process_element(element)
-        except etree.XMLSyntaxError as synt_err:
+        for error in schema.error_log:
             self._validation_errors.append(
                 Result.model_validate({
-                    'rule_id': 'XML-1',
-                    'location': str(synt_err.filename) + str(synt_err.lineno) + str(synt_err.offset),
-                    'message': f'File {mets} is not valid XML. {synt_err.msg}',
+                    'rule_id': 'XML',
+                    'location': f"Line {error.line}, Column {error.column}",
+                    'message': f"File {self._mets_path} is not valid XML. {error.message}",
                     'severity': 'Error'
                     })
             )
-        return len(self._validation_errors) == 0
 
-    def _process_element(self, element: etree.Element) -> None:
-        # Define what to do with specific tags.
-        if element.tag == Namespaces.METS.qualify('div') and \
-            element.attrib['LABEL'].lower().startswith('representations/'):
-            self._process_rep_div(element)
-            return
-        if element.tag in [ Namespaces.METS.qualify('file'), Namespaces.METS.qualify('mdRef') ]:
-            self._file_refs.append(_parse_file_entry(element))
-
-    def _process_rep_div(self, element: etree.Element) -> None:
-        rep = element.attrib['LABEL'].rsplit('/', 1)[1]
-        for child in element.getchildren():
-            if child.tag == Namespaces.METS.qualify('mptr'):
-                self._reps_mets.update({
-                    rep:  child.attrib[Namespaces.XLINK.qualify('href')]
-                })
+        return is_valid
 
 def _parse_file_entry(element: etree.Element) -> FileEntry:
     """Create a FileItem from an etree element."""
@@ -211,6 +174,8 @@ def _validate_file_entry(file_entry: FileEntry, element: etree.Element, root: Pa
     if not os.path.isfile(full_path):
         errors.append(_get_path_requirement_id(element))
         return errors
+    else:
+        MetsFiles.file_paths_defined_in_mets_files.add(full_path)
 
     if file_entry.size is None or not file_entry.size.isdecimal():
         errors.append(_get_size_requirement_id(element))
