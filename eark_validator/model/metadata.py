@@ -39,7 +39,7 @@ class FileEntry(BaseModel):
     path : Optional[str]
     type: EntryType = EntryType.FILE
     size: Optional[str]
-    checksum: Checksum
+    checksum: Optional[Checksum]
     mimetype: Optional[Annotated[ str, StringConstraints(to_lower=True) ]] = MIME_DEFAULT
     isValid: bool = False
     errors: List[str] = []

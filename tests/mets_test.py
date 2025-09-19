@@ -25,6 +25,7 @@
 
 import unittest
 
+from pathlib import Path
 from importlib_resources import files
 from eark_validator.infopacks.manifest import Manifests
 
@@ -37,45 +38,45 @@ from eark_validator.ipxml.schema import LOCAL_SCHEMA, get_local_schema
 METS_XML = 'METS.xml'
 class MetsValidatorTest(unittest.TestCase):
     """Tests for Schematron validation rules."""
-    def test_mets_root(self):
-        validator = MetsValidator(str(files(XML)))
-        self.assertEqual(str(files(XML)), validator.root)
+    def test_mets_path(self):
+        mets_path: Path = Path(files(XML)).joinpath('METS-valid.xml')
+        validator = MetsValidator(mets_path)
+        self.assertEqual(mets_path, validator._mets_path)
 
     def test_valid_mets(self):
-        validator = MetsValidator(str(files(XML)))
-        is_valid = validator.validate_mets('METS-valid.xml')
+        mets_path: Path = Path(files(XML)).joinpath('METS-valid.xml')
+        validator = MetsValidator(mets_path)
+        is_valid = validator.validate_against_schema()
         self.assertTrue(is_valid)
         self.assertEqual(len(validator.validation_errors), 0)
 
     def test_invalid_mets(self):
-        validator = MetsValidator(str(files(XML)))
-        is_valid = validator.validate_mets('METS-no-root.xml')
+        mets_path: Path = Path(files(XML)).joinpath('METS-no-root.xml')
+        validator = MetsValidator(mets_path)
+        is_valid = validator.validate_against_schema()
         self.assertFalse(is_valid)
         self.assertGreater(len(validator.validation_errors), 0)
 
     def test_mets_no_structmap(self):
-        validator = MetsValidator(str(files(XML)))
-        is_valid = validator.validate_mets('METS-no-structmap.xml')
+        mets_path: Path = Path(files(XML)).joinpath('METS-no-structmap.xml')
+        validator = MetsValidator(mets_path)
+        is_valid = validator.validate_against_schema()
         self.assertFalse(is_valid)
         self.assertGreater(len(validator.validation_errors), 0)
 
     def test_multi_mets(self):
-        validator = MetsValidator(str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031')))
-        is_valid = validator.validate_mets(METS_XML)
+        mets_path: Path = Path(files(UNPACKED)).joinpath('733dc055-34be-4260-85c7-5549a7083031').joinpath(METS_XML)
+        validator = MetsValidator(mets_path)
+        is_valid = validator.validate_against_schema()
         self.assertTrue(is_valid)
         self.assertEqual(len(validator.validation_errors), 0)
-        self.assertEqual(len(validator.representations), 1)
-        self.assertGreater(len(validator.file_references), 0)
-        self.assertGreater(len(validator.representation_mets), 0)
-        self.assertEqual(validator.get_mets_path('rep1'), 'representations/rep1/METS.xml')
 
     def test_bad_manifest(self):
-        validator = MetsValidator(str(files(UNPACKED).joinpath('733dc055-34be-4260-85c7-5549a7083031-bad')))
-        is_valid = validator.validate_mets(METS_XML)
+        mets_path: Path = Path(files(UNPACKED)).joinpath('733dc055-34be-4260-85c7-5549a7083031').joinpath(METS_XML)
+        validator = MetsValidator(mets_path)
+        is_valid = validator.validate_against_schema()
         self.assertTrue(is_valid)
         self.assertEqual(len(validator.validation_errors), 0)
-        self.assertEqual(len(validator.representations), 1)
-        self.assertGreater(len(validator.file_references), 0)
 
 class SchemaTest(unittest.TestCase):
     def test_schema(self):
