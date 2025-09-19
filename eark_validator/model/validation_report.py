@@ -131,16 +131,19 @@ class MetadataResults(BaseModel):
     def convert_status(cls, data: Any) -> Any:
         status = data.get('status')
         if status and status == 'NOTVALID':
-            data['status'] = 'INVALID'
+            data['status'] = 'INVALID'      
         return data
 
     def merge(self, other: Optional[MetadataResults]) -> MetadataResults:
-        if other is None:
+        if other is None or len(other.messages) == 0:
             return self
+        
+        self.messages.extend(other.messages)
+        all_messages = self.messages
 
         return MetadataResults(
             status = MetadataStatus.INVALID if self.status == MetadataStatus.INVALID or other.status == MetadataStatus.INVALID else MetadataStatus.VALID,
-            messages = self.messages.extend(other.messages)
+            messages = all_messages
         )
 
 class MetadataResultSet(BaseModel):
