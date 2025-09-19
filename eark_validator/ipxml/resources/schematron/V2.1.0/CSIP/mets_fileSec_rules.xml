@@ -2,14 +2,15 @@
   <ns prefix="mets" uri="http://www.loc.gov/METS/" />
   <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
-  <pattern id="METS_file_element">
-    <title>Use of the METS file section.</title>
+  <pattern id="METS_file_element_1">
     <rule context="/mets:mets/mets:fileSec">
       <assert test="@ID">CSIP59;ERROR;An xml:id identifier for the file section used for internal package references.</assert>
       <assert test="mets:fileGrp[@USE = 'Documentation']">CSIP60;ERROR;All documentation pertaining to the transferred content is placed in one or more file group elements with mets/fileSec/fileGrp/@USE attribute value “Documentation”.</assert>
       <assert test="mets:fileGrp[@USE = 'Schemas']">CSIP113;ERROR;All XML schemas used in the information package must be referenced from one or more file groups with `mets/fileSec/fileGrp/@USE` attribute value "Schemas".</assert>
       <assert test="mets:fileGrp[starts-with(@USE, 'Representations')]">CSIP114;ERROR;A pointer to the METS document describing the representation or pointers to the content being transferred must be present in one or more file groups with `mets/fileSec/fileGrp/@USE` attribute value starting with "Representations" followed by the path to the folder where the representation level METS document is placed. For example "Representation/submission" and "Representation/ingest".</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_file_element_2">
     <rule context="/mets:mets/mets:fileSec/mets:fileGrp">
       <assert test="every $admid_part in tokenize(@ADMID, '\s+') satisfies some $id in /mets:mets/mets:amdSec/*/@ID satisfies $admid_part = $id">CSIP61;ERROR;ADMID must contains real administrative metadata section ID.</assert>
       <assert test="(starts-with(@USE, 'Representations') and @csip:CONTENTINFORMATIONTYPE) or (not(starts-with(@USE, 'Representations')))">CSIP62;ERROR;When the file group describes a representation with the `mets/fileSec/fileGrp/@USE` attribute value is starting with "Representations", then `mets/fileSec/fileGrp/@CONTENTINFORMATIONTYPE` must state the content information type specification used for the representation.</assert>
@@ -19,6 +20,8 @@
       <assert test="@ID">CSIP65;ERROR;This attribute is mandatory. An xml:id identifier for the file group used for internal package references. It must be unique within the package.</assert>
       <assert test="mets:file">CSIP66;ERROR;The file group contains the file elements which describe the file objects.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_file_element_3">
     <rule context="/mets:mets/mets:fileSec/mets:fileGrp/mets:file">
       <assert test="@ID">CSIP67;ERROR;This attribute is mandatory. An xml:id identifier for the file group used for internal package references. It must be unique within the package.</assert>
       <assert test="@MIMETYPE">CSIP68;ERROR;MUST record the MIME type of the referenced file.</assert>
@@ -31,6 +34,8 @@
       <report test="@DMDID">CSIP75;INFO;A file element has an DMDID attribute.</report>
       <assert test="mets:FLocat">CSIP76;ERROR;The location of each external file must be defined by the file location `FLocat` element using the same rules as references for metadata files. All references to files should be made using the XLink href attribute and the file protocol using the relative location of the file.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_file_element_4">
     <rule context="/mets:mets/mets:fileSec/mets:fileGrp/mets:file/mets:FLocat">
       <assert test="@LOCTYPE = 'URL'">CSIP77;ERROR;Mandatory, locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
       <assert test="@xlink:type = 'simple'">CSIP78;ERROR;Attribute MUST be used with the value “simple”. Value list is maintained by the xlink standard.</assert>
