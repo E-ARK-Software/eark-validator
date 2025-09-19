@@ -27,6 +27,7 @@ Factory methods for the package classes.
 """
 import os
 from pathlib import Path
+from typing import Optional
 
 from eark_validator import rules as SC
 from eark_validator import structure
@@ -43,7 +44,7 @@ METS: str = 'METS.xml'
 class PackageValidator():
     """Class for performing full package validation."""
     _package_handler = PackageHandler()
-    def __init__(self, package_path: Path, version: SpecificationVersion = SpecificationVersion.V2_1_0):
+    def __init__(self, package_path: Path, type: Optional[SpecificationType], version: SpecificationVersion = SpecificationVersion.V2_1_0):
         self._path : Path = package_path
         self._name: str = os.path.basename(package_path)
         self._report: ValidationReport = None
@@ -63,7 +64,7 @@ class PackageValidator():
             self._report = _report_from_bad_path(package_path)
             return
 
-        self._report = self.validate(self._version, self._to_proc)
+        self._report = self.validate(self._version, self._to_proc, type)
 
     @property
     def original_path(self) -> Path:
@@ -86,7 +87,7 @@ class PackageValidator():
         return self._version
 
     @classmethod
-    def validate(cls, version: SpecificationVersion, to_validate: Path) -> ValidationReport:
+    def validate(cls, version: SpecificationVersion, to_validate: Path, type: Optional[SpecificationType]) -> ValidationReport:
         """Returns the validation report that results from validating the path
         to_validate as a folder. The method does not validate archive files."""
         is_struct_valid, struct_results = structure.validate(to_validate)
@@ -107,10 +108,15 @@ class PackageValidator():
         results = csip_profile.get_all_results()
 
         package: InformationPackage = InformationPackages.from_path(to_validate)
-        if package.details.oaispackagetype in ['SIP', 'DIP']:
-            profile = SC.ValidationProfile(SpecificationType.from_string(package.details.oaispackagetype), version, to_validate)
-            profile.validate(to_validate.joinpath(METS))
-            results.extend(profile.get_all_results())
+        specific_profile: Optional[SC.ValidationProfile] = None
+        if type and type != SpecificationType.CSIP:
+            specific_profile = SC.ValidationProfile(type, version, to_validate)
+        elif package.details.oaispackagetype in ['SIP', 'DIP']:
+            specific_profile = SC.ValidationProfile(SpecificationType.from_string(package.details.oaispackagetype), version, to_validate)
+
+        if specific_profile:
+            specific_profile.validate(to_validate.joinpath(METS))
+            results.extend(specific_profile.get_all_results())
 
         metadata: MetatdataResultSet = MetatdataResultSet.model_validate({
             'schema_results': MetadataResults.model_validate({ 'status': _validity_from_messages(validator.validation_errors), 'messages': validator.validation_errors }),
