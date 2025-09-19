@@ -32,7 +32,7 @@
       <report test="@OWNERID">CSIP73;INFO;A file element has an OWNERID attribute.</report>
       <report test="@ADMID">CSIP74;INFO;A file element has an ADMID attribute.</report>
       <report test="@DMDID">CSIP75;INFO;A file element has an DMDID attribute.</report>
-      <assert test="mets:FLocat">CSIP76;ERROR;The location of each external file must be defined by the file location `FLocat` element using the same rules as references for metadata files. All references to files should be made using the XLink href attribute and the file protocol using the relative location of the file.</assert>
+      <assert test="count(mets:FLocat) = 1">CSIP76;ERROR;The location of each external file must be defined by the file location `FLocat` element using the same rules as references for metadata files. All references to files should be made using the XLink href attribute and the file protocol using the relative location of the file.</assert>
     </rule>
   </pattern>
   <pattern id="METS_file_element_4">
