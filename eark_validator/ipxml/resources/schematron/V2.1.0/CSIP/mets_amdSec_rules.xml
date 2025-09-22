@@ -2,21 +2,26 @@
   <ns prefix="mets" uri="http://www.loc.gov/METS/" />
   <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
-  <pattern id="METS_administrative_metadata_element">
-    <title>Use of the METS administrative metadata section.</title>
+  <pattern id="METS_administrative_metadata_element_1">
     <rule context="/mets:mets/mets:amdSec">
       <assert test="mets:digiprovMD">CSIP32;WARN;Sould be used to record information about preservation the standard PREMIS is used.</assert>
       <report test="mets:rightsMD">CSIP45;INFO;A simple rights statement may be used to describe general permissions for the package. Individual representations should state their specific rights in their representation METS file.</report>
     </rule>
+  </pattern>
+  <pattern id="METS_administrative_metadata_element_2">
     <rule context="/mets:mets/mets:amdSec/*[@STATUS = 'CURRENT']">
       <assert test="contains(/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Metadata']/@ADMID, @ID)">CSIP91;ERROR;The admimistrative metadata division should reference all current administrative metadata sections.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_administrative_metadata_element_3">
     <rule context="/mets:mets/mets:amdSec/mets:digiprovMD">
       <assert test="@ID">CSIP33;ERROR;Mandatory, unique id for the digital provenance.</assert>
       <assert test="@STATUS">CSIP34_1;WARN;SHOULD be used to indicated the status of the package.</assert>
       <assert test="not(@STATUS) or (@STATUS_vocabulary_test)">CSIP34_2;ERROR;SHOULD be used to indicated the status of the package.</assert>
       <assert test="mets:mdRef">CSIP35;WARN;Should provide a reference to the digital provenance metadata file stored in the “metadata” section of the IP.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_administrative_metadata_element_4">
     <rule context="/mets:mets/mets:amdSec/mets:digiprovMD/mets:mdRef">
       <assert test="@LOCTYPE = 'URL'">CSIP36;ERROR;Mandatory, locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
       <assert test="@xlink:type = 'simple'">CSIP37;ERROR;Attribute MUST be used with the value “simple”. Value list is maintained by the xlink standard.</assert>
@@ -28,12 +33,16 @@
       <assert test="@CHECKSUM">CSIP43;ERROR;MUST record the checksum of the referenced file.</assert>
       <assert test="@CHECKSUMTYPE">CSIP44;ERROR;MUST record a value from the METS-standard which identifies the algorithm used to calculate the checksum for the referenced file.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_administrative_metadata_element_5">
     <rule context="/mets:mets/mets:amdSec/mets:rightsMD">
       <assert test="@ID">CSIP46;ERROR;Mandatory, unique id for the rights metadata.</assert>
       <assert test="@STATUS">CSIP47_1;WARN;SHOULD be used to indicated the status of the package.</assert>
       <assert test="not(@STATUS) or (@STATUS_vocabulary_test)">CSIP47_2;ERROR;SHOULD be used to indicated the status of the package.</assert>
       <assert test="mets:mdRef">CSIP48;WARN;Should provide a reference to the digital provenance metadata file stored in the “metadata” section of the IP.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_administrative_metadata_element_6">
     <rule context="/mets:mets/mets:amdSec/mets:rightsMD/mets:mdRef">
       <assert test="@LOCTYPE = 'URL'">CSIP49;ERROR;Mandatory, locator type is always used with the value “URL” from the vocabulary in the attribute.</assert>
       <assert test="@xlink:type = 'simple'">CSIP50;ERROR;Attribute MUST be used with the value “simple”. Value list is maintained by the xlink standard.</assert>

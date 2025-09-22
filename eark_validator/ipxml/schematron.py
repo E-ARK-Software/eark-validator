@@ -41,6 +41,8 @@ SCHEMATRON_NS = '{http://purl.oclc.org/dsdl/schematron}'
 SVRL_NS = '{http://purl.oclc.org/dsdl/svrl}'
 
 class SchematronTests():
+    __recordstatus_values: list[str] = ['NEW', 'SUPPLEMENT', 'REPLACEMENT', 'TEST', 'VERSION', 'DELETE', 'OTHER']
+
     __vocabulary_definitions = {
         '@TYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyContentCategory.xml',
         '@csip:CONTENTINFORMATIONTYPE': 'https://earkcsip.dilcis.eu/schema/CSIPVocabularyContentInformationType.xml',
@@ -56,6 +58,7 @@ class SchematronTests():
             self.tests[attribute + '_vocabulary_test'] = self._create_vocabulary_test(attribute, vocabulary_uri)
 
         self.tests['@OBJID_test'] = self._create_OBJID_test(to_validate)
+        self.tests['@RECORDSTATUS_vocabulary_test'] = ' or '.join([f"(@RECORDSTATUS = '{v}')" for v in self.__recordstatus_values])
 
     def _create_vocabulary_test(self, attribute: str, vocabulary_uri: str) -> str:
         vocabulary_tests = []

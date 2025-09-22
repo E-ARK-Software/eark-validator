@@ -38,7 +38,6 @@ from eark_validator.model import (
 )
 
 METS_NAME = 'METS.xml'
-STR_REQ_PREFIX = 'CSIPSTR'
 ROOT = 'root'
 DIR_NAMES = {
     'DATA': 'data',
@@ -54,20 +53,16 @@ DIR_NAMES = {
 class StructureParser():
     _package_handler = PackageHandler()
     """Encapsulates the set of tests carried out on folder structure."""
-    def __init__(self, package_path: Path):
-        self._is_archive = PackageHandler.is_archive(package_path)
+    def __init__(self, package_path: Path, was_package_compressed: Optional[bool] = None):
+        self.was_package_compressed = was_package_compressed
         self.md_folders: set[str]= set()
         self.folders: set[str] = set()
         self.files : set[str] = set()
-        self.is_parsable = False
-        if self._is_archive or package_path.is_dir():
-            self.is_parsable = True
-            self.resolved_path = self._package_handler.prepare_package(package_path)
-            self.folders, self.files = _folders_and_files(self.resolved_path)
-            if DIR_NAMES['META'] in self.folders:
-                self.md_folders, _ = _folders_and_files(
-                    os.path.join(self.resolved_path,
-                                 DIR_NAMES['META']))
+
+        self.folders, self.files = _folders_and_files(package_path)
+        if DIR_NAMES['META'] in self.folders:
+            self.md_folders, _ = _folders_and_files(
+                os.path.join(package_path, DIR_NAMES['META']))
 
     def has_data(self) -> bool:
         """Returns True if the package/representation has a structure folder."""
@@ -125,26 +120,32 @@ class StructureParser():
         """Returns True if the package/representation has a schemas folder."""
         return DIR_NAMES['SCHM'] in self.folders
 
-    @property
     def is_archive(self) -> bool:
-        """Returns True if the package/representation is an archive."""
-        return self._is_archive
+        return self.was_package_compressed
 
 class StructureChecker():
-    def __init__(self, dir_to_scan: Path):
-        self.name: str = os.path.basename(dir_to_scan)
-        self.parser: StructureParser = StructureParser(dir_to_scan)
-        self.representations: Dict[Representation, StructureParser] = {}
-        if self.parser.is_parsable:
-            _reps = os.path.join(self.parser.resolved_path, DIR_NAMES['REPS'])
-            if os.path.isdir(_reps):
-                for entry in  os.listdir(_reps):
-                    self.representations[entry] = StructureParser(Path(os.path.join(_reps, entry)))
+    def __init__(self, package_path: Path, was_package_compressed: bool):
+        self.name: str = os.path.basename(package_path)
+        if not package_path.is_dir():
+            self._struct_results = get_bad_path_results(self.name)
+            return
 
-    def get_test_results(self) -> StructResults:
-        if not self.parser.is_parsable:
-            return get_bad_path_results(self.name)
+        self.parser: StructureParser = StructureParser(package_path, was_package_compressed)
+        self.representations: Dict[Path, StructureParser] = {}
+        representations_folder = os.path.join(package_path, DIR_NAMES['REPS'])
+        if os.path.isdir(representations_folder):
+            subdirs = [p for p in Path(representations_folder).iterdir() if p.is_dir()]
+            for representation in subdirs:
+                representation_path = representation.resolve()
+                self.representations[representation_path] = StructureParser(representation_path)
 
+        self._struct_results = self._get_test_results()
+
+    @property
+    def results(self) -> StructResults:
+        return self._struct_results
+
+    def _get_test_results(self) -> StructResults:
         results: List[Result] = self.get_root_results()
         results = results + self.get_package_results()
         for name, tests in self.representations.items():
@@ -160,23 +161,17 @@ class StructureChecker():
             'messages': results
             })
 
-    def get_representations(self) -> List[Representation]:
-        reps: List[Representation] = []
-        for rep in self.representations: # pylint: disable=C0201
-            reps.append(Representation.model_validate({ 'name': rep }))
-        return reps
-
     def get_root_results(self) -> List[Result]:
         results: List[Result] = []
         location: str = _root_loc(self.name)
-        if not self.parser.is_archive:
+        if not self.parser.is_archive():
             results.append(test_result_from_id(3, location))
         if not self.parser.has_mets():
             results.append(test_result_from_id(4, location))
         results.extend(self._get_metadata_results(location=location))
         if not self.parser.has_representations_folder():
             results.append(test_result_from_id(9, location))
-        elif len(self.representations) == 0 or not all(parser.is_parsable for _, parser in self.representations.items()):
+        elif len(self.representations) == 0:
             results.append(test_result_from_id(10, location))
         return results
 
@@ -268,10 +263,3 @@ def _get_str1_result_list(name: str) -> List[Result]:
 
 def _root_loc(name: str) -> str:
     return f'{ROOT} {name}'
-
-def validate(to_validate) -> Tuple[bool, StructResults]:
-    try:
-        struct_tests = StructureChecker(to_validate).get_test_results()
-        return struct_tests.status == StructureStatus.WELLFORMED, struct_tests
-    except PackageError:
-        return False, get_bad_path_results(to_validate)

@@ -32,8 +32,8 @@ from importlib_resources import files
 from .resources import schema as SCHEMA
 from .namespaces import Namespaces
 IP_SCHEMA = {
-    'csip': etree.XMLSchema(file=str(files(SCHEMA).joinpath('mets.csip.local.v2-0.xsd'))),
-    'sip': etree.XMLSchema(file=str(files(SCHEMA).joinpath('mets.sip.local.v2-0.xsd')))
+    'csip': str(files(SCHEMA).joinpath('mets.csip.local.v2-0.xsd')),
+    'sip': str(files(SCHEMA).joinpath('mets.sip.local.v2-0.xsd'))
 }
 
 LOCAL_SCHEMA = {

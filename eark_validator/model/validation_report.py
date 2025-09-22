@@ -29,6 +29,8 @@ E-ARK : Information Package Validation
         Information Package Validation Report type
 """
 
+from __future__ import annotations
+
 from enum import Enum, unique
 from typing import Any, List, Optional, Annotated
 from uuid import uuid4
@@ -132,14 +134,32 @@ class MetadataResults(BaseModel):
             data['status'] = 'INVALID'
         return data
 
-class MetatdataResultSet(BaseModel):
+    def merge(self, other: Optional[MetadataResults]) -> MetadataResults:
+        if other is None or len(other.messages) == 0:
+            return self
+
+        self.messages.extend(other.messages)
+        all_messages = self.messages
+
+        return MetadataResults(
+            status = MetadataStatus.INVALID if self.status == MetadataStatus.INVALID or other.status == MetadataStatus.INVALID else MetadataStatus.VALID,
+            messages = all_messages
+        )
+
+class MetadataResultSet(BaseModel):
     schema_results: Optional[MetadataResults] = None
     schematron_results: Optional[MetadataResults] = None
+
+    def merge(self, other: MetadataResultSet) -> MetadataResultSet:
+        return MetadataResultSet(
+            schema_results=self.schema_results.merge(other.schema_results) if self.schema_results else other.schema_results,
+            schematron_results=self.schematron_results.merge(other.schematron_results) if self.schematron_results else other.schematron_results
+        )
 
 class ValidationReport(BaseModel):
     uid: Annotated[str, Field(default_factory=lambda: uuid4().hex)]
     structure: Optional[StructResults] = None
-    metadata: Optional[MetatdataResultSet] = None
+    metadata: Optional[MetadataResultSet] = None
     package: Optional[InformationPackage] = None
 
     @property

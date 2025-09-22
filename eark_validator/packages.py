@@ -27,15 +27,16 @@ Factory methods for the package classes.
 """
 import os
 from pathlib import Path
+from typing import Optional, List
 
 from eark_validator import rules as SC
 from eark_validator import structure
 from eark_validator.infopacks.information_package import InformationPackages
 from eark_validator.infopacks.package_handler import PackageHandler
-from eark_validator.mets import MetsValidator
-from eark_validator.model import ValidationReport
-from eark_validator.model.package_details import InformationPackage
-from eark_validator.model.validation_report import MetadataResults, MetadataStatus, MetatdataResultSet, Result, Severity
+from eark_validator.mets import MetsValidator, MetsFiles, FileEntry
+from eark_validator.model import ValidationReport, PackageDetails
+from eark_validator.model.package_details import InformationPackage, MetsFile, Representation
+from eark_validator.model.validation_report import MetadataResults, MetadataStatus, MetadataResultSet, Result, Severity
 from eark_validator.specifications.specification import SpecificationType, SpecificationVersion
 
 METS: str = 'METS.xml'
@@ -43,17 +44,19 @@ METS: str = 'METS.xml'
 class PackageValidator():
     """Class for performing full package validation."""
     _package_handler = PackageHandler()
-    def __init__(self, package_path: Path, version: SpecificationVersion = SpecificationVersion.V2_1_0):
+    def __init__(self, package_path: Path, type: Optional[SpecificationType], version: SpecificationVersion = SpecificationVersion.V2_1_0):
         self._path : Path = package_path
         self._name: str = os.path.basename(package_path)
         self._report: ValidationReport = None
         self._version: SpecificationVersion = version
+        self._compressed = False
 
         if os.path.isdir(package_path):
             # If a directory or archive get the path to process
             self._to_proc = self._path.absolute()
         elif PackageHandler.is_archive(package_path):
             self._to_proc = self._package_handler.prepare_package(package_path)
+            self._compressed = True
         elif self._name == METS:
             mets_path = Path(package_path)
             self._to_proc = mets_path.parent.absolute()
@@ -63,7 +66,7 @@ class PackageValidator():
             self._report = _report_from_bad_path(package_path)
             return
 
-        self._report = self.validate(self._version, self._to_proc)
+        self._report = self.validate(self._to_proc, self._version, type)
 
     @property
     def original_path(self) -> Path:
@@ -85,42 +88,102 @@ class PackageValidator():
         """Returns the specifiation version used for validation."""
         return self._version
 
-    @classmethod
-    def validate(cls, version: SpecificationVersion, to_validate: Path) -> ValidationReport:
-        """Returns the validation report that results from validating the path
-        to_validate as a folder. The method does not validate archive files."""
-        is_struct_valid, struct_results = structure.validate(to_validate)
-        if not is_struct_valid:
-            return ValidationReport.model_validate({'structure': struct_results})
-        validator = MetsValidator(str(to_validate))
-        is_mets_valid = validator.validate_mets(METS)
-        if not is_mets_valid:
-            metadata: MetatdataResultSet = MetatdataResultSet.model_validate({
-                'schema_results': MetadataResults.model_validate({ 'status': _validity_from_messages(validator.validation_errors), 'messages': validator.validation_errors })})
-            return ValidationReport.model_validate({
-                'structure': struct_results,
-                'metadata': metadata
-                })
+    @property
+    def compressed(self) -> bool:
+        """Returns whether the package was contained in compressed form."""
+        return self._compressed
 
-        csip_profile = SC.ValidationProfile(SpecificationType.CSIP, version, to_validate)
-        csip_profile.validate(to_validate.joinpath(METS))
+    def validate(self, path_to_package: Path, version: SpecificationVersion, forced_type: Optional[SpecificationType]) -> ValidationReport:
+        #structure
+        structure_checker = structure.StructureChecker(path_to_package, self.compressed)
+        if structure_checker.results.status != structure.StructureStatus.WELLFORMED:
+            return ValidationReport.model_validate({'structure': structure_checker.results})
+
+        #metadata
+        root_mets_path: Path = path_to_package.joinpath(METS)
+        package_details: PackageDetails = InformationPackages.details_from_mets_file(root_mets_path)
+        type: Optional[SpecificationType] = None
+        if forced_type:
+            type = forced_type
+        else:
+            if package_details.oaispackagetype in ['SIP', 'DIP']:
+                type = SpecificationType.from_string(package_details.oaispackagetype)
+
+        metadata_results: MetadataResultSet = self.__validate_mets(path_to_package, version, type)
+
+        for representation in structure_checker.representations.keys():
+            if representation.joinpath(METS).is_file():
+                representation_metadata_results: MetadataResultSet = self.__validate_mets(representation, version, type)
+                metadata_results = metadata_results.merge(representation_metadata_results)
+
+        #package
+        package_mets: MetsFile = MetsFiles.from_file(root_mets_path)
+        package_representations: List[Representation] = []
+        for representation in structure_checker.representations.keys():
+            representation_path = Path(representation)
+            representation_mets_path = representation_path.joinpath(METS)
+            if representation_mets_path.is_file():
+                package_representation_mets = MetsFiles.from_file(representation_mets_path)
+
+                package_representations.append(Representation.model_validate({
+                    'mets': package_representation_mets,
+                    'name':  representation_mets_path.parent.name
+                }))
+
+        package_mets.file_entries.extend(self.__find_undefined_files(MetsFiles.file_paths_defined_in_mets_files, path_to_package))
+
+        package: InformationPackage = InformationPackage.model_validate({
+            'mets': package_mets,
+            'details': package_details,
+            'representations': package_representations
+        })
+
+        return ValidationReport.model_validate({
+            'structure': structure_checker.results,
+            'metadata': metadata_results,
+            'package': package,
+            })
+
+    def __validate_mets(self, path_to_package: Path, version: SpecificationVersion, type: Optional[SpecificationType]) -> MetadataResultSet:
+        mets_path: Path = path_to_package.joinpath(METS)
+        validator = MetsValidator(mets_path)
+        is_mets_valid = validator.validate_against_schema()
+        if not is_mets_valid:
+            return MetadataResultSet.model_validate({
+                'schema_results': MetadataResults.model_validate(
+                    {
+                        'status': _validity_from_messages(validator.validation_errors),
+                        'messages': validator.validation_errors
+                    })})
+
+        csip_profile = SC.ValidationProfile(SpecificationType.CSIP, version, path_to_package)
+        csip_profile.validate(mets_path)
         results = csip_profile.get_all_results()
 
-        package: InformationPackage = InformationPackages.from_path(to_validate)
-        if package.details.oaispackagetype in ['SIP', 'DIP']:
-            profile = SC.ValidationProfile(SpecificationType.from_string(package.details.oaispackagetype), version, to_validate)
-            profile.validate(to_validate.joinpath(METS))
-            results.extend(profile.get_all_results())
+        if type and type != SpecificationType.CSIP:
+            specific_profile: SC.ValidationProfile = SC.ValidationProfile(type, version, path_to_package)
+            specific_profile.validate(mets_path)
+            results.extend(specific_profile.get_all_results())
 
-        metadata: MetatdataResultSet = MetatdataResultSet.model_validate({
+        return MetadataResultSet.model_validate({
             'schema_results': MetadataResults.model_validate({ 'status': _validity_from_messages(validator.validation_errors), 'messages': validator.validation_errors }),
             'schematron_results': MetadataResults.model_validate({ 'status': _validity_from_messages(results), 'messages': results })
             })
-        return ValidationReport.model_validate({
-            'structure': struct_results,
-            'package': package,
-            'metadata': metadata
-            })
+
+    def __find_undefined_files(self, defined_files_in_mets_files: set[Path], package_path: Path) -> List[FileEntry]:
+        package_path = package_path.resolve()
+        all_files_in_package: set[Path] = {f.resolve() for f in Path(package_path).rglob('*') if f.is_file()}
+        defined_files = {p.resolve() for p in defined_files_in_mets_files}
+
+        undefined_files = all_files_in_package.difference(defined_files)
+        return [FileEntry.model_validate({
+                    'path': str(p.relative_to(package_path)),
+                    'isValid': False,
+                    'errors': ['File is not referenced in any mets file.'],
+                    'size': None,
+                    'checksum': None,
+                    'mimetype': None
+                }) for p in undefined_files]
 
 def _validity_from_messages(messages: list[Result]) -> MetadataStatus:
     return MetadataStatus.VALID if len([ res for res in messages if res.severity == Severity.ERROR]) == 0 else MetadataStatus.INVALID

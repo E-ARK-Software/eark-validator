@@ -3,13 +3,12 @@
   <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
   <ns prefix="sip" uri="https://DILCIS.eu/XML/METS/SIPExtensionMETS"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
-  <pattern id="METS_file_element">
-    <title>Use of the METS file section.</title>
+  <pattern id="METS_file_element_1">
     <rule context="/mets:mets/mets:fileSec/mets:fileGrp/mets:file">
-      <report test="@sip:FILEFORMATNAME">CSIP73;INFO;A file element has an FILEFORMATNAME attribute.</report>
-      <report test="@sip:FILEFORMATVERSION">CSIP74;INFO;A file element has an FILEFORMATVERSION attribute.</report>
-      <report test="@sip:FILEFORMATREGISTRY">CSIP75;INFO;A file element has an FILEFORMATREGISTRY attribute.</report>
-      <report test="@sip:FILEFORMATKEY">CSIP76;INFO;A file element has an FILEFORMATKEY attribute.</report>
+      <assert test="@sip:FILEFORMATNAME != ''">SIP32;INFO;An optional attribute may be used if the MIMETYPE is not sufficient for the purposes of processing the information package.</assert>
+      <assert test="@sip:FILEFORMATVERSION != ''">SIP33;INFO;The version of the file format when the use of PREMIS has not been agreed upon in the submission agreement.</assert>
+      <assert test="@sip:FILEFORMATREGISTRY != ''">SIP34;INFO;The name of the format registry used to identify the file format when the use of PREMIS has not been agreed upon in the submission agreement.</assert>
+      <assert test="@sip:FILEFORMATKEY != ''">SIP35;INFO;Key of the file format in the registry when use of PREMIS has not been agreed upon in the submission agreement.</assert>
     </rule>
   </pattern>
 </schema>

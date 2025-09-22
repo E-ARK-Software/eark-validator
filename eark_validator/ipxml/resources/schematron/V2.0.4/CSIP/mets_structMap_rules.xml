@@ -2,17 +2,20 @@
   <ns prefix="mets" uri="http://www.loc.gov/METS/" />
   <ns prefix="csip" uri="https://DILCIS.eu/XML/METS/CSIPExtensionMETS"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink" />
-  <pattern id="METS_structmap_element">
-    <title>Use of the METS structural map.</title>
+  <pattern id="METS_structmap_element_1">
     <rule context="/mets:mets/mets:structMap">
       <assert test="@TYPE = 'PHYSICAL'">CSIP81;ERROR;The mets/structMap/@TYPE attribute must take the value “PHYSICAL” from the vocabulary.</assert>
       <assert test="@LABEL = 'CSIP'">CSIP82;ERROR;The mets/structMap/@LABEL attribute value is set to “CSIP” from the vocabulary.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_structmap_element_2">
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']">
       <assert test="@ID">CSIP83;ERROR;An xml:id identifier for the structural description (structMap) used for internal package references. It must be unique within the package.</assert>
       <assert test="mets:div">CSIP84;ERROR;The structural map MUST comprises a single division.</assert>
       <assert test="mets:div[@LABEL = /mets:mets/@OBJID]">CSIP86;ERROR;The package’s top-level structural division div element’s @LABEL attribute value must be identical to the package identifier, i.e. the same value as the mets/@OBJID attribute.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_structmap_element_3">
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div">
       <assert test="@ID">CSIP85;ERROR;An xml:id identifier must be unique within the package.</assert>
       <assert test="count(mets:div[@LABEL = 'Metadata']) = 1">CSIP88;ERROR;The metadata referenced in the administrative and/or descriptive metadata section is described in the structural map with one sub division.</assert>
@@ -28,37 +31,55 @@
       <assert test="count(mets:div[@LABEL = 'Representations']) &lt;= 1">CSIP103;ERROR;The package's content division element must have the @LABEL attribute value "Representations", taken from the vocabulary.</assert>
       <assert test="count(mets:div[@LABEL = 'Representations']) != 0 or (count(mets:div[@LABEL = 'Representations']) = 0 and count(mets:div[@LABEL != 'Metadata' and @LABEL != 'Documentation' and @LABEL != 'Schemas' and @LABEL != 'Representations']) != 0)">CSIP105;WARN;When a package consists of multiple representations, each described by a representation level METS.xml document, there should be a discrete representation div element for each representation. Each representation div references the representation level METS.xml document, documenting the structure of the package and its constituent representations.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_structmap_element_4">
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Metadata']">
       <assert test="@ID">CSIP89;ERROR;An xml:id identifier must be unique within the package.</assert>
       <assert test="every $admid_part in tokenize(@ADMID, '\s+') satisfies some $id in /mets:mets/mets:amdSec/*[@STATUS = 'CURRENT']/@ID satisfies $admid_part = $id">CSIP91;ERROR;When there is administrative metadata and the amdSec is present, all administrative metadata MUST be referenced via the administrative sections different identifiers.</assert>
       <assert test="every $dmdid_part in tokenize(@DMDID, '\s+') satisfies some $id in /mets:mets/mets:dmdSec/*[@STATUS = 'CURRENT']/@ID satisfies $dmdid_part = $id">CSIP92;ERROR;When there are descriptive metadata and one or more dmdSec is present, all descriptive metadata MUST be referenced via the descriptive section identifiers.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_structmap_element_5">
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Documentation']">
       <assert test="@ID">CSIP94;ERROR;An xml:id identifier must be unique within the package.</assert>
       <assert test="count(mets:fptr) = count(/mets:mets/mets:fileSec/mets:fileGrp[@USE = 'Documentation'])">CSIP96;ERROR;All file groups containing documentation described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_structmap_element_6">
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Documentation']/mets:fptr">
       <assert test="@FILEID and some $fileGrp in /mets:mets/mets:fileSec/mets:fileGrp[@USE = 'Documentation'] satisfies $fileGrp/@ID = @FILEID">CSIP116;ERROR;A reference, by ID, to the “Documentation” file group.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_structmap_element_7">
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Schemas']">
       <assert test="@ID">CSIP98;ERROR;An xml:id identifier must be unique within the package.</assert>
       <assert test="count(mets:fptr) = count(/mets:mets/mets:fileSec/mets:fileGrp[@USE = 'Schemas'])">CSIP100;ERROR;All file groups containing schemas described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_structmap_element_8">
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Schemas']/mets:fptr">
       <assert test="@FILEID and some $fileGrp in /mets:mets/mets:fileSec/mets:fileGrp[@USE = 'Schemas'] satisfies $fileGrp/@ID = @FILEID">CSIP118;ERROR;The pointer to the identifier for the “Schema” file group.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_structmap_element_9">
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Representations']">
       <assert test="@ID">CSIP102;ERROR;An xml:id identifier must be unique within the package.</assert>
       <assert test="count(mets:fptr) = count(/mets:mets/mets:fileSec/mets:fileGrp[starts-with(@USE, 'Representations')])">CSIP104;ERROR;All file groups containing documentation described in the package are referenced via the relevant file group identifiers. There MUST be one file group reference per fptr element.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_structmap_element_10">
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL = 'Representations']/mets:fptr">
       <assert test="@FILEID and some $fileGrp in /mets:mets/mets:fileSec/mets:fileGrp[starts-with(@USE, 'Representations')] satisfies $fileGrp/@ID = @FILEID">CSIP119;ERROR;The pointer to the identifier for the Representations file group.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_structmap_element_11">
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL != 'Metadata' and @LABEL != 'Documentation' and @LABEL != 'Schemas' and @LABEL != 'Representations']">
       <assert test="@ID">CSIP106;ERROR;Mandatory, xml:id identifier must be unique within the package.</assert>
       <assert test="starts-with(@LABEL, 'Representations')">CSIP107;ERROR;The package's representation division div element @LABEL attribute value must be the path to the representation level METS document starting with the value "Representations" followed by the main folder name for example "Representations/submission" and "Representations/ingest".</assert>
       <assert test="mets:mptr">CSIP109;ERROR;The division div of the specific representation includes one occurrence of the METS pointer mptr element, pointing to the appropriate representation METS file.</assert>
     </rule>
+  </pattern>
+  <pattern id="METS_structmap_element_12">
     <rule context="/mets:mets/mets:structMap[@LABEL = 'CSIP']/mets:div/mets:div[@LABEL != 'Metadata' and @LABEL != 'Documentation' and @LABEL != 'Schemas' and @LABEL != 'Representations']/mets:mptr">
       <assert test="@xlink:title">CSIP108;ERROR;The file group containing the files described in the package are referenced via the relevant file group identifier.</assert>
       <assert test="@xlink:href">CSIP110;ERROR;MUST point to the actual location of the resource. We recommend recording a URL type filepath within this attribute.</assert>
