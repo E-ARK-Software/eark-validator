@@ -175,15 +175,15 @@ class MetsValidator():
 
     def _process_element(self, element: etree.Element) -> None:
         # Define what to do with specific tags.
-        if element.tag == Namespaces.METS.qualify('div') and \
-            element.attrib['LABEL'].lower().startswith('representations/'):
+        if element.tag == Namespaces.METS.qualify('div') and element.attrib.get('LABEL') and \
+            element.attrib.get('LABEL').lower().startswith('representations/'):
             self._process_rep_div(element)
             return
         if element.tag in [ Namespaces.METS.qualify('file'), Namespaces.METS.qualify('mdRef') ]:
             self._file_refs.append(_parse_file_entry(element))
 
     def _process_rep_div(self, element: etree.Element) -> None:
-        rep = element.attrib['LABEL'].rsplit('/', 1)[1]
+        rep = element.attrib.get('LABEL').rsplit('/', 1)[1]
         for child in element.getchildren():
             if child.tag == Namespaces.METS.qualify('mptr'):
                 self._reps_mets.update({
@@ -235,16 +235,14 @@ def _validate_file_entry(file_entry: FileEntry, element: etree.Element, root: Pa
     return errors
 
 def _path_from_xml_element(element: etree.Element) -> Optional[str]:
-    loc_ele: etree.Element = element
-    if element.tag in [ Namespaces.METS.qualify('file'), 'file' ]:
+    if element.tag in [ Namespaces.METS.qualify('file'), 'file']:
         tag: str = Namespaces.METS.qualify('FLocat') if hasattr(element, 'nsmap') else 'FLocat'
-        loc_ele = element.find(tag)
-    if element.tag in [
-        Namespaces.METS.qualify('file'),
-        'file', Namespaces.METS.qualify('mdRef'),
-        'mdRef'
-        ]:
-        return  _get_path_attrib(loc_ele)
+        flocat: Optional[etree.Element] = element.find(tag)
+        if flocat is None:
+            return None
+        return _get_path_attrib(flocat)
+    if element.tag in [Namespaces.METS.qualify('mdRef'), 'mdRef']:
+        return _get_path_attrib(element)
     raise ValueError(f'Element {element.tag} is not a METS:file or METS:mdRef element.')
 
 def _get_path_attrib(element: etree.Element) -> Optional[str]:

@@ -52,8 +52,8 @@ class PackageDetailsTest(unittest.TestCase):
             InformationPackages.details_from_mets_file(Path(files(XML)))
 
     def test_bad_xml(self):
-        with self.assertRaises(ValueError):
-            InformationPackages.details_from_mets_file(Path(files(XML).joinpath('METS-no-hdr.xml')))
+        details = InformationPackages.details_from_mets_file(Path(files(XML).joinpath('METS-no-hdr.xml')))
+        self.assertEqual(details.oaispackagetype, '')
 
     def test_label(self):
         package_details = InformationPackages.details_from_mets_file(self._mets_file)
